@@ -17,6 +17,9 @@ questions = [
     "How much is Victor Wembanyama worth in a trade?",
     "Which player has the best defensive instincts based on the numbers?",
     "What's Clingan's points per game?",
+    "Which players suppress shooting the most at the rim?",
+    "Who's an underrated defender that doesn't show up in the box score?",
+    "Which player has good hustle numbers that don't translate to results?",
 ]
 
 for i, q in enumerate(questions, 1):
