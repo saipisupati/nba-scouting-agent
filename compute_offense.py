@@ -55,6 +55,20 @@ _VALID_PLAY_TYPES = set(_PLAYTYPE_CSV)
 # shot suppression and playtype_defense in this project.
 _MIN_TOTAL_POSS = 30
 
+# Cut is sorted by POSS (volume) not PPP because finishing efficiency on cuts
+# is uniformly high across all qualifiers (~1.3–1.7 PPP, 65–85% FG) — the
+# range is too compressed to meaningfully rank players by efficiency. The real
+# signal is who gets the most cuts, not who finishes them slightly better.
+_SORT_BY_VOLUME = {"Cut"}
+
+# OffScreen: total-poss threshold below which the answer notes the player's
+# cut usage is moderate-volume and the ranking is somewhat threshold-sensitive.
+# Derived from the actual distribution: Murray (57 total poss) and Jokić
+# (76 total poss) are the top qualifiers at the default floor — both are real
+# samples but modest for a full-season action. 100 total possessions is a
+# clean round number that sits between "micro-sample" and "primary action".
+_OFFSCREEN_MODERATE_POSS_THRESHOLD = 100
+
 
 def playtype_offense(play_type: str, min_poss: float | None = None) -> pd.DataFrame:
     """Return offensive efficiency rankings for a Synergy play type.
@@ -63,13 +77,20 @@ def playtype_offense(play_type: str, min_poss: float | None = None) -> pd.DataFr
     This is the OPPOSITE direction from playtype_defense and shot_suppression,
     which both rank ascending (lower = better defender).
 
+    Exception — Cut: sorted DESCENDING by POSS (volume) instead of PPP.
+    Cutting efficiency is uniformly high (~1.3–1.7 PPP) across all qualifiers;
+    PPP doesn't meaningfully differentiate cutters. Volume of cuts is the real
+    signal for who uses this action as a meaningful part of their game.
+
     All 9 play types have real data on the offensive side (including Cut and
     Transition, which returned empty on the defensive pull).
 
-    OffScreen note: Jokić ranks #1 at the default threshold (0.5 poss/g), but
-    his ranking is threshold-sensitive — he has 1.2 poss/g (real usage) but
-    sits just above the p25 floor. At thresholds above 1.5 poss/g he drops out
-    of the pool entirely. Pair with POSS volume when interpreting OffScreen results.
+    OffScreen note: top qualifiers at the default threshold have 57–76 total
+    possessions — real usage, but moderate volume for a full season. Rankings
+    are somewhat threshold-sensitive (Jokić moves from #11 → #2 → absent as
+    the floor tightens from 0.3 → 0.5 → 1.5 poss/g). format_playtype_offense_answer()
+    adds a caveat when a player's total possessions fall below
+    _OFFSCREEN_MODERATE_POSS_THRESHOLD (100).
 
     Parameters
     ----------
@@ -80,7 +101,7 @@ def playtype_offense(play_type: str, min_poss: float | None = None) -> pd.DataFr
 
     Returns
     -------
-    DataFrame sorted descending by PPP with columns:
+    DataFrame sorted descending by POSS (Cut) or PPP (all others), columns:
         PLAYER_NAME, TEAM_ABBREVIATION, POSS, PPP, FG_PCT, PERCENTILE
     """
     if play_type not in _VALID_PLAY_TYPES:
@@ -95,8 +116,82 @@ def playtype_offense(play_type: str, min_poss: float | None = None) -> pd.DataFr
         (df["POSS"] * df["GP"] >= _MIN_TOTAL_POSS)
     ].copy()
 
+    sort_col = "POSS" if play_type in _SORT_BY_VOLUME else "PPP"
     return (
         filtered[_RETURN_COLS]
-        .sort_values("PPP", ascending=False)
+        .sort_values(sort_col, ascending=False)
         .reset_index(drop=True)
     )
+
+
+# ── Answer formatting ─────────────────────────────────────────────────────────
+
+_PLAYTYPE_OFFENSE_LABEL = {
+    "Isolation":    "isolation offense",
+    "PRBallHandler":"pick-and-roll ball-handler offense",
+    "PRRollman":    "pick-and-roll roll-man offense",
+    "Postup":       "post-up offense",
+    "Spotup":       "spot-up / catch-and-shoot offense",
+    "Handoff":      "dribble handoff offense",
+    "Cut":          "cutting",
+    "OffScreen":    "off-screen offense",
+    "Transition":   "transition offense",
+}
+
+_OFFSCREEN_CAVEAT = (
+    "NOTE: Off-screen is a moderate-volume action for most players in this ranking — "
+    "the top qualifiers have roughly 57–100 total possessions on the season, which is "
+    "real usage but not a primary action. Rankings are somewhat threshold-sensitive: "
+    "small changes to the minimum-possession floor shift who qualifies and in what order. "
+    "Pair with POSS/g volume when comparing players here."
+)
+
+_CUT_VOLUME_NOTE = (
+    "NOTE: Sorted by cuts per game (volume), not PPP. "
+    "Finishing efficiency on cuts is uniformly high across all qualifiers "
+    "(roughly 1.3–1.7 PPP, 65–85% FG%) — the range is too compressed to meaningfully "
+    "rank players by efficiency. Who gets the most cuts is the real signal."
+)
+
+
+def format_playtype_offense_answer(
+    row: pd.Series,
+    play_type: str,
+    season_label: str,
+    total_poss: float | None = None,
+) -> str:
+    """Format a one-sentence answer for the top offensive play-type result.
+
+    Parameters
+    ----------
+    row          : top row from playtype_offense(play_type)
+    play_type    : play type string
+    season_label : e.g. '2025-26'
+    total_poss   : POSS/g × GP for the top player; used for OffScreen caveat.
+                   Pass None to skip the threshold check.
+    """
+    label = _PLAYTYPE_OFFENSE_LABEL.get(play_type, play_type)
+    player = f"{row['PLAYER_NAME']} ({row['TEAM_ABBREVIATION']})"
+
+    if play_type == "Cut":
+        base = (
+            f"{player} leads in {label} with {row['POSS']:.1f} cuts per game "
+            f"({row['PPP']} PPP, {row['FG_PCT']:.1%} FG%) [{season_label}]. "
+            f"{_CUT_VOLUME_NOTE}"
+        )
+        return base
+
+    base = (
+        f"{player} leads in {label} with {row['PPP']} PPP "
+        f"({row['FG_PCT']:.1%} FG%, {row['POSS']:.1f} poss/g, "
+        f"{row['PERCENTILE']:.0%} percentile) [{season_label}]."
+    )
+
+    if play_type == "OffScreen":
+        moderate = (
+            total_poss is not None and total_poss < _OFFSCREEN_MODERATE_POSS_THRESHOLD
+        )
+        if moderate:
+            return f"{base} {_OFFSCREEN_CAVEAT}"
+
+    return base
