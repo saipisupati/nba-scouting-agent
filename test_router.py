@@ -20,6 +20,10 @@ questions = [
     "Which players suppress shooting the most at the rim?",
     "Who's an underrated defender that doesn't show up in the box score?",
     "Which player has good hustle numbers that don't translate to results?",
+    "How does he defend the pick and roll ball handler?",
+    "Who's the best roll man defender in the league?",
+    "How good is he at defending cuts to the basket?",
+    "Who navigates screens best on defense?",
 ]
 
 for i, q in enumerate(questions, 1):

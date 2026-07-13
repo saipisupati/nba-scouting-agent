@@ -165,6 +165,94 @@ def hustle_vs_suppression_gap(
     )
 
 
+_PLAYTYPE_CSV = {
+    "Isolation":    "playtype_defense_isolation_2025_26.csv",
+    "PRBallHandler":"playtype_defense_prballhandler_2025_26.csv",
+    "PRRollman":    "playtype_defense_prrollman_2025_26.csv",
+    "Postup":       "playtype_defense_postup_2025_26.csv",
+    "Spotup":       "playtype_defense_spotup_2025_26.csv",
+    "Handoff":      "playtype_defense_handoff_2025_26.csv",
+    "OffScreen":    "playtype_defense_offscreen_2025_26.csv",
+}
+
+# POSS distributions (2025-26, all qualified players):
+#   Isolation     n=394  min=10  p25=25  p35=30  p40=33  median=40  p75=58   max=156
+#   PRBallHandler n=415  min=13  p25=89  p35=112 p40=124 median=156 p75=226  max=806
+#   PRRollman     n=386  min=10  p25=27  p35=32  p40=35  median=41  p75=59   max=214
+#   Postup        n=329  min=10  p25=16  p35=18  p40=19  median=22  p75=31   max=64
+#   Spotup        n=419  min=11  p25=76  p35=97  p40=107 median=128 p75=198  max=378
+#   Handoff       n=313  min=10  p25=19  p35=22  p40=24  median=31  p75=45   max=98
+#   OffScreen     n=317  min=10  p25=16  p35=18  p40=20  median=24  p75=36   max=85
+# Isolation/PRBallHandler/PRRollman/Spotup: p25 (sanity-checked, retained as-is).
+# Postup/Handoff/OffScreen raised to p40 — sparse distributions where p25 let through
+# genuine single-game samples (e.g. 16 poss for Raynaud in OffScreen leading the list).
+_PLAYTYPE_DEFAULT_MIN_POSS = {
+    "Isolation":    25,
+    "PRBallHandler": 90,
+    "PRRollman":    27,
+    "Postup":       19,
+    "Spotup":       76,
+    "Handoff":      24,
+    "OffScreen":    20,
+}
+
+# Below this possession count the answer text flags "small sample".
+# Set at 30: comfortably above the p40 floors for sparse types, and meaningful
+# even in high-volume types (e.g. an Isolation result with 27 poss is still thin).
+SMALL_SAMPLE_THRESHOLD = 30
+
+_NO_DATA_TYPES = {"Cut", "Transition"}
+
+
+def playtype_defense(play_type: str, min_poss: int = None) -> pd.DataFrame:
+    """Return players ranked by PPP allowed (ascending) for a given Synergy play type.
+
+    Lower PPP = better defender — the player allowed fewer points per possession
+    when the offense ran this play type at them.
+
+    Parameters
+    ----------
+    play_type : str
+        One of: Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, OffScreen.
+        Cut and Transition have no player-level data in the Synergy feed and will raise ValueError.
+
+        PRRollman caveat: PPP allowed on logged roll-man possessions reflects both
+        defensive quality AND selection effects. Elite rim protectors may show middling
+        numbers here because opponents avoid attacking them in this play type — only the
+        possessions where the offense chose to attack get logged. Do not read this
+        category as "best rim protector." Pair it with shot_suppression('Less Than 6Ft')
+        for a fuller picture of interior defense.
+    min_poss : int, optional
+        Minimum possessions to qualify. Defaults to the ~p25 of each play type's
+        distribution (see _PLAYTYPE_DEFAULT_MIN_POSS), which retains ~75% of players
+        while filtering out true single-game samples.
+
+    Returns
+    -------
+    DataFrame with columns: PLAYER_NAME, TEAM_ABBREVIATION, POSS, PPP, FG_PCT
+        sorted ascending by PPP (best defenders first).
+    """
+    if play_type in _NO_DATA_TYPES:
+        raise ValueError(
+            f"'{play_type}' has no player-level defensive data in the Synergy feed. "
+            f"Valid play types: {sorted(_PLAYTYPE_CSV)}"
+        )
+    if play_type not in _PLAYTYPE_CSV:
+        raise ValueError(
+            f"Unknown play type '{play_type}'. "
+            f"Valid: {sorted(_PLAYTYPE_CSV)} (Cut and Transition have no data)."
+        )
+
+    threshold = min_poss if min_poss is not None else _PLAYTYPE_DEFAULT_MIN_POSS[play_type]
+    df = pd.read_csv(_PLAYTYPE_CSV[play_type])
+    d = df[df["POSS"] >= threshold].copy()
+    return (
+        d[["PLAYER_NAME", "TEAM_ABBREVIATION", "POSS", "PPP", "FG_PCT"]]
+        .sort_values("PPP", ascending=True)
+        .reset_index(drop=True)
+    )
+
+
 if __name__ == "__main__":
     hustle = pd.read_csv("hustle_stats_2025_26.csv")
     defend_overall = pd.read_csv("shot_defense_overall_2025_26.csv")

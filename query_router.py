@@ -12,13 +12,22 @@ from compute_defense import (
     hustle_iq_composite,
     shot_suppression,
     hustle_vs_suppression_gap,
+    playtype_defense,
+    SMALL_SAMPLE_THRESHOLD,
 )
 
 OUT_OF_SCOPE_MSG = (
     "I don't have data to answer that — this tool only covers "
     "deflections, rim/perimeter contests, box-out efficiency, "
     "hustle-play composites, shot suppression (opponent FG%), "
-    "and hustle-vs-suppression gap analysis."
+    "hustle-vs-suppression gap analysis, and Synergy play-type defense "
+    "(Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, OffScreen)."
+)
+
+_NO_PLAYTYPE_DATA_MSG = (
+    "Synergy doesn't publish player-level defensive data for this play type. "
+    "Cut and Transition defense are not available at the individual player level — "
+    "only team-level data exists for these categories in the Synergy feed."
 )
 
 _RULES = [
@@ -129,10 +138,74 @@ _RULES = [
         "shot_suppression",
         "Overall",
     ),
+    # playtype_defense — cut/transition have no player-level data; checked before
+    # generic playtype rules so the specific message fires instead of a miss
+    (
+        re.compile(r"cut.*defense|defend.*cut|cut.*basket|cutting.*lane", re.IGNORECASE),
+        "playtype_defense",
+        "Cut",
+    ),
+    (
+        re.compile(r"transition.*defense|defend.*transition|defend.*fast.?break|fast.?break.*defense", re.IGNORECASE),
+        "playtype_defense",
+        "Transition",
+    ),
+    # playtype_defense — 7 valid play types
+    (
+        re.compile(r"iso.*defense|isolation.*defense|defend.*iso|one.on.one.*defense|1.on.1.*defense", re.IGNORECASE),
+        "playtype_defense",
+        "Isolation",
+    ),
+    (
+        re.compile(
+            r"pick.*roll.*defense|p.?r.*defense|pick.*roll.*ball.?handler|"
+            r"defend.*ball.?handler|ball.?handler.*defense|defend.*pick.*roll",
+            re.IGNORECASE,
+        ),
+        "playtype_defense",
+        "PRBallHandler",
+    ),
+    (
+        re.compile(
+            r"roll.?man.*defense|defend.*roll.?man|defend.*the.*roll|"
+            r"pick.*roll.*big|roll.*man.*defend|roll.*big.*defend",
+            re.IGNORECASE,
+        ),
+        "playtype_defense",
+        "PRRollman",
+    ),
+    (
+        re.compile(r"post.*defense|post.?up.*defense|defend.*post|defending.*post", re.IGNORECASE),
+        "playtype_defense",
+        "Postup",
+    ),
+    (
+        re.compile(
+            r"spot.?up.*defense|defend.*spot.?up|defend.*shooter|defending.*shooter|"
+            r"clos.*out.*spot|spot.*up.*defend",
+            re.IGNORECASE,
+        ),
+        "playtype_defense",
+        "Spotup",
+    ),
+    (
+        re.compile(r"handoff.*defense|defend.*handoff|defending.*handoff|hand.?off.*defend", re.IGNORECASE),
+        "playtype_defense",
+        "Handoff",
+    ),
+    (
+        re.compile(
+            r"off.?screen.*defense|defend.*off.?screen|navigat.*screen|"
+            r"chas.*shooter|screen.*defense|off.screen.*defend",
+            re.IGNORECASE,
+        ),
+        "playtype_defense",
+        "OffScreen",
+    ),
 ]
 
 _SYSTEM_PROMPT = """You are a routing assistant for an NBA scouting tool.
-You have access to exactly six statistical functions:
+You have access to exactly seven statistical functions:
 
 1. deflections_per36(df, min_minutes=15, min_games=40)
    Measures: deflections per 36 minutes.
@@ -164,12 +237,25 @@ You have access to exactly six statistical functions:
    Use for: questions about underrated defenders, effort vs. results, hustle that doesn't translate.
    Sort column hint: use "positive" for quiet/underrated/effort-pays-off questions, "negative" for hustle-doesn't-translate/busy-but-not-impactful questions, null if unclear.
 
-None of these functions cover: scoring, shooting efficiency, assists, salary, trade value, draft grades, or anything unrelated to the six hustle/defense categories above.
+7. playtype_defense(play_type, min_poss=<per-type default>)
+   Measures: PPP (points per possession) allowed by play type from Synergy data. Lower PPP = better defense.
+   Valid play types and when to use them:
+     "Isolation"    — iso defense, one-on-one defense, defending iso situations
+     "PRBallHandler"— pick-and-roll defense (ball handler side), defending the ball handler in P&R
+     "PRRollman"    — defending the roll man / pick-and-roll big
+     "Postup"       — post defense, defending post-ups
+     "Spotup"       — spot-up defense, defending shooters catching and shooting
+     "Handoff"      — defending handoffs
+     "OffScreen"    — off-screen defense, chasing shooters off screens, navigating screens
+   NOT available (no player-level data): Cut, Transition — return out_of_scope for these.
+   Sort column hint: use the play type name exactly as listed above (e.g. "Isolation", "PRBallHandler").
+
+None of these functions cover: scoring, shooting efficiency, assists, salary, trade value, draft grades, or anything unrelated to the seven hustle/defense categories above.
 
 Respond ONLY with a JSON object — no prose, no markdown, no explanation:
-- If the question maps to one of the six functions:
-  {"function": "<function_name>", "sort_col": "<optional hint: '2pt', '3pt', 'Overall', 'Less Than 6Ft', 'positive', 'negative', or null>"}
-- If the question is outside the scope of all six functions:
+- If the question maps to one of the seven functions:
+  {"function": "<function_name>", "sort_col": "<hint: '2pt', '3pt', 'Overall', 'Less Than 6Ft', 'positive', 'negative', play type name, or null>"}
+- If the question is outside the scope of all seven functions:
   {"out_of_scope": true}"""
 
 
@@ -290,6 +376,39 @@ def _format_hustle_iq(row: pd.Series, season_label: str) -> str:
     )
 
 
+_PLAYTYPE_LABEL = {
+    "Isolation":    "isolation defense",
+    "PRBallHandler":"pick-and-roll ball-handler defense",
+    "PRRollman":    "pick-and-roll roll-man defense",
+    "Postup":       "post-up defense",
+    "Spotup":       "spot-up defense",
+    "Handoff":      "handoff defense",
+    "OffScreen":    "off-screen defense",
+}
+
+_PRROLLMAN_CAVEAT = (
+    "NOTE: This reflects PPP allowed on possessions the offense chose to attack this player "
+    "in the pick-and-roll. Elite rim protectors may rank lower here because opponents avoid "
+    "attacking them — only the possessions where the offense attacked get logged. "
+    "Do not read this as 'best rim protector.' Pair with shot suppression (rim category) "
+    "for a fuller picture of interior defense."
+)
+
+
+def _format_playtype(row: pd.Series, play_type: str, season_label: str) -> str:
+    label = _PLAYTYPE_LABEL.get(play_type, play_type)
+    poss = int(row["POSS"])
+    sample_flag = f" (small sample — {poss} possessions)" if poss < SMALL_SAMPLE_THRESHOLD else ""
+    base = (
+        f"{row['PLAYER_NAME']} ({row['TEAM_ABBREVIATION']}) leads in {label} "
+        f"with {row['PPP']} PPP allowed ({row['FG_PCT']:.1%} FG%) on "
+        f"{poss} possessions{sample_flag} [{season_label}]."
+    )
+    if play_type == "PRRollman":
+        return f"{base} {_PRROLLMAN_CAVEAT}"
+    return base
+
+
 def route(question: str, df: pd.DataFrame, season_label: str = "2025-26") -> dict:
     routing = _deterministic_route(question)
     method = "deterministic"
@@ -362,6 +481,19 @@ def route(question: str, df: pd.DataFrame, season_label: str = "2025-26") -> dic
                 result = result.sort_values("GAP", ascending=True).reset_index(drop=True)
             top = result.iloc[0]
             answer = _format_gap(top, season_label)
+
+        elif func_name == "playtype_defense":
+            play_type = sort_col  # sort_col carries the play_type name for this function
+            if play_type in ("Cut", "Transition"):
+                return {
+                    "question": question,
+                    "method": method,
+                    "function_matched": f"playtype_defense:{play_type}",
+                    "answer": _NO_PLAYTYPE_DATA_MSG,
+                }
+            result = playtype_defense(play_type)
+            top = result.iloc[0]
+            answer = _format_playtype(top, play_type, season_label)
 
         else:
             return {
