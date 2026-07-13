@@ -392,7 +392,13 @@ def _format_contest(row: pd.Series, sort_col: Optional[str], season_label: str) 
         return (
             f"{row['PLAYER_NAME']} ({row['TEAM_ABBREVIATION']}) leads in rim contests "
             f"with {row['CONTESTED_2PT_PER36']} 2PT contests per 36 "
-            f"({row['TOTAL_CONTESTED_PER36']} total) in {row['G']} games [{season_label}]."
+            f"({row['TOTAL_CONTESTED_PER36']} total) in {row['G']} games [{season_label}]. "
+            f"NOTE: This measures contest volume at the rim, not shot suppression — contesting "
+            f"frequently does not mean opponents miss. The volume leaders and the suppression "
+            f"leaders differ significantly at the rim (9 of the top-10 in contest volume are "
+            f"not in the top-10 in rim suppression; Clingan is #1 in volume but only #21 in "
+            f"suppression, Gobert is #10 in volume but #29 in suppression). "
+            f"For true rim shot suppression, see shot_suppression('Less Than 6Ft')."
         )
     elif sort_col == "3pt":
         return (

@@ -9,7 +9,7 @@
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: #f5f6f8;
+    background: #f0f2f7;
     color: #1a1a2e;
     height: 100vh;
     display: flex;
@@ -18,69 +18,51 @@
 
   /* ── header ── */
   header {
-    background: #0f2044;
+    background: #0d1b36;
     color: #fff;
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    padding: 16px 24px;
     flex-shrink: 0;
   }
-  header svg { flex-shrink: 0; }
-  header h1 { font-size: 1.1rem; font-weight: 600; letter-spacing: .02em; }
-  header p  { font-size: .75rem; color: #8ba3cc; margin-top: 1px; }
+  header h1 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: .01em;
+  }
+  header p {
+    font-size: .78rem;
+    color: #7a9acc;
+    margin-top: 3px;
+  }
 
   /* ── chat area ── */
   #chat {
     flex: 1;
     overflow-y: auto;
-    padding: 24px 16px;
+    padding: 20px 16px 8px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 18px;
   }
 
   /* ── bubbles ── */
   .bubble-row {
     display: flex;
     flex-direction: column;
-    max-width: 760px;
+    max-width: 780px;
     width: 100%;
   }
   .bubble-row.user  { align-self: flex-end; align-items: flex-end; }
   .bubble-row.agent { align-self: flex-start; align-items: flex-start; }
 
-  .bubble {
-    padding: 11px 15px;
-    border-radius: 12px;
-    line-height: 1.55;
+  .user-bubble {
+    background: #0d1b36;
+    color: #fff;
+    border-radius: 14px 14px 3px 14px;
+    padding: 10px 15px;
     font-size: .9rem;
+    line-height: 1.5;
     max-width: 100%;
     word-break: break-word;
-  }
-  .bubble-row.user .bubble {
-    background: #0f2044;
-    color: #fff;
-    border-bottom-right-radius: 3px;
-  }
-
-  /* answer types */
-  .bubble.answer {
-    background: #fff;
-    border: 1px solid #e0e4ec;
-    border-bottom-left-radius: 3px;
-  }
-  .bubble.out_of_scope {
-    background: #fff8f0;
-    border: 1px solid #f5c97a;
-    border-bottom-left-radius: 3px;
-    color: #7a5000;
-  }
-  .bubble.needs_clarification {
-    background: #f0f5ff;
-    border: 1px solid #93b4f5;
-    border-bottom-left-radius: 3px;
-    color: #1a3a80;
   }
 
   /* ── badge ── */
@@ -88,39 +70,157 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-size: .7rem;
-    font-weight: 600;
+    font-size: .68rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .05em;
+    letter-spacing: .06em;
     padding: 2px 8px;
     border-radius: 99px;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
   }
-  .badge.answer              { background: #e8f0fe; color: #1a56db; }
-  .badge.out_of_scope        { background: #fff0d6; color: #92600a; }
-  .badge.needs_clarification { background: #e8effe; color: #1a3a80; }
-
+  .badge.answer              { background: #dbeafe; color: #1d4ed8; }
+  .badge.out_of_scope        { background: #fef3c7; color: #92400e; }
+  .badge.needs_clarification { background: #ede9fe; color: #5b21b6; }
   .badge-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
+    width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+  }
+  .badge.answer .badge-dot              { background: #1d4ed8; }
+  .badge.out_of_scope .badge-dot        { background: #d97706; }
+  .badge.needs_clarification .badge-dot { background: #7c3aed; }
+
+  /* ── stat card (normal answer) ── */
+  .stat-card {
+    background: #fff;
+    border: 1px solid #e2e8f4;
+    border-radius: 12px;
+    padding: 16px 18px 14px;
+    width: 100%;
+    border-bottom-left-radius: 3px;
+  }
+  .stat-card-top {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .stat-player {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #0d1b36;
+    line-height: 1.1;
+  }
+  .stat-team {
+    font-size: .8rem;
+    font-weight: 600;
+    color: #6b7a99;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .stat-number {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1d4ed8;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+  .stat-season {
+    font-size: .7rem;
+    color: #9aa3b8;
+    margin-bottom: 10px;
+  }
+  .stat-answer-text {
+    font-size: .85rem;
+    color: #334060;
+    line-height: 1.6;
+    border-top: 1px solid #eef1f8;
+    padding-top: 10px;
+    margin-top: 2px;
+  }
+
+  /* ── mini ranked list ── */
+  .mini-list {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .mini-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: .8rem;
+    border-bottom: 1px solid #f0f2f8;
+  }
+  .mini-row:last-child { border-bottom: none; }
+  .mini-rank {
+    width: 18px;
+    text-align: right;
+    color: #9aa3b8;
+    font-weight: 600;
+    font-size: .72rem;
     flex-shrink: 0;
   }
-  .badge.answer .badge-dot              { background: #1a56db; }
-  .badge.out_of_scope .badge-dot        { background: #f59e0b; }
-  .badge.needs_clarification .badge-dot { background: #4f80f0; }
-
-  /* ── function tag ── */
-  .fn-tag {
-    font-size: .7rem;
-    color: #888;
-    margin-top: 5px;
+  .mini-rank.gold   { color: #d97706; }
+  .mini-rank.silver { color: #6b7a99; }
+  .mini-rank.bronze { color: #92400e; }
+  .mini-name {
+    flex: 1;
+    font-weight: 600;
+    color: #1a1a2e;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .mini-team {
+    font-size: .72rem;
+    color: #9aa3b8;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .mini-val {
+    font-weight: 700;
+    color: #1d4ed8;
+    flex-shrink: 0;
+    font-size: .8rem;
+    min-width: 52px;
+    text-align: right;
   }
 
-  /* ── table toggle ── */
+  /* ── non-answer bubbles (out_of_scope / needs_clarification) ── */
+  .plain-bubble {
+    padding: 12px 15px;
+    border-radius: 12px 12px 3px 12px;
+    line-height: 1.55;
+    font-size: .9rem;
+    max-width: 100%;
+    word-break: break-word;
+  }
+  .plain-bubble.out_of_scope {
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    color: #78350f;
+  }
+  .plain-bubble.needs_clarification {
+    background: #f5f3ff;
+    border: 1px solid #c4b5fd;
+    color: #4c1d95;
+  }
+
+  /* ── fn tag ── */
+  .fn-tag {
+    font-size: .68rem;
+    color: #a0aab8;
+    margin-top: 6px;
+  }
+
+  /* ── full table toggle ── */
   .table-toggle {
-    margin-top: 8px;
-    font-size: .78rem;
-    color: #1a56db;
+    margin-top: 10px;
+    font-size: .76rem;
+    color: #1d4ed8;
     cursor: pointer;
     user-select: none;
     display: inline-flex;
@@ -135,86 +235,136 @@
   .table-toggle .arrow { transition: transform .15s; display: inline-block; }
   .table-toggle.open .arrow { transform: rotate(90deg); }
 
-  /* ── data table ── */
+  /* ── full table ── */
   .table-wrap {
     display: none;
-    margin-top: 10px;
+    margin-top: 8px;
     overflow-x: auto;
-    border: 1px solid #e0e4ec;
+    border: 1px solid #e2e8f4;
     border-radius: 8px;
     background: #fff;
   }
   .table-wrap.visible { display: block; }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    font-size: .78rem;
-  }
+  table { border-collapse: collapse; width: 100%; font-size: .76rem; }
   th {
     background: #f0f4ff;
     color: #1a2a4a;
     font-weight: 600;
     text-align: left;
-    padding: 8px 12px;
-    border-bottom: 1px solid #d8dff0;
+    padding: 7px 11px;
+    border-bottom: 1px solid #dbe3f4;
     white-space: nowrap;
   }
   td {
-    padding: 7px 12px;
-    border-bottom: 1px solid #f0f2f7;
+    padding: 6px 11px;
+    border-bottom: 1px solid #f0f2f8;
     white-space: nowrap;
   }
   tr:last-child td { border-bottom: none; }
-  tr:nth-child(even) td { background: #f8f9fc; }
-  tr.top-row td { font-weight: 600; }
+  tr:nth-child(even) td { background: #f8f9fd; }
 
-  /* ── loading spinner ── */
-  .spinner {
-    display: inline-block;
-    width: 14px; height: 14px;
-    border: 2px solid #ccc;
-    border-top-color: #1a56db;
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-    vertical-align: middle;
-    margin-right: 6px;
+  /* ── chips (suggestion + follow-up) ── */
+  .chips-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 0 0 4px;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .chip {
+    background: #fff;
+    border: 1px solid #d0d8ec;
+    border-radius: 99px;
+    padding: 5px 13px;
+    font-size: .78rem;
+    font-weight: 500;
+    color: #2a3a5e;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .12s, border-color .12s, transform .1s;
+    line-height: 1.4;
+  }
+  .chip:hover {
+    background: #eef2ff;
+    border-color: #93a8e8;
+    transform: translateY(-1px);
+  }
+  .chip:active { transform: translateY(0); }
+
+  .followup-chips { margin-top: 10px; }
+  .followup-chips .chip {
+    background: #f0f4ff;
+    border-color: #c3d0f4;
+    font-size: .74rem;
+    padding: 4px 11px;
+  }
+  .followup-chips .chip:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+  }
+  .followup-label {
+    font-size: .68rem;
+    color: #9aa3b8;
+    margin-bottom: 5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+
+  /* ── suggestion chips strip above input ── */
+  #chip-bar {
+    padding: 10px 16px 0;
+    background: #f0f2f7;
+    flex-shrink: 0;
+  }
 
   /* ── input bar ── */
   #input-bar {
-    background: #fff;
-    border-top: 1px solid #e0e4ec;
-    padding: 14px 16px;
+    background: #f0f2f7;
+    padding: 10px 16px 14px;
     display: flex;
     gap: 10px;
     flex-shrink: 0;
   }
   #question {
     flex: 1;
-    border: 1px solid #c8d0e0;
+    border: 1px solid #c8d0e4;
     border-radius: 8px;
     padding: 10px 14px;
     font-size: .9rem;
     font-family: inherit;
+    background: #fff;
     outline: none;
     transition: border-color .15s;
   }
-  #question:focus { border-color: #1a56db; }
+  #question:focus { border-color: #1d4ed8; }
   #send-btn {
-    background: #0f2044;
+    background: #0d1b36;
     color: #fff;
     border: none;
     border-radius: 8px;
-    padding: 10px 20px;
+    padding: 10px 22px;
     font-size: .9rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     font-family: inherit;
     transition: background .15s;
+    white-space: nowrap;
   }
   #send-btn:hover:not(:disabled) { background: #1a3a6e; }
-  #send-btn:disabled { opacity: .5; cursor: default; }
+  #send-btn:disabled { opacity: .45; cursor: default; }
+
+  /* ── spinner ── */
+  .spinner {
+    display: inline-block;
+    width: 13px; height: 13px;
+    border: 2px solid #d0d8ec;
+    border-top-color: #1d4ed8;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   /* ── empty state ── */
   #empty {
@@ -224,48 +374,51 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    color: #8a96b0;
+    color: #9aa3b8;
     pointer-events: none;
+    padding-bottom: 40px;
   }
-  #empty svg { opacity: .35; }
-  #empty p { font-size: .9rem; }
+  #empty svg { opacity: .3; }
+  #empty p { font-size: .88rem; }
 </style>
 </head>
 <body>
 
 <header>
-  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-    <circle cx="14" cy="14" r="13" stroke="#4a7fcb" stroke-width="2"/>
-    <path d="M14 2 Q20 14 14 26 Q8 14 14 2Z" stroke="#4a7fcb" stroke-width="1.5" fill="none"/>
-    <line x1="2" y1="14" x2="26" y2="14" stroke="#4a7fcb" stroke-width="1.5"/>
-  </svg>
-  <div>
-    <h1>NBA Scouting Agent</h1>
-    <p>Hustle &amp; defense analytics · 2025-26</p>
-  </div>
+  <h1>NBA Scouting Agent</h1>
+  <p>Ask a defensive question. Get a real answer, backed by real numbers.</p>
 </header>
 
 <div id="chat">
   <div id="empty">
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-      <circle cx="24" cy="24" r="22" stroke="#8a96b0" stroke-width="2"/>
-      <path d="M24 4 Q32 24 24 44 Q16 24 24 4Z" stroke="#8a96b0" stroke-width="1.5" fill="none"/>
-      <line x1="4" y1="24" x2="44" y2="24" stroke="#8a96b0" stroke-width="1.5"/>
+    <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+      <circle cx="22" cy="22" r="20" stroke="#9aa3b8" stroke-width="2"/>
+      <path d="M22 4 Q29 22 22 40 Q15 22 22 4Z" stroke="#9aa3b8" stroke-width="1.5" fill="none"/>
+      <line x1="4" y1="22" x2="40" y2="22" stroke="#9aa3b8" stroke-width="1.5"/>
     </svg>
-    <p>Ask a defensive scouting question to get started.</p>
+    <p>Click a chip or type a question below.</p>
   </div>
 </div>
 
+<div id="chip-bar">
+  <div class="chips-row" id="suggest-chips"></div>
+</div>
+
 <div id="input-bar">
-  <input id="question" type="text" placeholder="e.g. Who leads the league in deflections per 36?" autocomplete="off" />
+  <input id="question" type="text" placeholder="Ask about defense, hustle, play types, year-over-year trends…" autocomplete="off" />
   <button id="send-btn">Ask</button>
 </div>
 
 <script>
-const chat     = document.getElementById('chat');
-const empty    = document.getElementById('empty');
-const input    = document.getElementById('question');
-const sendBtn  = document.getElementById('send-btn');
+/* ── constants ── */
+const SUGGEST_CHIPS = [
+  'Best rim protector',
+  'Most improved defender',
+  'Underrated defenders',
+  'Best pick-and-roll defender',
+  'Trending down this year',
+  'Best perimeter defender',
+];
 
 const BADGE_LABELS = {
   answer:              'Result',
@@ -273,19 +426,194 @@ const BADGE_LABELS = {
   needs_clarification: 'Needs clarification',
 };
 
-function formatValue(v) {
+// key metric column + label per function_matched
+const METRIC_COL = {
+  deflections_per36:    { col: 'DEFLECTIONS_PER36',      label: 'deflections/36' },
+  contest_profile_per36:{ col: 'TOTAL_CONTESTED_PER36',  label: 'contests/36' },
+  boxout_conversion:    { col: 'BOXOUT_CONV_RATE',        label: 'box-out conv %', isPct: true },
+  hustle_iq_composite:  { col: 'HUSTLE_IQ_COMPOSITE',    label: 'hustle IQ' },
+  shot_suppression:     { col: 'PCT_PLUSMINUS',           label: 'FG% delta', isSigned: true },
+  hustle_vs_suppression_gap: { col: 'GAP',               label: 'gap', isSigned: true },
+  playtype_defense:     { col: 'PPP',                     label: 'PPP allowed' },
+  year_over_year_delta: { col: 'DELTA',                   label: 'Δ (YoY)', isSigned: true },
+};
+
+// team col varies by function
+const TEAM_COL = {
+  shot_suppression:     'PLAYER_LAST_TEAM_ABBREVIATION',
+  year_over_year_delta: 'TEAM_CUR',
+};
+
+// follow-up chips per function
+const FOLLOWUPS = {
+  contest_profile_per36: [
+    'Check perimeter suppression instead',
+    'Who\'s improved most in contests this year?',
+  ],
+  shot_suppression: [
+    'Who contests the most shots at the rim?',
+    'Best perimeter defender',
+  ],
+  deflections_per36: [
+    'Who declined the most in deflections?',
+    'Who has the best defensive IQ?',
+  ],
+  hustle_iq_composite: [
+    'Who leads in deflections per 36?',
+    'Who declined most in hustle this year?',
+  ],
+  playtype_defense: [
+    'Who\'s the best roll man defender in the league?',
+    'Who navigates screens best on defense?',
+  ],
+  hustle_vs_suppression_gap: [
+    'Who suppresses shooting the most?',
+    'Best rim protector',
+  ],
+  boxout_conversion: [
+    'Who leads in deflections per 36?',
+    'Most improved defender',
+  ],
+  year_over_year_delta: [
+    'Who leads the league in deflections per 36 minutes?',
+    'Best rim protector',
+  ],
+};
+
+/* ── DOM refs ── */
+const chat      = document.getElementById('chat');
+const empty     = document.getElementById('empty');
+const input     = document.getElementById('question');
+const sendBtn   = document.getElementById('send-btn');
+const chipBar   = document.getElementById('suggest-chips');
+
+/* ── suggestion chips (persistent) ── */
+function buildSuggestChips() {
+  chipBar.innerHTML = '';
+  SUGGEST_CHIPS.forEach(label => {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.textContent = label;
+    btn.addEventListener('click', () => fireQuestion(label));
+    chipBar.appendChild(btn);
+  });
+}
+buildSuggestChips();
+
+/* ── formatting helpers ── */
+function formatValue(v, isSigned, isPct) {
   if (v === null || v === undefined) return '—';
   if (typeof v === 'number') {
+    if (isPct)    return (v * 100).toFixed(1) + '%';
+    if (isSigned) return (v >= 0 ? '+' : '') + v.toFixed(3);
     if (Number.isInteger(v)) return v.toString();
-    // percentages: columns ending in _PCT or RATE
-    return v.toFixed(3);
+    return v.toFixed(v < 1 ? 3 : 2);
   }
   return String(v);
 }
 
-function buildTable(records) {
-  if (!records || records.length === 0) return null;
-  const cols = Object.keys(records[0]);
+function getTeam(row, fn) {
+  const col = TEAM_COL[fn] || 'TEAM_ABBREVIATION';
+  return row[col] || '—';
+}
+
+function getMetricVal(row, fn) {
+  const m = METRIC_COL[fn];
+  if (!m) return null;
+  const raw = row[m.col];
+  if (raw === undefined || raw === null) return null;
+  return { raw, label: m.label, isPct: m.isPct, isSigned: m.isSigned };
+}
+
+/* ── stat card builder ── */
+function buildStatCard(data) {
+  const { table, function_matched: fn, answer } = data;
+  if (!table || table.length === 0) return null;
+
+  const row0 = table[0];
+  const card = document.createElement('div');
+  card.className = 'stat-card';
+
+  // top line: name + team + key number
+  const top = document.createElement('div');
+  top.className = 'stat-card-top';
+
+  const nameEl = document.createElement('div');
+  nameEl.className = 'stat-player';
+  nameEl.textContent = row0.PLAYER_NAME || '—';
+  top.appendChild(nameEl);
+
+  const teamEl = document.createElement('div');
+  teamEl.className = 'stat-team';
+  teamEl.textContent = getTeam(row0, fn);
+  top.appendChild(teamEl);
+
+  const mv = getMetricVal(row0, fn);
+  if (mv) {
+    const numEl = document.createElement('div');
+    numEl.className = 'stat-number';
+    numEl.textContent = formatValue(mv.raw, mv.isSigned, mv.isPct) + ' ' + mv.label;
+    top.appendChild(numEl);
+  }
+
+  card.appendChild(top);
+
+  const seasonEl = document.createElement('div');
+  seasonEl.className = 'stat-season';
+  seasonEl.textContent = '2025–26 season';
+  card.appendChild(seasonEl);
+
+  // mini top-5 list
+  const mini = document.createElement('div');
+  mini.className = 'mini-list';
+  const top5 = table.slice(0, 5);
+  const rankClasses = ['gold', 'silver', 'bronze', '', ''];
+
+  top5.forEach((row, i) => {
+    const mv2 = getMetricVal(row, fn);
+    const line = document.createElement('div');
+    line.className = 'mini-row';
+
+    const rankEl = document.createElement('div');
+    rankEl.className = `mini-rank ${rankClasses[i] || ''}`;
+    rankEl.textContent = i + 1;
+    line.appendChild(rankEl);
+
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'mini-name';
+    nameDiv.textContent = row.PLAYER_NAME || '—';
+    line.appendChild(nameDiv);
+
+    const teamDiv = document.createElement('div');
+    teamDiv.className = 'mini-team';
+    teamDiv.textContent = getTeam(row, fn);
+    line.appendChild(teamDiv);
+
+    if (mv2) {
+      const valDiv = document.createElement('div');
+      valDiv.className = 'mini-val';
+      valDiv.textContent = formatValue(mv2.raw, mv2.isSigned, mv2.isPct);
+      line.appendChild(valDiv);
+    }
+
+    mini.appendChild(line);
+  });
+  card.appendChild(mini);
+
+  // answer text / caveats
+  const textEl = document.createElement('div');
+  textEl.className = 'stat-answer-text';
+  textEl.textContent = answer;
+  card.appendChild(textEl);
+
+  return card;
+}
+
+/* ── full table (rows 5-24) ── */
+function buildFullTable(records) {
+  if (!records || records.length <= 5) return null;
+  const rest = records.slice(5);
+  const cols = Object.keys(rest[0]);
   const table = document.createElement('table');
   const thead = table.createTHead();
   const hr = thead.insertRow();
@@ -295,9 +623,9 @@ function buildTable(records) {
     hr.appendChild(th);
   });
   const tbody = table.createTBody();
-  records.forEach((row, i) => {
+  rest.forEach((row, i) => {
     const tr = tbody.insertRow();
-    if (i === 0) tr.classList.add('top-row');
+    if (i % 2 === 1) tr.style.background = '#f8f9fd';
     cols.forEach(c => {
       const td = tr.insertCell();
       td.textContent = formatValue(row[c]);
@@ -306,6 +634,33 @@ function buildTable(records) {
   return table;
 }
 
+/* ── follow-up chips ── */
+function buildFollowupChips(fn) {
+  const suggestions = FOLLOWUPS[fn];
+  if (!suggestions || suggestions.length === 0) return null;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'followup-chips';
+
+  const lbl = document.createElement('div');
+  lbl.className = 'followup-label';
+  lbl.textContent = 'Ask next';
+  wrap.appendChild(lbl);
+
+  const row = document.createElement('div');
+  row.className = 'chips-row';
+  suggestions.forEach(q => {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.textContent = q;
+    btn.addEventListener('click', () => fireQuestion(q));
+    row.appendChild(btn);
+  });
+  wrap.appendChild(row);
+  return wrap;
+}
+
+/* ── main message renderer ── */
 function appendMessage(question, data) {
   empty.style.display = 'none';
 
@@ -313,18 +668,17 @@ function appendMessage(question, data) {
   const userRow = document.createElement('div');
   userRow.className = 'bubble-row user';
   const userBubble = document.createElement('div');
-  userBubble.className = 'bubble';
-  userBubble.style.background = '#0f2044';
-  userBubble.style.color = '#fff';
+  userBubble.className = 'user-bubble';
   userBubble.textContent = question;
   userRow.appendChild(userBubble);
   chat.appendChild(userRow);
 
-  // agent bubble
+  // agent row
   const agentRow = document.createElement('div');
   agentRow.className = 'bubble-row agent';
 
   const rtype = data.response_type || 'answer';
+  const fn    = data.function_matched || '';
 
   // badge
   const badge = document.createElement('div');
@@ -335,53 +689,66 @@ function appendMessage(question, data) {
   badge.appendChild(document.createTextNode(BADGE_LABELS[rtype] || rtype));
   agentRow.appendChild(badge);
 
-  // answer bubble
-  const agentBubble = document.createElement('div');
-  agentBubble.className = `bubble ${rtype}`;
-  agentBubble.textContent = data.answer;
-  agentRow.appendChild(agentBubble);
+  if (rtype === 'answer' && data.table && data.table.length > 0) {
+    // stat card + mini list
+    const card = buildStatCard(data);
+    if (card) agentRow.appendChild(card);
 
-  // function tag
-  if (data.function_matched && !['out_of_scope','needs_clarification'].includes(data.function_matched)) {
+    // full table toggle (rows 6+)
+    if (data.table.length > 5) {
+      const toggle = document.createElement('button');
+      toggle.className = 'table-toggle';
+      toggle.innerHTML = '<span class="arrow">▶</span> <span class="toggle-label">Show full rankings (#6–#' + data.table.length + ')</span>';
+
+      const wrap = document.createElement('div');
+      wrap.className = 'table-wrap';
+      const tbl = buildFullTable(data.table);
+      if (tbl) wrap.appendChild(tbl);
+
+      toggle.addEventListener('click', () => {
+        const open = wrap.classList.toggle('visible');
+        toggle.classList.toggle('open', open);
+        toggle.querySelector('.toggle-label').textContent =
+          open
+            ? 'Hide full rankings'
+            : `Show full rankings (#6–#${data.table.length})`;
+      });
+
+      agentRow.appendChild(toggle);
+      agentRow.appendChild(wrap);
+    }
+
+    // fn tag
     const tag = document.createElement('div');
     tag.className = 'fn-tag';
-    tag.textContent = `fn: ${data.function_matched}  ·  via ${data.method || '?'}`;
+    tag.textContent = `fn: ${fn}  ·  via ${data.method || '?'}`;
     agentRow.appendChild(tag);
-  }
 
-  // expandable table
-  if (data.table && data.table.length > 0) {
-    const toggle = document.createElement('button');
-    toggle.className = 'table-toggle';
-    toggle.innerHTML = '<span class="arrow">▶</span> Show full rankings';
+    // follow-up chips
+    const followups = buildFollowupChips(fn);
+    if (followups) agentRow.appendChild(followups);
 
-    const wrap = document.createElement('div');
-    wrap.className = 'table-wrap';
-    const tbl = buildTable(data.table);
-    if (tbl) wrap.appendChild(tbl);
-
-    toggle.addEventListener('click', () => {
-      const open = wrap.classList.toggle('visible');
-      toggle.classList.toggle('open', open);
-      toggle.querySelector('.arrow').parentNode.childNodes[1].textContent =
-        open ? ' Hide rankings' : ' Show full rankings';
-    });
-
-    agentRow.appendChild(toggle);
-    agentRow.appendChild(wrap);
+  } else {
+    // non-answer: plain styled bubble
+    const bubble = document.createElement('div');
+    bubble.className = `plain-bubble ${rtype}`;
+    bubble.textContent = data.answer;
+    agentRow.appendChild(bubble);
   }
 
   chat.appendChild(agentRow);
   chat.scrollTop = chat.scrollHeight;
 }
 
+/* ── loading indicator ── */
 function appendLoading() {
   empty.style.display = 'none';
   const row = document.createElement('div');
   row.className = 'bubble-row agent';
   row.id = 'loading-row';
   const b = document.createElement('div');
-  b.className = 'bubble answer';
+  b.className = 'plain-bubble';
+  b.style.cssText = 'background:#fff;border:1px solid #e2e8f4;color:#6b7a99;';
   b.innerHTML = '<span class="spinner"></span>Thinking…';
   row.appendChild(b);
   chat.appendChild(row);
@@ -389,14 +756,11 @@ function appendLoading() {
   return row;
 }
 
-async function ask() {
-  const q = input.value.trim();
-  if (!q) return;
+/* ── core ask flow ── */
+async function fireQuestion(q) {
   input.value = '';
   sendBtn.disabled = true;
-
   const loadingRow = appendLoading();
-
   try {
     const res = await fetch('/query', {
       method: 'POST',
@@ -406,14 +770,12 @@ async function ask() {
     const data = await res.json();
     loadingRow.remove();
     appendMessage(q, data);
-  } catch (err) {
+  } catch {
     loadingRow.remove();
     appendMessage(q, {
       response_type: 'out_of_scope',
       answer: 'Network error — is the server running?',
-      function_matched: null,
-      method: null,
-      table: null,
+      function_matched: null, method: null, table: null,
     });
   } finally {
     sendBtn.disabled = false;
@@ -421,9 +783,14 @@ async function ask() {
   }
 }
 
+async function ask() {
+  const q = input.value.trim();
+  if (!q) return;
+  await fireQuestion(q);
+}
+
 sendBtn.addEventListener('click', ask);
 input.addEventListener('keydown', e => { if (e.key === 'Enter') ask(); });
 </script>
-
 </body>
 </html>
