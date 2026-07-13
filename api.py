@@ -12,6 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from query_router import route
+from report import generate_scouting_report_data
 
 
 # ── startup: load dataframes once ────────────────────────────────────────────
@@ -50,6 +51,29 @@ class QueryResponse(BaseModel):
     function_matched: Optional[str]
     method: Optional[str]
     table: Optional[list[dict]]
+
+
+class ReportRequest(BaseModel):
+    player_name: str
+    season: str = "2025-26"
+
+
+class ReportSectionRow(BaseModel):
+    label: str
+    qualified: bool
+    text: str
+    caveats: list[str]
+
+
+class ReportSection(BaseModel):
+    title: str
+    rows: list[ReportSectionRow]
+
+
+class ReportResponse(BaseModel):
+    player_name: str
+    season: str
+    sections: list[ReportSection]
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────
@@ -101,6 +125,12 @@ def query(req: QueryRequest):
         method=result.get("method"),
         table=table,
     )
+
+
+@app.post("/report", response_model=ReportResponse)
+def report(req: ReportRequest):
+    data = generate_scouting_report_data(req.player_name, req.season)
+    return ReportResponse(**data)
 
 
 # ── serve frontend ────────────────────────────────────────────────────────────

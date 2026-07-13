@@ -366,6 +366,171 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* ── mode toggle ── */
+  #mode-bar {
+    display: flex;
+    gap: 6px;
+    padding: 10px 16px 0;
+    flex-shrink: 0;
+  }
+  .mode-btn {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 8px 8px 0 0;
+    padding: 8px 16px;
+    font-size: .82rem;
+    font-weight: 600;
+    color: #6b7a99;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .mode-btn.active {
+    background: #fff;
+    border-color: #e2e8f4;
+    border-bottom-color: #fff;
+    color: #0d1b36;
+  }
+
+  /* ── report search bar ── */
+  #report-bar {
+    display: none;
+    background: #f0f2f7;
+    padding: 10px 16px 14px;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  #report-bar.visible { display: flex; }
+  #report-bar label {
+    font-size: .78rem;
+    font-weight: 600;
+    color: #334060;
+    align-self: center;
+    white-space: nowrap;
+  }
+  #player-input {
+    flex: 1;
+    border: 1px solid #c8d0e4;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: .9rem;
+    font-family: inherit;
+    background: #fff;
+    outline: none;
+    transition: border-color .15s;
+  }
+  #player-input:focus { border-color: #1d4ed8; }
+  #generate-btn {
+    background: #0d1b36;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-size: .9rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s;
+    white-space: nowrap;
+  }
+  #generate-btn:hover:not(:disabled) { background: #1a3a6e; }
+  #generate-btn:disabled { opacity: .45; cursor: default; }
+
+  /* ── report view (separate from chat) ── */
+  #report-view {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px 24px;
+  }
+  #report-view.visible { display: block; }
+
+  .report-card {
+    background: #fff;
+    border: 1px solid #e2e8f4;
+    border-radius: 14px;
+    max-width: 780px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+  .report-header {
+    background: #0d1b36;
+    color: #fff;
+    padding: 20px 24px;
+  }
+  .report-header .report-player {
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+  .report-header .report-season {
+    font-size: .78rem;
+    color: #7a9acc;
+    margin-top: 3px;
+  }
+
+  .report-section {
+    padding: 16px 24px;
+    border-bottom: 1px solid #eef1f8;
+  }
+  .report-section:last-child { border-bottom: none; }
+  .report-section-title {
+    font-size: .95rem;
+    font-weight: 700;
+    color: #0d1b36;
+    margin-bottom: 10px;
+  }
+  .report-row {
+    padding: 7px 0;
+    border-bottom: 1px solid #f4f6fb;
+  }
+  .report-row:last-child { border-bottom: none; }
+  .report-row-label {
+    font-size: .78rem;
+    font-weight: 700;
+    color: #334060;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    margin-bottom: 2px;
+  }
+  .report-row-text {
+    font-size: .85rem;
+    color: #334060;
+    line-height: 1.55;
+  }
+  .report-row-text.unqualified {
+    color: #9aa3b8;
+    font-style: italic;
+  }
+
+  /* ── caveat box (reuses needs_clarification palette for visual distinctness) ── */
+  .caveat-box {
+    margin-top: 6px;
+    padding: 8px 12px;
+    background: #f5f3ff;
+    border: 1px solid #c4b5fd;
+    border-left: 3px solid #7c3aed;
+    border-radius: 6px;
+    color: #4c1d95;
+    font-size: .78rem;
+    line-height: 1.5;
+  }
+  .caveat-box .caveat-label {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-size: .68rem;
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .report-loading, .report-error {
+    max-width: 780px;
+    margin: 40px auto;
+    text-align: center;
+    color: #9aa3b8;
+    font-size: .9rem;
+  }
+  .report-error { color: #92400e; }
+
   /* ── empty state ── */
   #empty {
     flex: 1;
@@ -389,6 +554,11 @@
   <p>Ask about defense or offense. Get a real answer, backed by real numbers.</p>
 </header>
 
+<div id="mode-bar">
+  <button class="mode-btn active" id="mode-ask">Ask a question</button>
+  <button class="mode-btn" id="mode-report">Full scouting report</button>
+</div>
+
 <div id="chat">
   <div id="empty">
     <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
@@ -400,6 +570,8 @@
   </div>
 </div>
 
+<div id="report-view"></div>
+
 <div id="chip-bar">
   <div class="chips-row" id="suggest-chips"></div>
 </div>
@@ -407,6 +579,12 @@
 <div id="input-bar">
   <input id="question" type="text" placeholder="Ask about defense, hustle, play types, year-over-year trends…" autocomplete="off" />
   <button id="send-btn">Ask</button>
+</div>
+
+<div id="report-bar">
+  <label for="player-input">Full scouting report for…</label>
+  <input id="player-input" type="text" placeholder="e.g. Alex Caruso" autocomplete="off" />
+  <button id="generate-btn">Generate</button>
 </div>
 
 <script>
@@ -799,6 +977,131 @@ async function ask() {
 
 sendBtn.addEventListener('click', ask);
 input.addEventListener('keydown', e => { if (e.key === 'Enter') ask(); });
+
+/* ── mode toggle: Ask vs. Scouting Report ── */
+const modeAskBtn    = document.getElementById('mode-ask');
+const modeReportBtn = document.getElementById('mode-report');
+const chipBarWrap    = document.getElementById('chip-bar');
+const inputBar       = document.getElementById('input-bar');
+const reportBar      = document.getElementById('report-bar');
+const reportView     = document.getElementById('report-view');
+const playerInput    = document.getElementById('player-input');
+const generateBtn    = document.getElementById('generate-btn');
+
+function setMode(mode) {
+  const isReport = mode === 'report';
+  modeAskBtn.classList.toggle('active', !isReport);
+  modeReportBtn.classList.toggle('active', isReport);
+
+  chat.style.display     = isReport ? 'none' : 'flex';
+  chipBarWrap.style.display = isReport ? 'none' : 'block';
+  inputBar.style.display    = isReport ? 'none' : 'flex';
+  reportBar.classList.toggle('visible', isReport);
+  reportView.classList.toggle('visible', isReport);
+
+  if (isReport) playerInput.focus();
+  else input.focus();
+}
+modeAskBtn.addEventListener('click', () => setMode('ask'));
+modeReportBtn.addEventListener('click', () => setMode('report'));
+
+/* ── caveat box builder (visually distinct, reused across all report sections) ── */
+function buildCaveatBox(text) {
+  const box = document.createElement('div');
+  box.className = 'caveat-box';
+  const label = document.createElement('span');
+  label.className = 'caveat-label';
+  label.textContent = 'Note';
+  box.appendChild(label);
+  box.appendChild(document.createTextNode(text));
+  return box;
+}
+
+/* ── report card builder ── */
+function buildReportCard(data) {
+  const card = document.createElement('div');
+  card.className = 'report-card';
+
+  const header = document.createElement('div');
+  header.className = 'report-header';
+  const nameEl = document.createElement('div');
+  nameEl.className = 'report-player';
+  nameEl.textContent = data.player_name;
+  header.appendChild(nameEl);
+  const seasonEl = document.createElement('div');
+  seasonEl.className = 'report-season';
+  seasonEl.textContent = `${data.season} season`;
+  header.appendChild(seasonEl);
+  card.appendChild(header);
+
+  data.sections.forEach(section => {
+    const sec = document.createElement('div');
+    sec.className = 'report-section';
+
+    const title = document.createElement('div');
+    title.className = 'report-section-title';
+    title.textContent = section.title;
+    sec.appendChild(title);
+
+    section.rows.forEach(row => {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'report-row';
+
+      // multi-row sections (Hustle/Activity, Shot Suppression, play-type
+      // profiles) have a meaningful per-metric label; single-row sections
+      // (Gap, YoY) fold the label into the sentence itself already, so
+      // skip a redundant label line for those.
+      if (section.rows.length > 1) {
+        const labelEl = document.createElement('div');
+        labelEl.className = 'report-row-label';
+        labelEl.textContent = row.label;
+        rowEl.appendChild(labelEl);
+      }
+
+      const textEl = document.createElement('div');
+      textEl.className = 'report-row-text' + (row.qualified ? '' : ' unqualified');
+      textEl.textContent = row.text;
+      rowEl.appendChild(textEl);
+
+      row.caveats.forEach(caveat => {
+        rowEl.appendChild(buildCaveatBox(caveat));
+      });
+
+      sec.appendChild(rowEl);
+    });
+
+    card.appendChild(sec);
+  });
+
+  return card;
+}
+
+async function generateReport() {
+  const name = playerInput.value.trim();
+  if (!name) return;
+
+  generateBtn.disabled = true;
+  reportView.innerHTML = '<div class="report-loading"><span class="spinner"></span>Generating report…</div>';
+
+  try {
+    const res = await fetch('/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ player_name: name }),
+    });
+    if (!res.ok) throw new Error('Request failed');
+    const data = await res.json();
+    reportView.innerHTML = '';
+    reportView.appendChild(buildReportCard(data));
+  } catch {
+    reportView.innerHTML = '<div class="report-error">Could not generate a report — is the server running?</div>';
+  } finally {
+    generateBtn.disabled = false;
+  }
+}
+
+generateBtn.addEventListener('click', generateReport);
+playerInput.addEventListener('keydown', e => { if (e.key === 'Enter') generateReport(); });
 </script>
 </body>
 </html>
