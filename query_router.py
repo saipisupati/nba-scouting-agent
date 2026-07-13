@@ -17,13 +17,16 @@ from compute_defense import (
     _YOY_METRIC_MAP,
     SMALL_SAMPLE_THRESHOLD,
 )
+from compute_offense import playtype_offense, format_playtype_offense_answer
 
 OUT_OF_SCOPE_MSG = (
-    "I don't have data to answer that — this tool only covers "
+    "I don't have data to answer that — this tool covers "
     "deflections, rim/perimeter contests, box-out efficiency, "
     "hustle-play composites, shot suppression (opponent FG%), "
-    "hustle-vs-suppression gap analysis, and Synergy play-type defense "
-    "(Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, OffScreen)."
+    "hustle-vs-suppression gap analysis, Synergy play-type defense "
+    "(Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, OffScreen), "
+    "and Synergy play-type offense "
+    "(Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, Cut, OffScreen, Transition)."
 )
 
 _NEEDS_CLARIFICATION_MSG = (
@@ -221,9 +224,11 @@ _RULES = [
     ),
     (
         re.compile(
-            r"pick.*roll.*defense|p.?r.*defense|pick.*roll.*ball.?handler|"
-            r"defend.*ball.?handler|ball.?handler.*defense|defend.*pick.*roll",
-            re.IGNORECASE,
+            r"^(?!.*(?:scor|finish|offens|efficien)).*"
+            r"(?:pick.*roll.*defen|p.?r.*defen|pick.*roll.*ball.?handler|"
+            r"defend.*ball.?handler|guard.*ball.?handler|ball.?handler.*defen|"
+            r"defend.*pick.*roll|guard.*pick.*roll)",
+            re.IGNORECASE | re.DOTALL,
         ),
         "playtype_defense",
         "PRBallHandler",
@@ -265,10 +270,118 @@ _RULES = [
         "playtype_defense",
         "OffScreen",
     ),
+    # ── playtype_offense — all rules require explicit scoring/offensive language
+    # so they cannot collide with defensive rules above. The anchor group
+    # (scor|finish|efficient|shoot) must appear somewhere in the question.
+    # Defensive questions ("defend the iso", "guard the pick and roll") will
+    # never contain those terms and fall through to the defensive rules.
+    (
+        re.compile(
+            r"(?=.*(?:scor|finish|efficient|shoot|best at|good at))"
+            r"(?:iso.*scor|scor.*iso|best in isolation|one.on.one.*scor|"
+            r"iso.*finish|isolation.*offens|isolation.*efficien)",
+            re.IGNORECASE,
+        ),
+        "playtype_offense",
+        "Isolation",
+    ),
+    (
+        re.compile(
+            r"(?:pick.*roll.*(?:ball.?handler|scor|finish|creat)|"
+            r"ball.?handler.*(?:scor|efficient)|"
+            r"p\.?r.*ball.?handler.*(?:scor|offens)|"
+            r"scor.*(?:pick.*roll|ball.?handler)|"
+            r"efficien.*ball.?handler|"
+            r"pick.*roll.*offens)",
+            re.IGNORECASE,
+        ),
+        "playtype_offense",
+        "PRBallHandler",
+    ),
+    (
+        re.compile(
+            r"(?=.*(?:scor|finish|roll))"
+            r"(?:roll.?man.*(?:scor|finish|offens)|"
+            r"(?:scor|finish).*roll.?man|"
+            r"pick.*roll.*finish|roll.*big.*(?:scor|finish)|"
+            r"finishing.*(?:roll|the roll)|roll.*man.*offens)",
+            re.IGNORECASE,
+        ),
+        "playtype_offense",
+        "PRRollman",
+    ),
+    (
+        re.compile(
+            r"(?=.*(?:scor|finish|offens|back.to.the.basket|post))"
+            r"(?:post.*scor|scor.*post|back.to.the.basket|"
+            r"post.*offens|post.?up.*(?:scor|finish|offens)|"
+            r"(?:scor|finish).*post)",
+            re.IGNORECASE,
+        ),
+        "playtype_offense",
+        "Postup",
+    ),
+    (
+        re.compile(
+            r"(?:spot.?up.*shoot|catch.*shoot|shoot.*off.*catch|"
+            r"catch.and.shoot|spot.?up.*(?:scor|offens|efficien)|"
+            r"stand.*still.*shoot|stationar.*shoot)",
+            re.IGNORECASE,
+        ),
+        "playtype_offense",
+        "Spotup",
+    ),
+    (
+        re.compile(
+            r"(?=.*(?:scor|shoot|finish|efficient))"
+            r"(?:handoff.*(?:scor|shoot|finish)|"
+            r"(?:scor|shoot|finish).*handoff|"
+            r"dribble.*handoff|hand.?off.*offens|"
+            r"scor.*off.*handoff|handoff.*efficien)",
+            re.IGNORECASE,
+        ),
+        "playtype_offense",
+        "Handoff",
+    ),
+    (
+        re.compile(
+            r"(?:who cuts the most|best cutter|most cuts|"
+            r"cut.*(?:most|best|frequen|offens)|"
+            r"cutter.*(?:league|best|most)|"
+            r"(?:most|best).*cutter)",
+            re.IGNORECASE,
+        ),
+        "playtype_offense",
+        "Cut",
+    ),
+    (
+        re.compile(
+            r"(?=.*(?:scor|shoot|offens|efficien))"
+            r"(?:off.?screen.*(?:scor|shoot|offens)|"
+            r"(?:scor|shoot).*off.*screen|"
+            r"movement.*shoot|coming.*off.*screen|"
+            r"off.screen.*efficien|screen.*(?:shoot|scor).*offens)",
+            re.IGNORECASE,
+        ),
+        "playtype_offense",
+        "OffScreen",
+    ),
+    (
+        re.compile(
+            r"(?:transition.*(?:scor|offens|finish|efficien)|"
+            r"fast.?break.*(?:scor|offens|finish)|"
+            r"(?:scor|finish).*transition|"
+            r"(?:scor|finish).*fast.?break|"
+            r"run.*(?:floor|break).*scor|open.*floor.*scor)",
+            re.IGNORECASE,
+        ),
+        "playtype_offense",
+        "Transition",
+    ),
 ]
 
 _SYSTEM_PROMPT = """You are a routing assistant for an NBA scouting tool.
-You have access to exactly eight statistical functions:
+You have access to exactly nine statistical functions:
 
 1. deflections_per36(df, min_minutes=15, min_games=40)
    Measures: deflections per 36 minutes.
@@ -298,36 +411,48 @@ You have access to exactly eight statistical functions:
    Positive GAP = low hustle activity but good shot suppression (quiet but effective defender).
    Negative GAP = high hustle activity but poor shot suppression (busy but not impactful).
    Use for: questions about underrated defenders, effort vs. results, hustle that doesn't translate.
-   Sort column hint: use "positive" for quiet/underrated/effort-pays-off questions, "negative" for hustle-doesn't-translate/busy-but-not-impactful questions, null if unclear.
+   Sort column hint: use "positive" for quiet/underrated questions, "negative" for hustle-doesn't-translate questions.
 
 7. playtype_defense(play_type, min_poss=<per-type default>)
-   Measures: PPP (points per possession) allowed by play type from Synergy data. Lower PPP = better defense.
-   Valid play types and when to use them:
-     "Isolation"    — iso defense, one-on-one defense, defending iso situations
-     "PRBallHandler"— pick-and-roll defense (ball handler side), defending the ball handler in P&R
-     "PRRollman"    — defending the roll man / pick-and-roll big
-     "Postup"       — post defense, defending post-ups
-     "Spotup"       — spot-up defense, defending shooters catching and shooting
-     "Handoff"      — defending handoffs
-     "OffScreen"    — off-screen defense, chasing shooters off screens, navigating screens
-   NOT available (no player-level data): Cut, Transition — return out_of_scope for these.
-   Sort column hint: use the play type name exactly as listed above (e.g. "Isolation", "PRBallHandler").
+   Measures: PPP (points per possession) ALLOWED by play type. Lower PPP = better defense.
+   ONLY for DEFENSIVE questions — "defending", "guarding", "stopping", "contesting", "how does he defend".
+   Valid play types: "Isolation", "PRBallHandler", "PRRollman", "Postup", "Spotup", "Handoff", "OffScreen".
+   NOT available: Cut, Transition (no player-level defensive data for these).
+   Sort column hint: the play type name exactly (e.g. "Isolation", "PRBallHandler").
 
-8. year_over_year_delta(current_df, prior_df, metric)
-   Measures: season-over-season change in a hustle metric for players who qualified in both seasons.
-   Use for: questions about improvement, decline, trending up/down, regression, breakout in a defensive metric.
+8. playtype_offense(play_type, min_poss=<per-type default>)
+   Measures: PPP (points per possession) SCORED by play type. Higher PPP = better offense.
+   ONLY for OFFENSIVE questions — "scoring", "finishing", "shooting", "efficient at", "best at scoring".
+   This is the OPPOSITE of playtype_defense — do not confuse them.
+   Valid play types: "Isolation", "PRBallHandler", "PRRollman", "Postup", "Spotup", "Handoff",
+                     "Cut", "OffScreen", "Transition".
+   Cut and Transition ARE available offensively (unlike defensively).
+   Special: Cut is ranked by possession volume (who cuts most), not PPP — cutting efficiency is
+   uniformly high and doesn't meaningfully differentiate players.
+   Sort column hint: the play type name exactly (e.g. "Isolation", "Cut", "Transition").
+
+   DISAMBIGUATION — offense vs. defense:
+   - "How does he defend the pick and roll?" → playtype_defense, PRBallHandler
+   - "How does he score in the pick and roll?" → playtype_offense, PRBallHandler
+   - "Who's the best isolation defender?" → playtype_defense, Isolation
+   - "Who's the best isolation scorer?" → playtype_offense, Isolation
+   The key signal is whether the question is about allowing points (defense) or scoring points (offense).
+
+9. year_over_year_delta(current_df, prior_df, metric)
+   Measures: season-over-season change in a hustle metric.
+   Use for: improvement, decline, trending up/down in a defensive metric.
    Supported metrics: deflections_per36, contest_profile_per36, boxout_conversion, hustle_iq_composite.
-   Sort column hint: encode as "<metric>:improve" or "<metric>:decline" — e.g. "deflections_per36:decline".
-   If the question has no clear direction (improve vs. decline) or no clear metric, return out_of_scope.
+   Sort column hint: "<metric>:improve" or "<metric>:decline".
 
-None of these functions cover: scoring, shooting efficiency, assists, salary, trade value, draft grades, or anything unrelated to the eight hustle/defense categories above.
+None of these functions cover: salary, trade value, draft grades, injuries, assists, or anything outside
+hustle/defense/play-type offense as described above.
 
 Respond ONLY with a JSON object — no prose, no markdown, no explanation. Three possible responses:
-- If the question maps to one of the eight functions:
-  {"function": "<function_name>", "sort_col": "<hint: '2pt', '3pt', 'Overall', 'Less Than 6Ft', 'positive', 'negative', play type name, '<metric>:improve'/'<metric>:decline', or null>"}
-- If the question is about a stat this tool tracks (deflections, contests, box-outs, hustle IQ, shot suppression, play-type defense, year-over-year trends) but is too vague or underspecified to answer — e.g. asks about trends without naming a stat or direction:
+- If the question maps to one of the nine functions:
+  {"function": "<function_name>", "sort_col": "<hint>"}
+- If the question is about a stat this tool tracks but is too vague or underspecified:
   {"needs_clarification": true}
-- If the question is genuinely outside what this tool covers (scoring, assists, salary, trade value, draft grades, injuries, etc.):
+- If the question is genuinely outside what this tool covers:
   {"out_of_scope": true}"""
 
 
@@ -633,6 +758,17 @@ def route(
             result = playtype_defense(play_type)
             top = result.iloc[0]
             answer = _format_playtype(top, play_type, season_label)
+
+        elif func_name == "playtype_offense":
+            play_type = sort_col  # sort_col carries the play_type name
+            result = playtype_offense(play_type)
+            top = result.iloc[0]
+            # compute total_poss for OffScreen caveat threshold check
+            raw_csv = f"playtype_offense_{play_type.lower()}_2025_26.csv"
+            _raw = pd.read_csv(raw_csv)
+            _gp_rows = _raw[_raw["PLAYER_NAME"] == top["PLAYER_NAME"]]["GP"]
+            total_poss = float(top["POSS"] * _gp_rows.values[0]) if not _gp_rows.empty else None
+            answer = format_playtype_offense_answer(top, play_type, season_label, total_poss=total_poss)
 
         elif func_name == "year_over_year_delta":
             # sort_col encodes "metric:direction" e.g. "deflections_per36:decline"

@@ -28,6 +28,18 @@ questions = [
     "Which player has improved the most at drawing charges this year?",
     "Who has declined the most in deflections?",
     "Is this player trending up or down defensively?",
+    # ── Q24-Q29: playtype_offense + disambiguation ────────────────────────────
+    "Who's the best scorer in isolation?",                          # Q24 → playtype_offense, Isolation
+    "How does he score coming off screens?",                        # Q25 → playtype_offense, OffScreen
+    "Who cuts the most?",                                           # Q26 → playtype_offense, Cut (volume)
+    "Who's the best off-screen scorer?",                            # Q27 → playtype_offense, OffScreen
+    "How does he defend the pick and roll?",                        # Q28 → playtype_defense, PRBallHandler (DISAMBIGUATION)
+    "How does he score in the pick and roll as the ball handler?",  # Q29 → playtype_offense, PRBallHandler (DISAMBIGUATION)
+    # ── Q30-Q33: additional PRBallHandler/PRRollman disambiguation ────────────
+    "Is he a good pick and roll defender?",                         # Q30 → playtype_defense, PRBallHandler (DISAMBIGUATION)
+    "Rate his offensive efficiency as a pick and roll ball handler", # Q31 → playtype_offense, PRBallHandler (DISAMBIGUATION)
+    "Can he guard ball handlers in the pick and roll?",             # Q32 → playtype_defense, PRBallHandler (DISAMBIGUATION)
+    "How efficient is he finishing as the roll man?",               # Q33 → playtype_offense, PRRollman (DISAMBIGUATION)
 ]
 
 for i, q in enumerate(questions, 1):
