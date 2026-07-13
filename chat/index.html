@@ -386,7 +386,7 @@
 
 <header>
   <h1>NBA Scouting Agent</h1>
-  <p>Ask a defensive question. Get a real answer, backed by real numbers.</p>
+  <p>Ask about defense or offense. Get a real answer, backed by real numbers.</p>
 </header>
 
 <div id="chat">
@@ -413,11 +413,11 @@
 /* ── constants ── */
 const SUGGEST_CHIPS = [
   'Best rim protector',
-  'Most improved defender',
-  'Underrated defenders',
+  'Best scorer in isolation',
   'Best pick-and-roll defender',
-  'Trending down this year',
-  'Best perimeter defender',
+  "Who's the best off-screen shooter",
+  'Underrated defenders',
+  'Who cuts the most',
 ];
 
 const BADGE_LABELS = {
@@ -435,6 +435,7 @@ const METRIC_COL = {
   shot_suppression:     { col: 'PCT_PLUSMINUS',           label: 'FG% delta', isSigned: true },
   hustle_vs_suppression_gap: { col: 'GAP',               label: 'gap', isSigned: true },
   playtype_defense:     { col: 'PPP',                     label: 'PPP allowed' },
+  playtype_offense:     { col: 'PPP',                     label: 'PPP' },
   year_over_year_delta: { col: 'DELTA',                   label: 'Δ (YoY)', isSigned: true },
 };
 
@@ -465,6 +466,13 @@ const FOLLOWUPS = {
   playtype_defense: [
     'Who\'s the best roll man defender in the league?',
     'Who navigates screens best on defense?',
+    'Best scorer in isolation',
+  ],
+  playtype_offense: [
+    'Best scorer in isolation',
+    'Who cuts the most',
+    "Who's the best off-screen shooter",
+    'How does he defend the pick and roll?',
   ],
   hustle_vs_suppression_gap: [
     'Who suppresses shooting the most?',
