@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from query_router import route
-from report import generate_scouting_report_data
+from report import generate_scouting_report_data, compare_players_data
 
 
 # ── startup: load dataframes once ────────────────────────────────────────────
@@ -63,6 +63,8 @@ class ReportSectionRow(BaseModel):
     qualified: bool
     text: str
     caveats: list[str]
+    value: Optional[float] = None
+    better: Optional[str] = None   # "higher" | "lower" | None
 
 
 class ReportSection(BaseModel):
@@ -74,6 +76,31 @@ class ReportResponse(BaseModel):
     player_name: str
     season: str
     sections: list[ReportSection]
+
+
+class CompareRequest(BaseModel):
+    player_a: str
+    player_b: str
+    season: str = "2025-26"
+
+
+class CompareRow(BaseModel):
+    label: str
+    a: ReportSectionRow
+    b: ReportSectionRow
+    winner: Optional[str] = None   # "a" | "b" | None
+
+
+class CompareSection(BaseModel):
+    title: str
+    rows: list[CompareRow]
+
+
+class CompareResponse(BaseModel):
+    player_a: str
+    player_b: str
+    season: str
+    sections: list[CompareSection]
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────
@@ -131,6 +158,12 @@ def query(req: QueryRequest):
 def report(req: ReportRequest):
     data = generate_scouting_report_data(req.player_name, req.season)
     return ReportResponse(**data)
+
+
+@app.post("/compare", response_model=CompareResponse)
+def compare(req: CompareRequest):
+    data = compare_players_data(req.player_a, req.player_b, req.season)
+    return CompareResponse(**data)
 
 
 # ── serve frontend ────────────────────────────────────────────────────────────

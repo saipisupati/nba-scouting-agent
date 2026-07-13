@@ -531,6 +531,133 @@
   }
   .report-error { color: #92400e; }
 
+  /* ── compare search bar ── */
+  #compare-bar {
+    display: none;
+    background: #f0f2f7;
+    padding: 10px 16px 14px;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  #compare-bar.visible { display: flex; }
+  #compare-bar label {
+    font-size: .78rem;
+    font-weight: 600;
+    color: #334060;
+    white-space: nowrap;
+  }
+  #compare-bar .compare-vs {
+    font-size: .78rem;
+    font-weight: 700;
+    color: #9aa3b8;
+  }
+  #player-a-input, #player-b-input {
+    flex: 1;
+    border: 1px solid #c8d0e4;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: .9rem;
+    font-family: inherit;
+    background: #fff;
+    outline: none;
+    transition: border-color .15s;
+  }
+  #player-a-input:focus, #player-b-input:focus { border-color: #1d4ed8; }
+  #compare-btn {
+    background: #0d1b36;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-size: .9rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s;
+    white-space: nowrap;
+  }
+  #compare-btn:hover:not(:disabled) { background: #1a3a6e; }
+  #compare-btn:disabled { opacity: .45; cursor: default; }
+
+  /* ── compare view: two-column, section-aligned ── */
+  #compare-view {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px 24px;
+  }
+  #compare-view.visible { display: block; }
+
+  .compare-card {
+    background: #fff;
+    border: 1px solid #e2e8f4;
+    border-radius: 14px;
+    max-width: 920px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+  .compare-header {
+    display: flex;
+    background: #0d1b36;
+    color: #fff;
+  }
+  .compare-header-col {
+    flex: 1;
+    padding: 20px 24px;
+  }
+  .compare-header-col:first-child { border-right: 1px solid rgba(255,255,255,.12); }
+  .compare-header-col .report-player { font-size: 1.3rem; font-weight: 800; }
+  .compare-header-col .report-season { font-size: .78rem; color: #7a9acc; margin-top: 3px; }
+
+  .compare-section {
+    padding: 16px 24px;
+    border-bottom: 1px solid #eef1f8;
+  }
+  .compare-section:last-child { border-bottom: none; }
+  .compare-section-title {
+    font-size: .95rem;
+    font-weight: 700;
+    color: #0d1b36;
+    margin-bottom: 10px;
+  }
+  .compare-row {
+    padding: 8px 0;
+    border-bottom: 1px solid #f4f6fb;
+  }
+  .compare-row:last-child { border-bottom: none; }
+  .compare-row-label {
+    font-size: .78rem;
+    font-weight: 700;
+    color: #334060;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    margin-bottom: 5px;
+  }
+  .compare-row-cols {
+    display: flex;
+    gap: 18px;
+  }
+  .compare-row-cols > div { flex: 1; min-width: 0; }
+  .compare-cell-text {
+    font-size: .84rem;
+    color: #334060;
+    line-height: 1.5;
+  }
+  .compare-cell-text.unqualified {
+    color: #9aa3b8;
+    font-style: italic;
+  }
+  .compare-cell-text.winner {
+    font-weight: 700;
+    color: #0d1b36;
+    background: #dbeafe;
+    border-radius: 5px;
+    padding: 2px 6px;
+    margin: -2px -6px;
+    display: inline-block;
+  }
+
   /* ── empty state ── */
   #empty {
     flex: 1;
@@ -557,6 +684,7 @@
 <div id="mode-bar">
   <button class="mode-btn active" id="mode-ask">Ask a question</button>
   <button class="mode-btn" id="mode-report">Full scouting report</button>
+  <button class="mode-btn" id="mode-compare">Compare</button>
 </div>
 
 <div id="chat">
@@ -571,6 +699,7 @@
 </div>
 
 <div id="report-view"></div>
+<div id="compare-view"></div>
 
 <div id="chip-bar">
   <div class="chips-row" id="suggest-chips"></div>
@@ -585,6 +714,14 @@
   <label for="player-input">Full scouting report for…</label>
   <input id="player-input" type="text" placeholder="e.g. Alex Caruso" autocomplete="off" />
   <button id="generate-btn">Generate</button>
+</div>
+
+<div id="compare-bar">
+  <label>Compare…</label>
+  <input id="player-a-input" type="text" placeholder="e.g. Alex Caruso" autocomplete="off" />
+  <span class="compare-vs">vs.</span>
+  <input id="player-b-input" type="text" placeholder="e.g. Herbert Jones" autocomplete="off" />
+  <button id="compare-btn">Compare</button>
 </div>
 
 <script>
@@ -978,32 +1115,42 @@ async function ask() {
 sendBtn.addEventListener('click', ask);
 input.addEventListener('keydown', e => { if (e.key === 'Enter') ask(); });
 
-/* ── mode toggle: Ask vs. Scouting Report ── */
-const modeAskBtn    = document.getElementById('mode-ask');
-const modeReportBtn = document.getElementById('mode-report');
+/* ── mode toggle: Ask vs. Scouting Report vs. Compare ── */
+const modeAskBtn     = document.getElementById('mode-ask');
+const modeReportBtn  = document.getElementById('mode-report');
+const modeCompareBtn = document.getElementById('mode-compare');
 const chipBarWrap    = document.getElementById('chip-bar');
 const inputBar       = document.getElementById('input-bar');
 const reportBar      = document.getElementById('report-bar');
 const reportView     = document.getElementById('report-view');
 const playerInput    = document.getElementById('player-input');
 const generateBtn    = document.getElementById('generate-btn');
+const compareBar     = document.getElementById('compare-bar');
+const compareView    = document.getElementById('compare-view');
+const playerAInput   = document.getElementById('player-a-input');
+const playerBInput   = document.getElementById('player-b-input');
+const compareBtn     = document.getElementById('compare-btn');
 
 function setMode(mode) {
-  const isReport = mode === 'report';
-  modeAskBtn.classList.toggle('active', !isReport);
-  modeReportBtn.classList.toggle('active', isReport);
+  modeAskBtn.classList.toggle('active', mode === 'ask');
+  modeReportBtn.classList.toggle('active', mode === 'report');
+  modeCompareBtn.classList.toggle('active', mode === 'compare');
 
-  chat.style.display     = isReport ? 'none' : 'flex';
-  chipBarWrap.style.display = isReport ? 'none' : 'block';
-  inputBar.style.display    = isReport ? 'none' : 'flex';
-  reportBar.classList.toggle('visible', isReport);
-  reportView.classList.toggle('visible', isReport);
+  chat.style.display        = mode === 'ask' ? 'flex' : 'none';
+  chipBarWrap.style.display = mode === 'ask' ? 'block' : 'none';
+  inputBar.style.display    = mode === 'ask' ? 'flex' : 'none';
+  reportBar.classList.toggle('visible', mode === 'report');
+  reportView.classList.toggle('visible', mode === 'report');
+  compareBar.classList.toggle('visible', mode === 'compare');
+  compareView.classList.toggle('visible', mode === 'compare');
 
-  if (isReport) playerInput.focus();
+  if (mode === 'report') playerInput.focus();
+  else if (mode === 'compare') playerAInput.focus();
   else input.focus();
 }
 modeAskBtn.addEventListener('click', () => setMode('ask'));
 modeReportBtn.addEventListener('click', () => setMode('report'));
+modeCompareBtn.addEventListener('click', () => setMode('compare'));
 
 /* ── caveat box builder (visually distinct, reused across all report sections) ── */
 function buildCaveatBox(text) {
@@ -1102,6 +1249,110 @@ async function generateReport() {
 
 generateBtn.addEventListener('click', generateReport);
 playerInput.addEventListener('keydown', e => { if (e.key === 'Enter') generateReport(); });
+
+/* ── compare card builder ── */
+function buildCompareCell(row, isWinner) {
+  const cell = document.createElement('div');
+
+  const textEl = document.createElement('div');
+  let cls = 'compare-cell-text';
+  if (!row.qualified) cls += ' unqualified';
+  else if (isWinner) cls += ' winner';
+  textEl.className = cls;
+  textEl.textContent = row.text;
+  cell.appendChild(textEl);
+
+  row.caveats.forEach(caveat => {
+    cell.appendChild(buildCaveatBox(caveat));
+  });
+
+  return cell;
+}
+
+function buildCompareCard(data) {
+  const card = document.createElement('div');
+  card.className = 'compare-card';
+
+  const header = document.createElement('div');
+  header.className = 'compare-header';
+  [data.player_a, data.player_b].forEach(name => {
+    const col = document.createElement('div');
+    col.className = 'compare-header-col';
+    const nameEl = document.createElement('div');
+    nameEl.className = 'report-player';
+    nameEl.textContent = name;
+    col.appendChild(nameEl);
+    const seasonEl = document.createElement('div');
+    seasonEl.className = 'report-season';
+    seasonEl.textContent = `${data.season} season`;
+    col.appendChild(seasonEl);
+    header.appendChild(col);
+  });
+  card.appendChild(header);
+
+  data.sections.forEach(section => {
+    const sec = document.createElement('div');
+    sec.className = 'compare-section';
+
+    const title = document.createElement('div');
+    title.className = 'compare-section-title';
+    title.textContent = section.title;
+    sec.appendChild(title);
+
+    section.rows.forEach(row => {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'compare-row';
+
+      if (section.rows.length > 1) {
+        const labelEl = document.createElement('div');
+        labelEl.className = 'compare-row-label';
+        labelEl.textContent = row.label;
+        rowEl.appendChild(labelEl);
+      }
+
+      const cols = document.createElement('div');
+      cols.className = 'compare-row-cols';
+      cols.appendChild(buildCompareCell(row.a, row.winner === 'a'));
+      cols.appendChild(buildCompareCell(row.b, row.winner === 'b'));
+      rowEl.appendChild(cols);
+
+      sec.appendChild(rowEl);
+    });
+
+    card.appendChild(sec);
+  });
+
+  return card;
+}
+
+async function generateComparison() {
+  const nameA = playerAInput.value.trim();
+  const nameB = playerBInput.value.trim();
+  if (!nameA || !nameB) return;
+
+  compareBtn.disabled = true;
+  compareView.innerHTML = '<div class="report-loading"><span class="spinner"></span>Comparing…</div>';
+
+  try {
+    const res = await fetch('/compare', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ player_a: nameA, player_b: nameB }),
+    });
+    if (!res.ok) throw new Error('Request failed');
+    const data = await res.json();
+    compareView.innerHTML = '';
+    compareView.appendChild(buildCompareCard(data));
+  } catch {
+    compareView.innerHTML = '<div class="report-error">Could not generate a comparison — is the server running?</div>';
+  } finally {
+    compareBtn.disabled = false;
+  }
+}
+
+compareBtn.addEventListener('click', generateComparison);
+playerAInput.addEventListener('keydown', e => { if (e.key === 'Enter') generateComparison(); });
+playerBInput.addEventListener('keydown', e => { if (e.key === 'Enter') generateComparison(); });
 </script>
 </body>
 </html>
