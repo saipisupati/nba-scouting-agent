@@ -13,6 +13,8 @@ from compute_defense import (
     shot_suppression,
     hustle_vs_suppression_gap,
     playtype_defense,
+    year_over_year_delta,
+    _YOY_METRIC_MAP,
     SMALL_SAMPLE_THRESHOLD,
 )
 
@@ -24,12 +26,73 @@ OUT_OF_SCOPE_MSG = (
     "(Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, OffScreen)."
 )
 
+_NEEDS_CLARIFICATION_MSG = (
+    "I can track year-over-year trends, but I need to know which stat "
+    "(deflections, contests, box-outs, or hustle IQ) and which direction "
+    "(improving or declining) you're asking about."
+)
+
 _NO_PLAYTYPE_DATA_MSG = (
     "Synergy doesn't publish player-level defensive data for this play type. "
     "Cut and Transition defense are not available at the individual player level — "
     "only team-level data exists for these categories in the Synergy feed."
 )
 
+# ── Year-over-year routing ────────────────────────────────────────────────────
+# Phase 1: detect a clear trend direction (improve OR decline).
+# Both must be present for deterministic routing; ambiguous questions fall
+# through to the LLM.
+_YOY_IMPROVE_PATTERN = re.compile(
+    r"improv|trending up|getting better|stepped up|better than last|risen|"
+    r"leap|breakout|jump.*stat|stat.*jump",
+    re.IGNORECASE,
+)
+_YOY_DECLINE_PATTERN = re.compile(
+    r"declin|dropped? off|regress|trending down|getting worse|fallen off|"
+    r"worse than last|slump|lost a step|fall.*off",
+    re.IGNORECASE,
+)
+
+# Phase 2: detect WHICH of the four YoY-supported metrics the question is about.
+# Keyword subsets are drawn directly from the corresponding _RULES patterns so
+# the same phrasing resolves to the same metric in both the base and YoY paths.
+_YOY_METRIC_PATTERNS: list[tuple[re.Pattern, str]] = [
+    # boxout before hustle_iq so "box out" doesn't accidentally hit hustle
+    (re.compile(r"box.?out|boxes out|rebound.*position|boxing out|screen.*out", re.IGNORECASE),
+     "boxout_conversion"),
+    (re.compile(r"deflect|active hand|tip.*pass|pass.*lane", re.IGNORECASE),
+     "deflections_per36"),
+    (re.compile(r"contest|shot.*contest|rim.*contest|perimeter.*contest|closeout", re.IGNORECASE),
+     "contest_profile_per36"),
+    (re.compile(r"hustle|loose ball|draw.*charge|charge.*draw|charges|motor|defensive iq", re.IGNORECASE),
+     "hustle_iq_composite"),
+]
+
+
+def _yoy_route(question: str) -> Optional[dict]:
+    """Return a YoY routing dict if question has both a clear direction AND a
+    detectable metric; return None otherwise (falls through to LLM)."""
+    improve = bool(_YOY_IMPROVE_PATTERN.search(question))
+    decline = bool(_YOY_DECLINE_PATTERN.search(question))
+
+    # Require exactly one direction signal; both present → ambiguous → LLM
+    if improve == decline:
+        return None
+
+    metric = None
+    for pattern, name in _YOY_METRIC_PATTERNS:
+        if pattern.search(question):
+            metric = name
+            break
+
+    if metric is None:
+        return None  # no detectable metric → LLM
+
+    direction = "improve" if improve else "decline"
+    return {"function": "year_over_year_delta", "sort_col": f"{metric}:{direction}"}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 _RULES = [
     (
         re.compile(
@@ -205,7 +268,7 @@ _RULES = [
 ]
 
 _SYSTEM_PROMPT = """You are a routing assistant for an NBA scouting tool.
-You have access to exactly seven statistical functions:
+You have access to exactly eight statistical functions:
 
 1. deflections_per36(df, min_minutes=15, min_games=40)
    Measures: deflections per 36 minutes.
@@ -250,12 +313,21 @@ You have access to exactly seven statistical functions:
    NOT available (no player-level data): Cut, Transition — return out_of_scope for these.
    Sort column hint: use the play type name exactly as listed above (e.g. "Isolation", "PRBallHandler").
 
-None of these functions cover: scoring, shooting efficiency, assists, salary, trade value, draft grades, or anything unrelated to the seven hustle/defense categories above.
+8. year_over_year_delta(current_df, prior_df, metric)
+   Measures: season-over-season change in a hustle metric for players who qualified in both seasons.
+   Use for: questions about improvement, decline, trending up/down, regression, breakout in a defensive metric.
+   Supported metrics: deflections_per36, contest_profile_per36, boxout_conversion, hustle_iq_composite.
+   Sort column hint: encode as "<metric>:improve" or "<metric>:decline" — e.g. "deflections_per36:decline".
+   If the question has no clear direction (improve vs. decline) or no clear metric, return out_of_scope.
 
-Respond ONLY with a JSON object — no prose, no markdown, no explanation:
-- If the question maps to one of the seven functions:
-  {"function": "<function_name>", "sort_col": "<hint: '2pt', '3pt', 'Overall', 'Less Than 6Ft', 'positive', 'negative', play type name, or null>"}
-- If the question is outside the scope of all seven functions:
+None of these functions cover: scoring, shooting efficiency, assists, salary, trade value, draft grades, or anything unrelated to the eight hustle/defense categories above.
+
+Respond ONLY with a JSON object — no prose, no markdown, no explanation. Three possible responses:
+- If the question maps to one of the eight functions:
+  {"function": "<function_name>", "sort_col": "<hint: '2pt', '3pt', 'Overall', 'Less Than 6Ft', 'positive', 'negative', play type name, '<metric>:improve'/'<metric>:decline', or null>"}
+- If the question is about a stat this tool tracks (deflections, contests, box-outs, hustle IQ, shot suppression, play-type defense, year-over-year trends) but is too vague or underspecified to answer — e.g. asks about trends without naming a stat or direction:
+  {"needs_clarification": true}
+- If the question is genuinely outside what this tool covers (scoring, assists, salary, trade value, draft grades, injuries, etc.):
   {"out_of_scope": true}"""
 
 
@@ -296,6 +368,11 @@ def _llm_route(question: str) -> dict:
 
 
 def _deterministic_route(question: str) -> Optional[dict]:
+    # YoY checked first — a trend question with a clear direction+metric wins
+    # before any base-metric rule can claim the "improve/decline" phrasing.
+    yoy = _yoy_route(question)
+    if yoy is not None:
+        return yoy
     for pattern, func_name, hint in _RULES:
         if pattern.search(question):
             return {"function": func_name, "sort_col": hint}
@@ -321,7 +398,12 @@ def _format_contest(row: pd.Series, sort_col: Optional[str], season_label: str) 
         return (
             f"{row['PLAYER_NAME']} ({row['TEAM_ABBREVIATION']}) leads in perimeter "
             f"closeout contests with {row['CONTESTED_3PT_PER36']} 3PT contests per 36 "
-            f"({row['TOTAL_CONTESTED_PER36']} total) in {row['G']} games [{season_label}]."
+            f"({row['TOTAL_CONTESTED_PER36']} total) in {row['G']} games [{season_label}]. "
+            f"NOTE: This measures contest volume, not shot suppression — high contest counts "
+            f"do not guarantee shooters miss. Volume leaders and suppression leaders differ "
+            f"significantly at the perimeter (e.g. Clingan leads in 3PT contest volume but "
+            f"opponents shoot above their normal rate against him). "
+            f"For true perimeter suppression, see shot_suppression('3 Pointers')."
         )
     return (
         f"{row['PLAYER_NAME']} ({row['TEAM_ABBREVIATION']}) leads in total shot contests "
@@ -409,7 +491,50 @@ def _format_playtype(row: pd.Series, play_type: str, season_label: str) -> str:
     return base
 
 
-def route(question: str, df: pd.DataFrame, season_label: str = "2025-26") -> dict:
+_YOY_METRIC_LABEL = {
+    "deflections_per36":    "deflections per 36",
+    "contest_profile_per36": "total contested shots per 36",
+    "boxout_conversion":    "box-out conversion rate",
+    "hustle_iq_composite":  "Hustle IQ Composite",
+}
+_YOY_METRIC_COL = {k: v for k, (_, v) in _YOY_METRIC_MAP.items()}
+
+
+def _format_yoy(row: pd.Series, metric: str, direction: str, season_label: str, prior_label: str) -> str:
+    metric_col = _YOY_METRIC_COL[metric]
+    label = _YOY_METRIC_LABEL[metric]
+    cur_val = row[f"{metric_col}_CUR"]
+    prior_val = row[f"{metric_col}_PRIOR"]
+    delta = row["DELTA"]
+    verb = "improved the most" if direction == "improve" else "declined the most"
+
+    if metric == "boxout_conversion":
+        cur_str = f"{cur_val * 100:.1f}%"
+        prior_str = f"{prior_val * 100:.1f}%"
+        delta_str = f"{delta * 100:+.1f}pp"
+    elif metric == "hustle_iq_composite":
+        cur_str = f"{cur_val:.3f}"
+        prior_str = f"{prior_val:.3f}"
+        delta_str = f"{delta:+.3f}"
+    else:
+        cur_str = f"{cur_val:.2f}"
+        prior_str = f"{prior_val:.2f}"
+        delta_str = f"{delta:+.2f}"
+
+    return (
+        f"{row['PLAYER_NAME']} ({row['TEAM_CUR']}) has {verb} in {label} "
+        f"({prior_label}: {prior_str} → {season_label}: {cur_str}, DELTA={delta_str}) "
+        f"in {int(row['G_CUR'])} games this season vs. {int(row['G_PRIOR'])} last season."
+    )
+
+
+def route(
+    question: str,
+    df: pd.DataFrame,
+    season_label: str = "2025-26",
+    prior_df: Optional[pd.DataFrame] = None,
+    prior_label: str = "2024-25",
+) -> dict:
     routing = _deterministic_route(question)
     method = "deterministic"
 
@@ -431,6 +556,14 @@ def route(question: str, df: pd.DataFrame, season_label: str = "2025-26") -> dic
             "method": method,
             "function_matched": "out_of_scope",
             "answer": OUT_OF_SCOPE_MSG,
+        }
+
+    if routing.get("needs_clarification"):
+        return {
+            "question": question,
+            "method": method,
+            "function_matched": "needs_clarification",
+            "answer": _NEEDS_CLARIFICATION_MSG,
         }
 
     func_name = routing.get("function")
@@ -495,6 +628,36 @@ def route(question: str, df: pd.DataFrame, season_label: str = "2025-26") -> dic
             top = result.iloc[0]
             answer = _format_playtype(top, play_type, season_label)
 
+        elif func_name == "year_over_year_delta":
+            # sort_col encodes "metric:direction" e.g. "deflections_per36:decline"
+            if prior_df is None:
+                return {
+                    "question": question,
+                    "method": method,
+                    "function_matched": func_name,
+                    "answer": "Year-over-year comparison requires a prior season dataframe. Pass prior_df to route().",
+                }
+            if not sort_col or ":" not in sort_col:
+                return {
+                    "question": question,
+                    "method": method,
+                    "function_matched": "needs_clarification",
+                    "answer": _NEEDS_CLARIFICATION_MSG,
+                }
+            metric, direction = sort_col.rsplit(":", 1)
+            if metric not in _YOY_METRIC_MAP or direction not in ("improve", "decline"):
+                return {
+                    "question": question,
+                    "method": method,
+                    "function_matched": "needs_clarification",
+                    "answer": _NEEDS_CLARIFICATION_MSG,
+                }
+            result = year_over_year_delta(df, prior_df, metric=metric)
+            if direction == "decline":
+                result = result.sort_values("DELTA", ascending=True).reset_index(drop=True)
+            top = result.iloc[0]
+            answer = _format_yoy(top, metric, direction, season_label, prior_label)
+
         else:
             return {
                 "question": question,
@@ -516,4 +679,5 @@ def route(question: str, df: pd.DataFrame, season_label: str = "2025-26") -> dic
         "method": method,
         "function_matched": func_name,
         "answer": answer,
+        "table": result.head(25).to_dict(orient="records"),
     }

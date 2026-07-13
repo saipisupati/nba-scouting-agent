@@ -2,6 +2,7 @@ import pandas as pd
 from query_router import route
 
 df = pd.read_csv("hustle_stats_2025_26.csv")
+prior_df = pd.read_csv("hustle_stats_2024_25.csv")
 
 questions = [
     "Who leads the league in deflections per 36 minutes?",
@@ -24,10 +25,13 @@ questions = [
     "Who's the best roll man defender in the league?",
     "How good is he at defending cuts to the basket?",
     "Who navigates screens best on defense?",
+    "Which player has improved the most at drawing charges this year?",
+    "Who has declined the most in deflections?",
+    "Is this player trending up or down defensively?",
 ]
 
 for i, q in enumerate(questions, 1):
-    result = route(q, df)
+    result = route(q, df, prior_df=prior_df)
     print(f"\n{'='*70}")
     print(f"Q{i}: {result['question']}")
     print(f"  Routing method : {result['method']}")

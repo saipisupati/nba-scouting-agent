@@ -253,6 +253,78 @@ def playtype_defense(play_type: str, min_poss: int = None) -> pd.DataFrame:
     )
 
 
+# Maps metric name → (function, primary metric column to diff)
+# contest_profile_per36 has three rate columns; TOTAL_CONTESTED_PER36 is the
+# most natural single-number summary for year-over-year comparison.
+_YOY_METRIC_MAP = {
+    "deflections_per36":   (deflections_per36,   "DEFLECTIONS_PER36"),
+    "contest_profile_per36": (contest_profile_per36, "TOTAL_CONTESTED_PER36"),
+    "boxout_conversion":   (boxout_conversion,   "BOXOUT_CONV_RATE"),
+    "hustle_iq_composite": (hustle_iq_composite, "HUSTLE_IQ_COMPOSITE"),
+}
+
+
+def year_over_year_delta(
+    current_df: pd.DataFrame,
+    prior_df: pd.DataFrame,
+    metric: str = "deflections_per36",
+    min_minutes: float = 15,
+    min_games: int = 40,
+) -> pd.DataFrame:
+    """Compare a hustle metric between two seasons and rank by change.
+
+    Returns players sorted by DELTA descending (biggest improvers first).
+    Negative DELTA = declined. Only players who pass the min_minutes / min_games
+    filter in BOTH seasons are included — a player with 10 prior-season games
+    is not a meaningful comparison point and will be excluded.
+
+    Parameters
+    ----------
+    current_df : DataFrame from the current season's hustle CSV.
+    prior_df   : DataFrame from the prior season's hustle CSV.
+    metric     : one of 'deflections_per36', 'contest_profile_per36',
+                 'boxout_conversion', 'hustle_iq_composite'.
+    min_minutes, min_games : qualification thresholds applied to BOTH seasons.
+
+    Returns
+    -------
+    DataFrame with columns:
+        PLAYER_NAME, TEAM_CUR, G_CUR, G_PRIOR, <metric_col>_CUR,
+        <metric_col>_PRIOR, DELTA
+    sorted by DELTA descending.
+    """
+    if metric not in _YOY_METRIC_MAP:
+        raise ValueError(f"metric must be one of {sorted(_YOY_METRIC_MAP)}")
+
+    fn, metric_col = _YOY_METRIC_MAP[metric]
+
+    # boxout_conversion uses a different filter signature; pass through cleanly
+    if metric == "boxout_conversion":
+        cur = fn(current_df)
+        pri = fn(prior_df)
+    else:
+        cur = fn(current_df, min_minutes=min_minutes, min_games=min_games)
+        pri = fn(prior_df,   min_minutes=min_minutes, min_games=min_games)
+
+    merged = cur.merge(
+        pri[["PLAYER_NAME", "G", metric_col]],
+        on="PLAYER_NAME",
+        how="inner",
+        suffixes=("_CUR", "_PRIOR"),
+    )
+
+    merged["DELTA"] = (merged[f"{metric_col}_CUR"] - merged[f"{metric_col}_PRIOR"]).round(3)
+
+    keep = ["PLAYER_NAME", "TEAM_ABBREVIATION", f"G_CUR", f"G_PRIOR",
+            f"{metric_col}_CUR", f"{metric_col}_PRIOR", "DELTA"]
+    return (
+        merged[keep]
+        .rename(columns={"TEAM_ABBREVIATION": "TEAM_CUR"})
+        .sort_values("DELTA", ascending=False)
+        .reset_index(drop=True)
+    )
+
+
 if __name__ == "__main__":
     hustle = pd.read_csv("hustle_stats_2025_26.csv")
     defend_overall = pd.read_csv("shot_defense_overall_2025_26.csv")
