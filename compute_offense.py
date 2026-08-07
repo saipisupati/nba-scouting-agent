@@ -195,3 +195,154 @@ def format_playtype_offense_answer(
             return f"{base} {_OFFSCREEN_CAVEAT}"
 
     return base
+
+
+# ── drive efficiency (LeagueDashPtStats, pt_measure_type='Drives') ────────────
+
+_DRIVES_CSV = "drives_2025_26.csv"
+
+# DRIVES in this CSV is already a per-game rate (confirmed against known
+# volume drivers: SGA shows DRIVES=18.8 across GP=68, consistent with his
+# real ~19 drives/game reputation — a season total at that magnitude would
+# be implausible).
+#
+# Floors were originally set at p25 (1.0/game, 30 total), matching this
+# project's default convention for high-volume categories. That floor was
+# too loose for this metric specifically: at n=582, PTS_PER_DRIVE among a
+# 30-total-drive qualifier pool was dominated by low-volume bigs (Jalen
+# Duren at 3.6 drives/g / 252 total, Jarrett Allen at 1.6/g / 89.6 total)
+# who finish point-blank rolls/dives rather than guards driving through
+# contact. Raising the total-drives floor alone (tested at 30/46/60) did
+# NOT dislodge them — corr(DRIVES per-game, PTS_PER_DRIVE) is only 0.163
+# among a TOTAL_DRIVES>=60 pool, and bucketed means by drives-per-game are
+# flat-to-rising with volume, not falling. That rules out small-sample
+# noise as the cause: it's a real category-conflation, the same shape as
+# the Cut volume-vs-PPP decision above (a mechanically easy, high-FG%
+# finishing action mixed in with harder, contested drives).
+#
+# Floors raised to p40 (this project's convention for sparse/skewed
+# categories, see compute_defense.py's Postup/Handoff/OffScreen precedent)
+# on both dimensions of the actual distribution (n=582, 2025-26):
+#   DRIVES per-game   p25=1.0  p35=1.4  p40=1.7  p50=2.4  p75=5.3
+#   TOTAL_DRIVES       p25=20.3 p35=46.1 p40=60.3 p50=96.6 p75=292.6
+# 309 of 582 players (53%) still qualify at this floor — this is not a
+# thin-sample cutoff, it excludes low-intent/marginal drivers while
+# keeping the metric an honest "efficient among real drivers" ranking.
+_MIN_DRIVES_PER_GAME = 1.7
+
+# Total-drives floor (DRIVES × GP), same role as _MIN_TOTAL_POSS above: a
+# per-game rate alone lets single-game/small-sample players qualify (e.g.
+# a player with GP=1, DRIVES=1.7 clears the per-game floor on two drives
+# taken all season). See comment above _MIN_DRIVES_PER_GAME for how 60 was
+# derived (p40 of TOTAL_DRIVES).
+_MIN_TOTAL_DRIVES = 60
+
+
+def drive_efficiency(min_drives_per_game: float | None = None) -> pd.DataFrame:
+    """Return drive volume and efficiency for qualifying players, from
+    LeagueDashPtStats (pt_measure_type='Drives').
+
+    Ranks DESCENDING by PTS_PER_DRIVE (points scored per drive — DRIVE_PTS
+    divided by DRIVES — not DRIVE_FG_PCT alone). Points-per-drive captures
+    value from drawn free throws as well as makes, the same "points per
+    action" convention as PPP elsewhere in this project; DRIVE_FG_PCT and
+    PTS_PER_DRIVE correlate at only ~0.59 across qualifiers, so they are
+    not interchangeable — a player drawing fouls on drives can be a more
+    efficient scorer than his raw FG% on drives alone suggests.
+
+    Also surfaces DRIVE_PASSES_PCT and DRIVE_AST_PCT so volume and
+    efficiency can be read alongside playmaking: a high-volume driver who
+    also passes/creates at a high rate is a different profile than one who
+    drives mostly to shoot himself, and neither PTS_PER_DRIVE nor DRIVES
+    alone captures that distinction.
+
+    Parameters
+    ----------
+    min_drives_per_game : minimum DRIVES per game to qualify; defaults to
+                           _MIN_DRIVES_PER_GAME (the p40 floor derived from
+                           the actual distribution — see the comment above
+                           _MIN_DRIVES_PER_GAME for why p25 was too loose
+                           for this specific metric). A total-drives floor
+                           (_MIN_TOTAL_DRIVES) is always applied on top of
+                           this, regardless of what's passed in, to exclude
+                           small-sample players who clear the per-game rate
+                           on a handful of games.
+
+    Returns
+    -------
+    DataFrame sorted descending by PTS_PER_DRIVE, columns:
+        PLAYER_NAME, TEAM_ABBREVIATION, GP, DRIVES, PTS_PER_DRIVE,
+        DRIVE_FG_PCT, DRIVE_PASSES_PCT, DRIVE_AST_PCT, DRIVE_TOV_PCT
+    """
+    floor = min_drives_per_game if min_drives_per_game is not None else _MIN_DRIVES_PER_GAME
+    df = pd.read_csv(_DRIVES_CSV)
+
+    df = df.copy()
+    df["TOTAL_DRIVES"] = df["DRIVES"] * df["GP"]
+    df["PTS_PER_DRIVE"] = df["DRIVE_PTS"] / df["DRIVES"]
+
+    filtered = df[
+        (df["DRIVES"] >= floor) &
+        (df["TOTAL_DRIVES"] >= _MIN_TOTAL_DRIVES)
+    ].copy()
+
+    filtered["PTS_PER_DRIVE"] = filtered["PTS_PER_DRIVE"].round(3)
+    filtered["DRIVE_FG_PCT"] = filtered["DRIVE_FG_PCT"].round(3)
+    filtered["DRIVE_PASSES_PCT"] = filtered["DRIVE_PASSES_PCT"].round(3)
+    filtered["DRIVE_AST_PCT"] = filtered["DRIVE_AST_PCT"].round(3)
+    filtered["DRIVE_TOV_PCT"] = filtered["DRIVE_TOV_PCT"].round(3)
+
+    keep = ["PLAYER_NAME", "TEAM_ABBREVIATION", "GP", "DRIVES", "PTS_PER_DRIVE",
+            "DRIVE_FG_PCT", "DRIVE_PASSES_PCT", "DRIVE_AST_PCT", "DRIVE_TOV_PCT"]
+    return (
+        filtered[keep]
+        .sort_values("PTS_PER_DRIVE", ascending=False)
+        .reset_index(drop=True)
+    )
+
+
+# PTS_PER_DRIVE and DRIVE_FG_PCT correlate at only ~0.59 (see drive_efficiency
+# docstring) — a player can lead in one without leading in the other, most
+# often because of drawn fouls/free throws inflating points per drive
+# relative to raw shooting percentage on the drive itself.
+_DRIVE_DIVERGENCE_GAP = 0.10
+
+# See the archetype-conflation analysis above _MIN_DRIVES_PER_GAME: even
+# after raising the qualification floor to p40 on both dimensions,
+# PTS_PER_DRIVE stays dominated by low-volume bigs finishing short
+# rolls/dives rather than by high-volume guards driving into a set defense
+# (corr(DRIVES, PTS_PER_DRIVE) = 0.163 among well-sampled qualifiers — a
+# real category-conflation, not a small-sample artifact). Always attached,
+# the same way _CUT_VOLUME_NOTE is always attached to the Cut answer,
+# since it applies to every drive_efficiency ranking, not just edge cases.
+_DRIVE_ARCHETYPE_CAVEAT = (
+    "NOTE: PTS_PER_DRIVE mixes fundamentally different shot types — short-roll/rim "
+    "finishes for bigs who drive rarely but efficiently, vs. contested, defense-set "
+    "drives for high-volume guards — so a raw efficiency ranking here shouldn't be "
+    "read as \"best offensive driver\" without that context. For evaluating "
+    "high-volume creators specifically, pair this with DRIVES (volume) and "
+    "DRIVE_AST_PCT/DRIVE_PASSES_PCT (playmaking) — PTS_PER_DRIVE alone favors a "
+    "different archetype."
+)
+
+
+def format_drive_efficiency_answer(row: pd.Series, season_label: str) -> str:
+    """Format a one-sentence answer for the top drive-efficiency result."""
+    player = f"{row['PLAYER_NAME']} ({row['TEAM_ABBREVIATION']})"
+    base = (
+        f"{player} leads in points per drive with {row['PTS_PER_DRIVE']:.2f} "
+        f"({row['DRIVE_FG_PCT']:.1%} FG% on drives, {row['DRIVES']:.1f} drives/g, "
+        f"{row['DRIVE_AST_PCT']:.1%} assist rate) [{season_label}]. "
+        f"{_DRIVE_ARCHETYPE_CAVEAT}"
+    )
+
+    # rough FG%-equivalent of PTS_PER_DRIVE (2pt scale) to flag when scoring
+    # efficiency is meaningfully propped up by fouls drawn rather than raw shooting
+    if row["PTS_PER_DRIVE"] / 2 - row["DRIVE_FG_PCT"] > _DRIVE_DIVERGENCE_GAP:
+        base += (
+            " NOTE: Points-per-drive and raw drive FG% diverge meaningfully here — "
+            "this player's scoring value on drives is boosted substantially by drawn "
+            "fouls/free throws, not just made field goals."
+        )
+
+    return base

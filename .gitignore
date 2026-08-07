@@ -8,8 +8,8 @@ __pycache__/
 .venv/
 venv/
 
-# Data files (raw CSV pulls -- regeneratable, keep repo lean)
-*.csv
-
 # OS
 .DS_Store
+
+# Exploratory output images (not part of the shipped product)
+*.png

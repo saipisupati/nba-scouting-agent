@@ -1,0 +1,61 @@
+pick_number,name,school,round,class_year,PTS,TRB,AST,FG%,3P%,eFG%,USG%,TS%,BPM,PER,AST%,status
+1,AJ Dybantsa,BYU,1,FR,25.5,6.8,3.7,51.0,33.1,55.0,33.9,60.0,11.7,28.1,22.1,ok
+2,Darryn Peterson,Kansas,1,FR,20.2,4.2,1.6,43.8,38.2,52.7,33.5,57.8,14.1,25.4,12.5,ok
+3,Cameron Boozer,Duke,1,FR,22.5,10.2,4.1,55.6,39.1,60.7,29.9,65.3,18.7,33.7,25.6,ok
+4,Caleb Wilson,North Carolina,1,FR,19.8,9.4,2.7,57.8,25.9,59.0,28.7,62.6,14.0,31.4,18.1,ok
+5,Keaton Wagler,Illinois,1,FR,17.9,5.1,4.2,44.5,39.7,54.1,25.2,59.6,12.3,23.9,23.2,ok
+6,Mikel Brown Jr.,Louisville,1,FR,18.2,3.3,4.7,41.0,34.4,51.1,31.4,57.7,6.6,20.5,30.3,ok
+7,Darius Acuff Jr.,Arkansas,1,FR,23.5,3.1,6.4,48.4,44.0,56.1,29.5,60.4,10.1,25.2,32.2,ok
+8,Kingston Flemings,Houston,1,FR,16.1,4.1,5.2,47.6,38.7,52.0,26.0,56.3,12.6,23.6,32.6,ok
+9,Morez Johnson Jr.,Michigan,1,SO,13.1,7.3,1.2,62.3,34.3,64.2,21.3,67.7,11.8,25.2,8.4,ok
+10,Brayden Burries,Arizona,1,FR,16.1,4.9,2.4,49.1,39.1,57.2,23.2,61.6,11.7,21.7,14.2,ok
+11,Yaxel Lendeborg,Michigan,1,SR,15.1,6.8,3.2,51.5,37.2,60.2,20.4,64.6,16.7,25.4,18.0,ok
+12,Aday Mara,Michigan,1,JR,12.1,6.8,2.4,66.8,30.0,67.3,23.1,65.9,14.3,26.2,19.0,ok
+13,Nate Ament,Tennessee,1,FR,16.7,6.3,2.3,39.9,33.3,45.2,29.0,53.4,8.4,20.4,14.8,ok
+14,Hannes Steinbach,Washington,1,FR,18.5,11.8,1.6,57.7,34.0,60.2,23.9,63.6,10.1,28.0,9.1,ok
+15,Dailyn Swain,Texas,1,JR,17.3,7.5,3.6,54.2,34.4,58.2,24.6,63.6,10.5,25.0,21.0,ok
+16,Bennett Stirtz,Iowa,1,SR,19.8,2.6,4.4,47.7,35.8,56.5,26.9,60.7,10.2,22.3,24.9,ok
+17,Ebuka Okorie,Stanford,1,FR,23.2,3.6,3.6,46.5,35.4,52.8,31.0,58.9,10.6,26.5,23.9,ok
+18,Christian Anderson,Texas Tech,1,SO,18.5,3.6,7.4,47.2,41.5,59.7,23.8,62.6,9.4,20.9,35.2,ok
+19,Allen Graves,Santa Clara,1,SO,11.8,6.5,1.8,51.2,41.3,58.0,21.9,61.3,13.4,29.6,13.9,ok
+20,Jayden Quaintance,,1,SO,5.0,5.0,0.5,57.1,nan,57.1,19.2,49.6,1.9,13.2,5.2,ok
+21,Karim Lopez,New Zealand Breakers,1,,,,,,,,,,,,,international
+22,Labaron Philon Jr.,Alabama,1,SO,22.0,3.5,5.0,50.1,39.9,58.5,30.0,62.6,11.3,25.9,31.9,ok
+23,Zuby Ejiofor,St. John's,1,SR,16.3,7.3,3.5,53.6,30.5,56.0,24.8,60.9,14.5,27.7,23.0,ok
+24,Cameron Carr,Baylor,1,JR,18.9,5.8,2.6,49.4,37.4,58.2,25.3,62.2,9.2,22.0,14.6,ok
+25,Sergio De Larrea,Valencia,1,,,,,,,,,,,,,international
+26,Tarris Reed Jr.,Connecticut,1,SR,14.7,9.0,2.3,60.7,0.0,60.7,26.1,61.4,12.9,28.8,17.8,ok
+27,Chris Cenac Jr.,Houston,1,FR,9.5,7.9,0.7,48.5,33.3,53.6,19.9,54.6,7.5,19.3,5.5,ok
+28,Joshua Jefferson,Iowa State,1,SR,16.4,7.4,4.8,47.1,34.5,51.7,27.6,56.0,13.0,24.4,27.7,ok
+29,Alex Karaban,Connecticut,1,SR,13.2,5.3,2.4,46.4,37.4,55.9,18.4,59.0,9.0,17.7,12.4,ok
+30,Koa Peat,Arizona,1,FR,14.1,5.6,2.6,52.8,35.0,53.7,24.5,55.7,8.8,20.5,16.7,ok
+31,Bruce Thornton,Ohio State,2,SR,19.9,5.1,3.9,55.4,40.0,62.6,23.6,66.5,12.7,25.9,21.9,ok
+32,Richie Saunders,BYU,2,SR,18.0,5.8,2.1,48.9,37.6,59.3,24.5,63.2,10.7,25.0,12.2,ok
+33,Isaiah Evans,Duke,2,SO,15.0,3.2,1.3,43.3,36.1,55.0,24.9,59.0,9.8,19.2,8.3,ok
+34,Meleek Thomas,Arkansas,2,FR,15.6,3.8,2.5,43.5,41.6,52.2,23.6,55.9,7.0,19.2,13.2,ok
+35,Trevon Brazile,Arkansas,2,SR,13.0,7.3,1.6,52.5,34.1,59.5,17.6,61.9,9.3,20.9,7.6,ok
+36,Baba Miller,Cincinnati,2,SR,13.0,10.3,3.7,52.9,19.2,54.6,21.1,57.6,9.4,21.0,23.3,ok
+37,Ryan Conwell,Louisville,2,SR,18.8,4.8,2.7,40.8,34.5,52.1,29.5,56.6,7.3,19.0,16.6,ok
+38,Braden Smith,Purdue,2,SR,14.3,3.5,8.8,44.0,36.2,51.1,24.0,55.1,9.8,20.9,43.0,ok
+39,Jack Kayil,Alba Berlin,2,,,,,,,,,,,,,international
+40,Dillon Mitchell,St. John's,2,SR,8.3,7.0,3.0,55.9,6.7,56.1,14.5,55.5,9.3,18.7,18.8,ok
+41,Otega Oweh,Kentucky,2,SR,18.6,4.8,2.7,46.5,33.3,51.0,28.4,55.4,7.4,20.4,16.3,ok
+42,Ja'Kobi Gillespie,Tennessee,2,SR,18.4,2.8,5.4,41.0,33.8,50.1,26.9,53.8,10.9,20.3,30.2,ok
+43,Tyler Bilodeau,UCLA,2,SR,17.6,5.6,1.1,51.8,46.4,60.9,25.8,65.6,8.9,23.3,7.4,ok
+44,Maliq Brown,Duke,2,SR,4.9,5.2,1.6,62.9,16.7,64.8,12.7,63.4,11.6,19.0,13.4,ok
+45,Emanuel Sharp,Houston,2,SR,15.5,3.0,1.7,41.3,37.2,52.7,25.0,58.2,10.7,20.0,11.1,ok
+46,Felix Okpara,Tennessee,2,SR,8.0,6.3,0.5,59.7,36.4,60.7,13.4,61.7,5.5,16.3,3.1,ok
+47,Tyler Nickel,Vanderbilt,2,SR,13.5,3.3,1.2,44.5,40.0,59.6,18.9,61.7,7.5,16.6,6.9,ok
+48,Tobi Lawal,Virginia Tech,2,SR,12.3,8.5,0.6,54.2,25.0,57.8,20.0,63.5,3.9,19.3,3.9,ok
+49,Bryce Hopkins,St. John's,2,SR,13.6,6.2,1.9,46.9,36.3,51.4,22.4,55.8,8.5,19.7,12.7,ok
+50,Jaden Bradley,Arizona,2,SR,13.3,3.4,4.4,46.3,39.4,49.9,20.9,56.8,9.0,18.1,23.2,ok
+51,Izaiyah Nelson,South Florida,2,SR,15.9,9.6,1.2,56.1,14.3,57.1,23.7,61.2,9.2,28.9,8.8,ok
+52,Henri Veesaar,North Carolina,2,SR,17.0,8.7,2.1,60.8,42.6,66.7,23.3,66.4,10.7,25.4,13.6,ok
+53,Ugonna Onyenso,Virginia,2,SR,6.5,4.9,0.6,56.8,27.8,59.8,15.5,61.6,12.2,25.6,5.8,ok
+54,Lajae Jones,Florida State,2,SO,12.7,5.7,1.1,42.7,32.5,51.2,20.3,55.6,5.1,17.5,7.0,ok
+55,Nick Martinelli,Northwestern,2,SR,23.0,6.2,2.0,51.0,41.7,55.2,31.1,60.2,8.6,25.5,13.2,ok
+56,Vsevolod Ishchenko,Lokomotiv Kuban,2,,,,,,,,,,,,,international
+57,Narcisse Ngoy,Poitiers,2,,,,,,,,,,,,,international
+58,Jaron Pierre Jr.,Southern Methodist,2,SR,17.6,4.9,2.1,46.2,37.0,54.5,25.4,56.7,5.0,17.9,11.1,ok
+59,Trey Kaufman-Renn,Purdue,2,SR,14.2,8.3,2.5,57.8,15.4,58.0,24.9,59.0,8.4,23.8,17.2,ok
+60,Malique Lewis,South East Melbourne,2,,,,,,,,,,,,,international

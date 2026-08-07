@@ -82,7 +82,7 @@ Deterministic regex router (_RULES, ~20 rules)
 | Activity vs. outcome gap | derived | `hustle_vs_suppression_gap` |
 | Defensive play-type efficiency | `SynergyPlayTypes` (Defensive) | `playtype_defense` (7 categories) |
 | Offensive play-type efficiency | `SynergyPlayTypes` (Offensive) | `playtype_offense` (9 categories, including Cut + Transition) |
-| Drive efficiency | `LeagueDashPtStats` | `drives_2025_26.csv` (exploration complete, routing TBD) |
+| Drive efficiency | `LeagueDashPtStats` | `drive_efficiency` (points/drive, drive FG%, playmaking on drives) |
 | Year-over-year trends | derived from 2024-25 + 2025-26 | `year_over_year_delta` |
 
 Seasons covered: 2025-26 (current), 2024-25 (prior, for YoY comparisons).
@@ -94,13 +94,17 @@ Seasons covered: 2025-26 (current), 2024-25 (prior, for YoY comparisons).
 - **Cut is routed by volume, not PPP.** Every other category ranks by points-per-possession; Cut ranks by possession count (`POSS`) descending instead. A cut's efficiency is mechanically determined by whether the pass arrives, it's a finishing action, not a decision-making one, so a PPP ranking on Cut mostly measures who gets the most easy dunks, not who cuts well. Volume is the more honest signal.
 - **OffScreen carries a possession-count caveat.** At the default sample-size threshold, top qualifiers sit at 57-76 total possessions for the season: real usage, but a modest sample to hang a full-season efficiency ranking on. The answer surfaces this directly rather than presenting a thin sample with the same confidence as a 400-possession Spotup ranking.
 
-The router disambiguates offense/defense on overlapping phrasing: "pick-and-roll," "post," and "isolation" all mean different functions depending on whether the question is about the player initiating the action or defending it. `test_router.py` now runs 33 questions (up from 23), including dedicated PRBallHandler/PRRollman disambiguation cases (Q30-Q33).
+The router disambiguates offense/defense on overlapping phrasing: "pick-and-roll," "post," and "isolation" all mean different functions depending on whether the question is about the player initiating the action or defending it. `test_router.py` now runs 35 questions (up from 23), including dedicated PRBallHandler/PRRollman disambiguation cases (Q30-Q33) and drive-efficiency cases (Q34-Q35).
 
-### College data validation (paused)
+### Drive efficiency (complete)
+
+`drive_efficiency` (from `LeagueDashPtStats`, `pt_measure_type='Drives'`) ranks players by points scored per drive (`PTS_PER_DRIVE` — drive points including drawn fouls, not raw drive FG% alone), and surfaces drive-passing/assist/turnover rates alongside it so volume, scoring efficiency, and playmaking on drives can be read together. `PTS_PER_DRIVE` and `DRIVE_FG_PCT` correlate at only ~0.59 across qualifiers; the answer flags it directly when a player's points-per-drive is being propped up by drawn fouls rather than raw shooting. Wired into the router, the `/report` scouting-report sections, and `/compare` head-to-head (reused automatically, same as every other section).
+
+### College data validation (complete, integrated)
 
 To scope the next natural extension, prospect data outside the NBA, `explore_college.py` and `pull_2026_draft_class.py` proved out a sports-reference.com/cbb access pattern (per-player visible tables + advanced stats hidden in HTML comment blocks) against 5 known 2026 draft picks: Cameron Boozer (Duke), AJ Dybantsa (BYU), Darryn Peterson (Kansas), Keaton Wagler (Illinois), and Cameron Carr (Baylor, transferred from Tennessee). All 5 resolved correctly and their pulled stats matched public expectations (e.g. Boozer's ~39% 3P% on real volume, Dybantsa/Peterson's 33%+ usage as primary options).
 
-The full 60-pick 2026 draft class batch pull is written but currently paused: sports-reference enforces meaningful rate limiting, and this project's own debugging traffic tripped a 429 block that was still active after 20+ minutes. The pipeline is validated and ready to run; it's waiting on a rate-limit cooldown and, more fundamentally, on the 2026-27 college season actually generating new data to pull.
+`pull_2026_draft_class.py` is the full 60-pick batch pull, now committed and integrated as a standalone data-refresh script (it is not routed through the query agent — it produces `draft_class_2026.csv` for offline scouting/exploration, not a live query surface). It handles international picks (no NCAA data, logged as `status="international"`), unresolved school assignments, slug-collision risk (e.g. Cameron Boozer vs. twin brother Cayden Boozer), and sports-reference's rate limiting: 5-6s delay between every request, chunked batches with 60-90s pauses between chunks, 429-aware retry/backoff, and incremental CSV writes so a mid-run stop still leaves completed rows on disk. Resumable via `python pull_2026_draft_class.py <resume_from_pick>` (defaults to pick 1). A full run is ~8-10+ minutes by design — this is deliberate pacing against a rate-limited public source (see "Working With External Data Sources Responsibly" below), not something to optimize away.
 
 ---
 
@@ -112,7 +116,7 @@ These aren't aspirational guidelines. They're conclusions from building this spe
 
 The LLM never touches a number. It classifies which function to call (or returns `out_of_scope` / `needs_clarification`). Every statistic, ranking, and player name in an answer is computed directly from the underlying data.
 
-This means the tool can be tested exhaustively. `test_router.py` runs 23 questions and checks that each routes to the right function with the right parameters. That test suite is the correctness guarantee, not the LLM.
+This means the tool can be tested exhaustively. `test_router.py` runs 35 questions and checks that each routes to the right function with the right parameters. That test suite is the correctness guarantee, not the LLM.
 
 ### 2. Activity metrics and outcome metrics diverge more than they agree
 
@@ -163,20 +167,54 @@ This is a sharper failure than a wrong number, because the numbers were right. A
 
 ## Running the Tool
 
-**Requirements:** Python 3.9+, `fastapi`, `uvicorn`, `pandas`, `requests`, `nba_api`. Set `GROQ_API_KEY` in environment for LLM fallback (free tier sufficient).
+**Requirements:** Python 3.9+. Install pinned dependencies from `requirements.txt`.
 
 ```bash
-# Pull fresh data (only needed once, or to update)
-python hustle_stats.py
+# Set up
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env   # then fill in GROQ_API_KEY
 
-# Start the server
+# Start the server (data CSVs are committed to the repo — no pull required)
 GROQ_API_KEY=your_key uvicorn api:app --port 8000
 
 # Open in browser
 open http://localhost:8000
 ```
 
-The CSVs are not committed to the repo, they're generated locally by the exploration and data-pull scripts. The `explore_*.py` scripts document exactly which endpoints were called and what was found.
+`GROQ_API_KEY` is only needed for the LLM-fallback routing path (ambiguous questions the deterministic regex rules don't match). The deterministic path — the majority of recognizable question patterns — works without it.
+
+### Refreshing data
+
+Data CSVs are committed to the repo so a fresh clone runs immediately. To pull fresh data:
+
+```bash
+./refresh_data.sh                 # refresh everything, including the ~8-10 min college draft-class pull
+./refresh_data.sh --skip-college  # refresh NBA data only (hustle, shot defense, play-type, drives) — a few minutes
+```
+
+This runs `hustle_stats.py`, `explore_shot_defense.py`, `explore_playtype_defense.py`, `explore_offense.py`, and (unless skipped) `pull_2026_draft_class.py` in sequence, each writing its own CSV(s) in place. The `explore_*.py` scripts document exactly which endpoints were called and what was found.
+
+---
+
+## Deployment
+
+The app is a single FastAPI service — `api.py` serves both the API endpoints and the static frontend (`chat/index.html`) via a `StaticFiles` mount, so there's nothing separate to host for the frontend.
+
+**Local Docker:**
+
+```bash
+docker build -t nba-scouting-agent .
+docker run -p 8000:8000 -e GROQ_API_KEY=your_key nba-scouting-agent
+```
+
+Verified working: the image builds clean (no dependency conflicts) and `/health`, `/query`, `/report`, and `/compare` all respond correctly when run this way.
+
+**Render (or any platform that builds from a Dockerfile):** `render.yaml` defines a single web service on the free plan, building from `./Dockerfile`, with `/health` as the health-check path. `GROQ_API_KEY` is marked `sync: false` (set as a secret in the Render dashboard, not committed). `ALLOWED_ORIGINS` defaults to `*`; tighten it to your actual deployed origin once you have one.
+
+Actually provisioning a deployment (connecting a Render/Fly/Railway account, pushing the image, setting the real secret values) requires an account this repo doesn't have access to — that step is on whoever owns the hosting account.
+
+**Health check:** `GET /health` returns `{"status": "ok", "current_season_rows": ..., "prior_season_rows": ..., "groq_key_configured": ...}` — useful both as a platform health-check endpoint and as a quick local sanity check that data loaded and the LLM fallback is configured.
 
 ---
 

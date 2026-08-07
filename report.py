@@ -42,6 +42,8 @@ from compute_defense import (
 from compute_offense import (
     playtype_offense,
     format_playtype_offense_answer,
+    drive_efficiency,
+    format_drive_efficiency_answer,
     _PLAYTYPE_CSV as _OFF_PLAYTYPE_CSV,
 )
 from query_router import _PRROLLMAN_CAVEAT
@@ -236,6 +238,44 @@ def _offense_playtype_section_data(player_name: str, season: str) -> dict:
     return {"title": "Offensive Play-Type Profile", "rows": rows}
 
 
+def _drive_efficiency_section_data(player_name: str, season: str) -> dict:
+    if season != "2025-26":
+        return {"title": "Drive Efficiency", "rows": [{
+            "label": "Drives", "qualified": False,
+            "text": f"No drive-tracking data available for season {season}.",
+            "caveats": [], "value": None, "better": None,
+        }]}
+
+    ranked = drive_efficiency()
+    row = _player_row(ranked, player_name)
+
+    if row is None:
+        return {"title": "Drive Efficiency", "rows": [{
+            "label": "Drives", "qualified": False,
+            "text": "Insufficient sample for drive efficiency this season.",
+            "caveats": [], "value": None, "better": None,
+        }]}
+
+    rank = _rank_of(ranked, player_name)
+    sentence = format_drive_efficiency_answer(row, season)
+
+    caveats = []
+    if "NOTE:" in sentence:
+        caveats.append(_strip_note_prefix(sentence[sentence.index("NOTE:"):]))
+
+    return {"title": "Drive Efficiency", "rows": [{
+        "label": "Drives", "qualified": True,
+        "text": (
+            f"{row['PTS_PER_DRIVE']:.2f} points/drive ({row['DRIVE_FG_PCT']:.1%} FG% on drives), "
+            f"{row['DRIVES']:.1f} drives/game, {row['DRIVE_AST_PCT']:.1%} assist rate, "
+            f"{row['DRIVE_TOV_PCT']:.1%} turnover rate "
+            f"(rank #{rank} of {len(ranked)} qualified players)"
+        ),
+        "caveats": caveats,
+        "value": float(row["PTS_PER_DRIVE"]), "better": "higher",
+    }]}
+
+
 def _gap_section_data(player_name: str, hustle_df: pd.DataFrame, season: str) -> dict:
     csv_map = SHOT_DEFENSE_CSV.get(season)
     if csv_map is None:
@@ -368,6 +408,7 @@ def generate_scouting_report_data(player_name: str, season: str = "2025-26") -> 
         _shot_suppression_section_data(player_name, season),
         _defense_playtype_section_data(player_name, season),
         _offense_playtype_section_data(player_name, season),
+        _drive_efficiency_section_data(player_name, season),
         _gap_section_data(player_name, hustle_df, season),
         _yoy_section_data(player_name, hustle_df, prior_df),
     ]

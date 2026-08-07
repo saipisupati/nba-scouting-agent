@@ -17,7 +17,12 @@ from compute_defense import (
     _YOY_METRIC_MAP,
     SMALL_SAMPLE_THRESHOLD,
 )
-from compute_offense import playtype_offense, format_playtype_offense_answer
+from compute_offense import (
+    playtype_offense,
+    format_playtype_offense_answer,
+    drive_efficiency,
+    format_drive_efficiency_answer,
+)
 
 OUT_OF_SCOPE_MSG = (
     "I don't have data to answer that — this tool covers "
@@ -25,8 +30,9 @@ OUT_OF_SCOPE_MSG = (
     "hustle-play composites, shot suppression (opponent FG%), "
     "hustle-vs-suppression gap analysis, Synergy play-type defense "
     "(Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, OffScreen), "
-    "and Synergy play-type offense "
-    "(Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, Cut, OffScreen, Transition)."
+    "Synergy play-type offense "
+    "(Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, Cut, OffScreen, Transition), "
+    "and drive efficiency (points per drive, drive FG%, playmaking on drives)."
 )
 
 _NEEDS_CLARIFICATION_MSG = (
@@ -378,10 +384,22 @@ _RULES = [
         "playtype_offense",
         "Transition",
     ),
+    # ── drive_efficiency (LeagueDashPtStats, Drives) ──────────────────────────
+    (
+        re.compile(
+            r"(?:drive.*(?:efficien|scor|point)|point.*per.*drive|"
+            r"most efficient driver|best driver.*basket|"
+            r"driving.*(?:efficien|scor)|attack.*(?:basket|rim).*(?:efficien|scor)|"
+            r"slash.*(?:efficien|scor)|off.the.dribble.*(?:efficien|scor))",
+            re.IGNORECASE,
+        ),
+        "drive_efficiency",
+        None,
+    ),
 ]
 
 _SYSTEM_PROMPT = """You are a routing assistant for an NBA scouting tool.
-You have access to exactly nine statistical functions:
+You have access to exactly ten statistical functions:
 
 1. deflections_per36(df, min_minutes=15, min_games=40)
    Measures: deflections per 36 minutes.
@@ -444,11 +462,17 @@ You have access to exactly nine statistical functions:
    Supported metrics: deflections_per36, contest_profile_per36, boxout_conversion, hustle_iq_composite.
    Sort column hint: "<metric>:improve" or "<metric>:decline".
 
+10. drive_efficiency(min_drives_per_game=None)
+    Measures: points scored per drive (PTS_PER_DRIVE), drive FG%, and drive playmaking
+    (DRIVE_PASSES_PCT, DRIVE_AST_PCT, DRIVE_TOV_PCT).
+    Use for: questions about driving to the basket, attacking off the dribble, slashing efficiency.
+    Sort column hint: not used, leave null.
+
 None of these functions cover: salary, trade value, draft grades, injuries, assists, or anything outside
-hustle/defense/play-type offense as described above.
+hustle/defense/play-type offense/drive efficiency as described above.
 
 Respond ONLY with a JSON object — no prose, no markdown, no explanation. Three possible responses:
-- If the question maps to one of the nine functions:
+- If the question maps to one of the ten functions:
   {"function": "<function_name>", "sort_col": "<hint>"}
 - If the question is about a stat this tool tracks but is too vague or underspecified:
   {"needs_clarification": true}
@@ -456,7 +480,17 @@ Respond ONLY with a JSON object — no prose, no markdown, no explanation. Three
   {"out_of_scope": true}"""
 
 
+class MissingGroqKeyError(RuntimeError):
+    """Raised when the LLM fallback is needed but GROQ_API_KEY isn't set."""
+
+
 def _llm_route(question: str) -> dict:
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        raise MissingGroqKeyError(
+            "GROQ_API_KEY is not set — cannot use the LLM fallback for this question."
+        )
+
     payload = {
         "model": "llama-3.3-70b-versatile",
         "max_tokens": 256,
@@ -466,7 +500,7 @@ def _llm_route(question: str) -> dict:
         ],
     }
     headers = {
-        "Authorization": f"Bearer {os.environ['GROQ_API_KEY']}",
+        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
     delay = 4
@@ -769,6 +803,11 @@ def route(
             _gp_rows = _raw[_raw["PLAYER_NAME"] == top["PLAYER_NAME"]]["GP"]
             total_poss = float(top["POSS"] * _gp_rows.values[0]) if not _gp_rows.empty else None
             answer = format_playtype_offense_answer(top, play_type, season_label, total_poss=total_poss)
+
+        elif func_name == "drive_efficiency":
+            result = drive_efficiency()
+            top = result.iloc[0]
+            answer = format_drive_efficiency_answer(top, season_label)
 
         elif func_name == "year_over_year_delta":
             # sort_col encodes "metric:direction" e.g. "deflections_per36:decline"

@@ -22,17 +22,25 @@ _state: dict = {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    _state["df"] = pd.read_csv("hustle_stats_2025_26.csv")
-    _state["prior_df"] = pd.read_csv("hustle_stats_2024_25.csv")
+    try:
+        _state["df"] = pd.read_csv("hustle_stats_2025_26.csv")
+        _state["prior_df"] = pd.read_csv("hustle_stats_2024_25.csv")
+    except FileNotFoundError as e:
+        raise RuntimeError(
+            f"Missing required data file: {e.filename}. "
+            "Run ./refresh_data.sh to pull data, or check that CSVs were "
+            "included in this deployment."
+        ) from e
     yield
     _state.clear()
 
 
 app = FastAPI(title="NBA Scouting Agent", lifespan=lifespan)
 
+_allowed_origins = os.environ.get("ALLOWED_ORIGINS", "*")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"] if _allowed_origins == "*" else [o.strip() for o in _allowed_origins.split(",")],
     allow_methods=["POST", "GET"],
     allow_headers=["*"],
 )
@@ -129,6 +137,16 @@ def _response_type(result: dict) -> str:
 
 
 # ── endpoints ─────────────────────────────────────────────────────────────────
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok",
+        "current_season_rows": len(_state["df"]),
+        "prior_season_rows": len(_state["prior_df"]),
+        "groq_key_configured": bool(os.environ.get("GROQ_API_KEY")),
+    }
+
 
 @app.post("/query", response_model=QueryResponse)
 def query(req: QueryRequest):

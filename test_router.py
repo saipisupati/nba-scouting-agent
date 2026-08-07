@@ -40,6 +40,9 @@ questions = [
     "Rate his offensive efficiency as a pick and roll ball handler", # Q31 → playtype_offense, PRBallHandler (DISAMBIGUATION)
     "Can he guard ball handlers in the pick and roll?",             # Q32 → playtype_defense, PRBallHandler (DISAMBIGUATION)
     "How efficient is he finishing as the roll man?",               # Q33 → playtype_offense, PRRollman (DISAMBIGUATION)
+    # ── Q34-Q35: drive_efficiency ─────────────────────────────────────────────
+    "Who's the most efficient driver to the basket?",               # Q34 → drive_efficiency
+    "Which player scores the most points per drive?",               # Q35 → drive_efficiency
 ]
 
 for i, q in enumerate(questions, 1):
