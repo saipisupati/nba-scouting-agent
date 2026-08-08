@@ -43,6 +43,13 @@ questions = [
     # ── Q34-Q35: drive_efficiency ─────────────────────────────────────────────
     "Who's the most efficient driver to the basket?",               # Q34 → drive_efficiency
     "Which player scores the most points per drive?",               # Q35 → drive_efficiency
+    # ── Q36-Q41: college draft-class layer ────────────────────────────────────
+    "What were AJ Dybantsa's college stats?",                       # Q36 → college_player_lookup
+    "What was Mikel Brown Jr.'s college season like?",              # Q37 → college_player_lookup (name suffix)
+    "What were Karim Lopez's college stats?",                       # Q38 → college_player_lookup (international, no data)
+    "Who had the highest scoring average in the 2026 draft class?", # Q39 → college_leaderboard, PTS
+    "Who had the highest usage rate in this draft class?",          # Q40 → college_leaderboard, USG%
+    "Who's a high-usage prospect that's also efficient in this draft class?",  # Q41 → college_efficiency_volume
 ]
 
 for i, q in enumerate(questions, 1):

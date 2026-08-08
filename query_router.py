@@ -23,6 +23,16 @@ from compute_offense import (
     drive_efficiency,
     format_drive_efficiency_answer,
 )
+from compute_college import (
+    college_player_lookup,
+    college_leaderboard,
+    college_efficiency_volume,
+    format_college_lookup_answer,
+    format_college_leaderboard_answer,
+    format_college_efficiency_volume_answer,
+    _load as _load_college,
+    _LEADERBOARD_LABEL as _COLLEGE_LEADERBOARD_METRICS,
+)
 
 OUT_OF_SCOPE_MSG = (
     "I don't have data to answer that — this tool covers "
@@ -32,7 +42,8 @@ OUT_OF_SCOPE_MSG = (
     "(Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, OffScreen), "
     "Synergy play-type offense "
     "(Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, Cut, OffScreen, Transition), "
-    "and drive efficiency (points per drive, drive FG%, playmaking on drives)."
+    "drive efficiency (points per drive, drive FG%, playmaking on drives), "
+    "and 2026 NBA draft-class college stats (player lookup, leaderboards, usage-vs-efficiency)."
 )
 
 _NEEDS_CLARIFICATION_MSG = (
@@ -100,6 +111,21 @@ def _yoy_route(question: str) -> Optional[dict]:
     direction = "improve" if improve else "decline"
     return {"function": "year_over_year_delta", "sort_col": f"{metric}:{direction}"}
 
+
+# Derived from draft_class_2026.csv at import time rather than hardcoded, so
+# this can never drift out of sync with the actual 60-player list the way a
+# manually-copied name list would. re.escape() is required, not optional —
+# real names in this dataset contain regex-special characters ("Ja'Kobi
+# Gillespie", "Mikel Brown Jr.").
+def _college_name_pattern() -> str:
+    try:
+        names = _load_college()["name"].tolist()
+    except Exception:
+        return r"(?!x)x"  # never matches, if the CSV isn't available
+    return "|".join(re.escape(n) for n in names)
+
+
+_COLLEGE_NAME_ALTERNATION = _college_name_pattern()
 
 # ─────────────────────────────────────────────────────────────────────────────
 _RULES = [
@@ -396,10 +422,120 @@ _RULES = [
         "drive_efficiency",
         None,
     ),
+    # ── college_player_lookup (2026 draft class) ──────────────────────────────
+    # Requires BOTH a name from the actual 60-player draft-class list AND a
+    # college/scouting-context keyword — several picks share surnames with
+    # current NBA players (Boozer, Karaban), so name alone would misroute an
+    # NBA question. This mirrors the offense/defense disambiguation pattern
+    # above: the anchor keyword group must be present, not just implied.
+    (
+        re.compile(
+            rf"(?=.*(?:{_COLLEGE_NAME_ALTERNATION}))"
+            r"(?=.*(?:college|draft class|ncaa|draft prospect|in college|"
+            r"college stats|college season|before (?:he|the draft)))",
+            re.IGNORECASE,
+        ),
+        "college_player_lookup",
+        None,
+    ),
+    # ── college_efficiency_volume (before college_leaderboard: more specific) ─
+    # Lookaheads (not sequential .*) since "draft class" context can appear
+    # before OR after the usage/efficiency phrasing in natural questions
+    # ("who's a high-usage AND efficient prospect in this draft class?" puts
+    # the keyword group first, the context group last).
+    (
+        re.compile(
+            r"(?=.*(?:draft class|2026 draft|college))"
+            r"(?=.*(?:high.?usage|usage.*efficien|efficien.*usage|"
+            r"usage.*(?:and|vs\.?|versus).*(?:efficien|shooting)|"
+            r"efficient.*(?:high.?usage|primary option)))",
+            re.IGNORECASE,
+        ),
+        "college_efficiency_volume",
+        None,
+    ),
+    # ── college_leaderboard — one rule per metric, same pattern as the
+    # playtype_offense/playtype_defense rules above (each play type gets its
+    # own dedicated rule + fixed hint, rather than one rule that has to parse
+    # which metric out of free text). "draft class"/"2026 draft"/"this draft"
+    # context required so these can't fire on an NBA-scoped ranking question;
+    # lookaheads used (not sequential .*) since the ranking keyword commonly
+    # comes before the draft-class context in real phrasing ("who had the
+    # highest scoring average in the 2026 draft class?").
+    (
+        re.compile(
+            r"(?=.*(?:draft class|2026 draft|(?:this|the) draft))"
+            r"(?=.*(?:highest|best|most|leads?|top))"
+            r"(?=.*(?:scor|point))",
+            re.IGNORECASE,
+        ),
+        "college_leaderboard",
+        "PTS",
+    ),
+    (
+        re.compile(
+            r"(?=.*(?:draft class|2026 draft|(?:this|the) draft))"
+            r"(?=.*(?:highest|best|most|leads?|top))"
+            r"(?=.*rebound)",
+            re.IGNORECASE,
+        ),
+        "college_leaderboard",
+        "TRB",
+    ),
+    (
+        re.compile(
+            r"(?=.*(?:draft class|2026 draft|(?:this|the) draft))"
+            r"(?=.*(?:highest|best|most|leads?|top))"
+            r"(?=.*assist)",
+            re.IGNORECASE,
+        ),
+        "college_leaderboard",
+        "AST",
+    ),
+    (
+        re.compile(
+            r"(?=.*(?:draft class|2026 draft|(?:this|the) draft))"
+            r"(?=.*(?:highest|best|most|leads?|top))"
+            r"(?=.*usage)",
+            re.IGNORECASE,
+        ),
+        "college_leaderboard",
+        "USG%",
+    ),
+    (
+        re.compile(
+            r"(?=.*(?:draft class|2026 draft|(?:this|the) draft))"
+            r"(?=.*(?:highest|best|most|leads?|top))"
+            r"(?=.*(?:true shooting|\bts%?\b))",
+            re.IGNORECASE,
+        ),
+        "college_leaderboard",
+        "TS%",
+    ),
+    (
+        re.compile(
+            r"(?=.*(?:draft class|2026 draft|(?:this|the) draft))"
+            r"(?=.*(?:highest|best|most|leads?|top))"
+            r"(?=.*\bbpm\b)",
+            re.IGNORECASE,
+        ),
+        "college_leaderboard",
+        "BPM",
+    ),
+    (
+        re.compile(
+            r"(?=.*(?:draft class|2026 draft|(?:this|the) draft))"
+            r"(?=.*(?:highest|best|most|leads?|top))"
+            r"(?=.*\bper\b)",
+            re.IGNORECASE,
+        ),
+        "college_leaderboard",
+        "PER",
+    ),
 ]
 
 _SYSTEM_PROMPT = """You are a routing assistant for an NBA scouting tool.
-You have access to exactly ten statistical functions:
+You have access to exactly thirteen statistical functions:
 
 1. deflections_per36(df, min_minutes=15, min_games=40)
    Measures: deflections per 36 minutes.
@@ -468,11 +604,30 @@ You have access to exactly ten statistical functions:
     Use for: questions about driving to the basket, attacking off the dribble, slashing efficiency.
     Sort column hint: not used, leave null.
 
+11. college_player_lookup(name)
+    Measures: a single 2026 draft-class prospect's final college season stats (PTS, TRB, AST,
+    shooting splits, USG%, TS%, BPM, PER, AST%).
+    Use for: "what were <player>'s college stats?" for a player in the 2026 NBA draft class.
+    ONLY for players who were 2026 NBA draft picks (college data, not current NBA data).
+    Sort column hint: the player's full name exactly as written in the question.
+
+12. college_leaderboard(metric)
+    Measures: ranks the 2026 draft class by a single college stat.
+    Use for: "who had the highest/best/most <stat> in the [2026] draft class" questions.
+    Valid metrics: "PTS", "TRB", "AST", "USG%", "TS%", "BPM", "PER".
+    Sort column hint: the metric code exactly as listed above (e.g. "PTS", "USG%").
+
+13. college_efficiency_volume()
+    Measures: TS% among high-usage (top-half USG%) 2026 draft-class prospects — the
+    volume-vs-efficiency framing applied to college data.
+    Use for: "who's a high-usage AND efficient prospect in this draft class" questions.
+    Sort column hint: not used, leave null.
+
 None of these functions cover: salary, trade value, draft grades, injuries, assists, or anything outside
-hustle/defense/play-type offense/drive efficiency as described above.
+hustle/defense/play-type offense/drive efficiency/2026 college draft-class data as described above.
 
 Respond ONLY with a JSON object — no prose, no markdown, no explanation. Three possible responses:
-- If the question maps to one of the ten functions:
+- If the question maps to one of the thirteen functions:
   {"function": "<function_name>", "sort_col": "<hint>"}
 - If the question is about a stat this tool tracks but is too vague or underspecified:
   {"needs_clarification": true}
@@ -533,7 +688,16 @@ def _deterministic_route(question: str) -> Optional[dict]:
     if yoy is not None:
         return yoy
     for pattern, func_name, hint in _RULES:
-        if pattern.search(question):
+        match = pattern.search(question)
+        if match:
+            if func_name == "college_player_lookup":
+                # hint is None for this rule; the matched player name is
+                # recovered by re-matching the name alternation directly,
+                # since the lookahead groups in the rule itself don't
+                # capture it positionally.
+                name_match = re.search(_COLLEGE_NAME_ALTERNATION, question, re.IGNORECASE)
+                sort_col = name_match.group(0) if name_match else None
+                return {"function": func_name, "sort_col": sort_col}
             return {"function": func_name, "sort_col": hint}
     return None
 
@@ -808,6 +972,48 @@ def route(
             result = drive_efficiency()
             top = result.iloc[0]
             answer = format_drive_efficiency_answer(top, season_label)
+
+        elif func_name == "college_player_lookup":
+            # sort_col carries the matched player name for this function
+            # (extracted at match time in _deterministic_route, or supplied
+            # by the LLM fallback as sort_col directly).
+            player_name = sort_col
+            if not player_name:
+                return {
+                    "question": question,
+                    "method": method,
+                    "function_matched": "needs_clarification",
+                    "answer": "Which 2026 draft-class player did you mean?",
+                }
+            row = college_player_lookup(player_name)
+            if row is None:
+                return {
+                    "question": question,
+                    "method": method,
+                    "function_matched": func_name,
+                    "answer": (
+                        f"{player_name} isn't in the 2026 draft class data this tool has."
+                    ),
+                }
+            answer = format_college_lookup_answer(row)
+            return {
+                "question": question,
+                "method": method,
+                "function_matched": func_name,
+                "answer": answer,
+                "table": [row.to_dict()],
+            }
+
+        elif func_name == "college_leaderboard":
+            metric = sort_col if sort_col in _COLLEGE_LEADERBOARD_METRICS else "PTS"
+            result = college_leaderboard(metric)
+            top = result.iloc[0]
+            answer = format_college_leaderboard_answer(top, metric)
+
+        elif func_name == "college_efficiency_volume":
+            result = college_efficiency_volume()
+            top = result.iloc[0]
+            answer = format_college_efficiency_volume_answer(result)
 
         elif func_name == "year_over_year_delta":
             # sort_col encodes "metric:direction" e.g. "deflections_per36:decline"
