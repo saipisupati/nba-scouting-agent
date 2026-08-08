@@ -38,10 +38,10 @@
   #chat {
     flex: 1;
     overflow-y: auto;
-    padding: 20px 16px 8px;
+    padding: 22px 16px 12px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 22px;
   }
 
   /* ── bubbles ── */
@@ -52,7 +52,7 @@
     width: 100%;
   }
   .bubble-row.user  { align-self: flex-end; align-items: flex-end; }
-  .bubble-row.agent { align-self: flex-start; align-items: flex-start; }
+  .bubble-row.agent { align-self: flex-start; align-items: flex-start; gap: 8px; }
 
   .user-bubble {
     background: #0d1b36;
@@ -76,7 +76,6 @@
     letter-spacing: .06em;
     padding: 2px 8px;
     border-radius: 99px;
-    margin-bottom: 6px;
   }
   .badge.answer              { background: #dbeafe; color: #1d4ed8; }
   .badge.out_of_scope        { background: #fef3c7; color: #92400e; }
@@ -93,49 +92,56 @@
     background: #fff;
     border: 1px solid #e2e8f4;
     border-radius: 12px;
-    padding: 16px 18px 14px;
+    padding: 18px 20px 16px;
     width: 100%;
     border-bottom-left-radius: 3px;
+    box-shadow: 0 1px 2px rgba(13,27,54,.04);
   }
   .stat-card-top {
     display: flex;
     align-items: baseline;
     gap: 10px;
     flex-wrap: wrap;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
   .stat-player {
-    font-size: 1.45rem;
+    font-size: 1.5rem;
     font-weight: 800;
     color: #0d1b36;
-    line-height: 1.1;
+    line-height: 1.15;
+    letter-spacing: -.01em;
   }
   .stat-team {
-    font-size: .8rem;
+    font-size: .74rem;
     font-weight: 600;
-    color: #6b7a99;
+    color: #8b96ad;
     text-transform: uppercase;
-    letter-spacing: .05em;
+    letter-spacing: .06em;
   }
   .stat-number {
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: 1.3rem;
+    font-weight: 800;
     color: #1d4ed8;
     margin-left: auto;
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.01em;
   }
   .stat-season {
-    font-size: .7rem;
-    color: #9aa3b8;
-    margin-bottom: 10px;
+    font-size: .68rem;
+    color: #aab2c4;
+    font-weight: 500;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
   }
   .stat-answer-text {
     font-size: .85rem;
-    color: #334060;
-    line-height: 1.6;
+    color: #46527a;
+    line-height: 1.65;
     border-top: 1px solid #eef1f8;
-    padding-top: 10px;
-    margin-top: 2px;
+    padding-top: 12px;
+    margin-top: 4px;
   }
 
   /* ── mini ranked list ── */
@@ -148,19 +154,23 @@
   .mini-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 4px 0;
+    gap: 9px;
+    padding: 6px 2px;
     font-size: .8rem;
     border-bottom: 1px solid #f0f2f8;
+    border-radius: 5px;
+    transition: background .12s;
   }
   .mini-row:last-child { border-bottom: none; }
+  .mini-row:hover { background: #f7f9fd; }
   .mini-rank {
     width: 18px;
     text-align: right;
-    color: #9aa3b8;
-    font-weight: 600;
+    color: #b3bbcc;
+    font-weight: 700;
     font-size: .72rem;
     flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
   }
   .mini-rank.gold   { color: #d97706; }
   .mini-rank.silver { color: #6b7a99; }
@@ -175,18 +185,19 @@
     white-space: nowrap;
   }
   .mini-team {
-    font-size: .72rem;
-    color: #9aa3b8;
+    font-size: .7rem;
+    color: #aab2c4;
     font-weight: 500;
     flex-shrink: 0;
   }
   .mini-val {
     font-weight: 700;
-    color: #1d4ed8;
+    color: #375bc8;
     flex-shrink: 0;
     font-size: .8rem;
     min-width: 52px;
     text-align: right;
+    font-variant-numeric: tabular-nums;
   }
 
   /* ── non-answer bubbles (out_of_scope / needs_clarification) ── */
@@ -202,23 +213,25 @@
     background: #fffbeb;
     border: 1px solid #fcd34d;
     color: #78350f;
+    box-shadow: 0 1px 2px rgba(217,119,6,.06);
   }
   .plain-bubble.needs_clarification {
     background: #f5f3ff;
     border: 1px solid #c4b5fd;
     color: #4c1d95;
+    box-shadow: 0 1px 2px rgba(124,58,237,.06);
   }
 
   /* ── fn tag ── */
   .fn-tag {
-    font-size: .68rem;
-    color: #a0aab8;
-    margin-top: 6px;
+    font-size: .66rem;
+    color: #b8c0d1;
+    font-weight: 500;
+    letter-spacing: .01em;
   }
 
   /* ── full table toggle ── */
   .table-toggle {
-    margin-top: 10px;
     font-size: .76rem;
     color: #1d4ed8;
     cursor: pointer;
@@ -245,7 +258,7 @@
     background: #fff;
   }
   .table-wrap.visible { display: block; }
-  table { border-collapse: collapse; width: 100%; font-size: .76rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .76rem; font-variant-numeric: tabular-nums; }
   th {
     background: #f0f4ff;
     color: #1a2a4a;
@@ -280,34 +293,47 @@
     color: #2a3a5e;
     cursor: pointer;
     font-family: inherit;
-    transition: background .12s, border-color .12s, transform .1s;
+    transition: background .12s, border-color .12s, box-shadow .12s, transform .08s;
     line-height: 1.4;
   }
   .chip:hover {
     background: #eef2ff;
     border-color: #93a8e8;
+    box-shadow: 0 2px 6px rgba(29,78,216,.1);
     transform: translateY(-1px);
   }
-  .chip:active { transform: translateY(0); }
+  .chip:active {
+    transform: translateY(0) scale(.97);
+    box-shadow: none;
+    transition-duration: .05s;
+  }
+  .chip:focus-visible {
+    outline: 2px solid #1d4ed8;
+    outline-offset: 2px;
+  }
 
-  .followup-chips { margin-top: 10px; }
+  .followup-chips {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px dashed #e4e9f5;
+  }
   .followup-chips .chip {
     background: #f0f4ff;
     border-color: #c3d0f4;
     font-size: .74rem;
-    padding: 4px 11px;
+    padding: 5px 12px;
   }
   .followup-chips .chip:hover {
     background: #dbeafe;
     border-color: #93c5fd;
   }
   .followup-label {
-    font-size: .68rem;
-    color: #9aa3b8;
-    margin-bottom: 5px;
-    font-weight: 500;
+    font-size: .66rem;
+    color: #aab2c4;
+    margin-bottom: 8px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .05em;
+    letter-spacing: .07em;
   }
 
   /* ── suggestion chips strip above input ── */
@@ -353,7 +379,7 @@
   #send-btn:hover:not(:disabled) { background: #1a3a6e; }
   #send-btn:disabled { opacity: .45; cursor: default; }
 
-  /* ── spinner ── */
+  /* ── spinner (used in report/compare loading states) ── */
   .spinner {
     display: inline-block;
     width: 13px; height: 13px;
@@ -365,6 +391,49 @@
     margin-right: 6px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── message entrance transition ── */
+  @keyframes messageIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .bubble-row { animation: messageIn .18s ease-out; }
+
+  /* ── skeleton loading card (replaces plain spinner bubble in chat) ── */
+  .skeleton-card {
+    background: #fff;
+    border: 1px solid #e2e8f4;
+    border-radius: 12px;
+    border-bottom-left-radius: 3px;
+    padding: 18px 20px 16px;
+    width: 100%;
+    max-width: 780px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .skel-line {
+    border-radius: 5px;
+    background: linear-gradient(90deg, #eef1f8 25%, #e2e8f4 37%, #eef1f8 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .skel-top    { display: flex; gap: 12px; align-items: center; }
+  .skel-name   { height: 22px; width: 42%; }
+  .skel-num    { height: 18px; width: 22%; margin-left: auto; }
+  .skel-row    { height: 13px; width: 100%; }
+  .skel-row:nth-child(1) { width: 96%; }
+  .skel-row:nth-child(2) { width: 88%; }
+  .skel-row:nth-child(3) { width: 92%; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bubble-row { animation: none; }
+    .skel-line  { animation: none; opacity: .7; }
+  }
 
   /* ── mode toggle ── */
   #mode-bar {
@@ -665,13 +734,33 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 14px;
     color: #9aa3b8;
     pointer-events: none;
     padding-bottom: 40px;
   }
-  #empty svg { opacity: .3; }
-  #empty p { font-size: .88rem; }
+  #empty .empty-icon-wrap {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #eef2ff, #e4e9f5 70%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #empty svg { opacity: .55; }
+  #empty .empty-title {
+    font-size: .95rem;
+    font-weight: 700;
+    color: #4a5578;
+  }
+  #empty p {
+    font-size: .82rem;
+    color: #9aa3b8;
+    max-width: 280px;
+    text-align: center;
+    line-height: 1.5;
+  }
 </style>
 </head>
 <body>
@@ -689,12 +778,15 @@
 
 <div id="chat">
   <div id="empty">
-    <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
-      <circle cx="22" cy="22" r="20" stroke="#9aa3b8" stroke-width="2"/>
-      <path d="M22 4 Q29 22 22 40 Q15 22 22 4Z" stroke="#9aa3b8" stroke-width="1.5" fill="none"/>
-      <line x1="4" y1="22" x2="40" y2="22" stroke="#9aa3b8" stroke-width="1.5"/>
-    </svg>
-    <p>Click a chip or type a question below.</p>
+    <div class="empty-icon-wrap">
+      <svg width="34" height="34" viewBox="0 0 44 44" fill="none">
+        <circle cx="22" cy="22" r="20" stroke="#1d4ed8" stroke-width="2"/>
+        <path d="M22 4 Q29 22 22 40 Q15 22 22 4Z" stroke="#1d4ed8" stroke-width="1.5" fill="none"/>
+        <line x1="4" y1="22" x2="40" y2="22" stroke="#1d4ed8" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <div class="empty-title">Ask about any player or team trend</div>
+    <p>Click a suggestion chip above, or type a question below to get started.</p>
   </div>
 </div>
 
@@ -1220,17 +1312,26 @@ function appendMessage(question, data) {
   chat.scrollTop = chat.scrollHeight;
 }
 
-/* ── loading indicator ── */
+/* ── loading indicator: skeleton card, mirrors the stat-card shape so the
+   transition into the real answer doesn't jump in size/position ── */
 function appendLoading() {
   empty.style.display = 'none';
   const row = document.createElement('div');
   row.className = 'bubble-row agent';
   row.id = 'loading-row';
-  const b = document.createElement('div');
-  b.className = 'plain-bubble';
-  b.style.cssText = 'background:#fff;border:1px solid #e2e8f4;color:#6b7a99;';
-  b.innerHTML = '<span class="spinner"></span>Thinking…';
-  row.appendChild(b);
+
+  const card = document.createElement('div');
+  card.className = 'skeleton-card';
+  card.innerHTML = `
+    <div class="skel-top">
+      <div class="skel-line skel-name"></div>
+      <div class="skel-line skel-num"></div>
+    </div>
+    <div class="skel-line skel-row"></div>
+    <div class="skel-line skel-row"></div>
+    <div class="skel-line skel-row"></div>
+  `;
+  row.appendChild(card);
   chat.appendChild(row);
   chat.scrollTop = chat.scrollHeight;
   return row;
