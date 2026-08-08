@@ -25,7 +25,7 @@ NBA teams have access to:
 - **Proprietary draft intelligence**: physical testing results, psychological profiling, private workouts
 - **Lineup-level context**: on/off defensive rating, scheme tagging (zone vs. man, switching vs. drop), opponent quality adjustments
 
-This tool is built entirely on public `nba_api` endpoints. It covers player hustle activity, shot suppression by zone, Synergy play-type efficiency (offensive and defensive), and year-over-year trends. That is a meaningful slice of what matters, but it is not the whole picture, and the tool says so explicitly when questions land outside its data coverage.
+This tool is built on public `nba_api` endpoints (hustle activity, shot suppression by zone, Synergy play-type efficiency offensive and defensive, drive efficiency, signature play type, year-over-year trends) plus a public-source college draft-class layer (2026 class only, via sports-reference.com/cbb). That is a meaningful slice of what matters, but it is not the whole picture, and the tool says so explicitly when questions land outside its data coverage.
 
 ---
 
@@ -63,13 +63,13 @@ Deterministic regex router (_RULES, ~20 rules)
          ranked DataFrame → JSON → chat UI
 ```
 
-**Backend:** FastAPI (`api.py`), serving both the `/query` endpoint and the static frontend. Two DataFrames (current + prior season) are loaded once at startup via FastAPI's lifespan context manager and passed to every query.
+**Backend:** FastAPI (`api.py`), serving both the `/query`/`/report`/`/compare` endpoints and the static frontend. Two DataFrames (current + prior season) are loaded once at startup via FastAPI's lifespan context manager and passed to every query.
 
-**Compute layer:** `compute_defense.py` and `compute_offense.py` contain pure functions that take DataFrames and return ranked DataFrames. No side effects, no network calls, no LLM involvement.
+**Compute layer:** `compute_defense.py`, `compute_offense.py`, and `compute_college.py` contain pure functions that take DataFrames (or read their own CSVs, for the college layer) and return ranked DataFrames. No side effects, no network calls, no LLM involvement.
 
-**Router:** `query_router.py` handles routing, formatting, and answer construction. The LLM is called only when the regex rules produce no match.
+**Router:** `query_router.py` handles routing, formatting, and answer construction across 14 statistical functions. The LLM is called only when the regex rules produce no match — this includes `signature_play_type` by design, since it needs an arbitrary NBA player's name extracted from free text, and no deterministic name list exists for that the way the fixed 60-player college draft class does.
 
-**Frontend:** Single-file vanilla JS chat UI (`chat/index.html`). No framework, no build step. Suggestion chips, stat card with mini top-5 always visible, follow-up chips, full-table toggle.
+**Frontend:** Single-file vanilla JS chat UI (`chat/index.html`). No framework, no build step. Suggestion chips, a stat card with mini top-5 always visible for ranked answers, a distinct player-detail card for single-player breakdowns (signature play type, college lookup), follow-up chips, full-table toggle, skeleton loading state, and a refined empty state.
 
 ---
 
@@ -83,9 +83,11 @@ Deterministic regex router (_RULES, ~20 rules)
 | Defensive play-type efficiency | `SynergyPlayTypes` (Defensive) | `playtype_defense` (7 categories) |
 | Offensive play-type efficiency | `SynergyPlayTypes` (Offensive) | `playtype_offense` (9 categories, including Cut + Transition) |
 | Drive efficiency | `LeagueDashPtStats` | `drive_efficiency` (points/drive, drive FG%, playmaking on drives) |
+| Signature play type | derived from `playtype_offense` | `signature_play_type` (a player's standout offensive category by percentile) |
 | Year-over-year trends | derived from 2024-25 + 2025-26 | `year_over_year_delta` |
+| 2026 college draft class | sports-reference.com/cbb | `college_player_lookup`, `college_leaderboard`, `college_efficiency_volume` |
 
-Seasons covered: 2025-26 (current), 2024-25 (prior, for YoY comparisons).
+Seasons covered: 2025-26 (current NBA), 2024-25 (prior NBA, for YoY comparisons), 2025-26 college season for the 2026 draft class.
 
 ### Offensive play-type efficiency (complete)
 
@@ -94,17 +96,34 @@ Seasons covered: 2025-26 (current), 2024-25 (prior, for YoY comparisons).
 - **Cut is routed by volume, not PPP.** Every other category ranks by points-per-possession; Cut ranks by possession count (`POSS`) descending instead. A cut's efficiency is mechanically determined by whether the pass arrives, it's a finishing action, not a decision-making one, so a PPP ranking on Cut mostly measures who gets the most easy dunks, not who cuts well. Volume is the more honest signal.
 - **OffScreen carries a possession-count caveat.** At the default sample-size threshold, top qualifiers sit at 57-76 total possessions for the season: real usage, but a modest sample to hang a full-season efficiency ranking on. The answer surfaces this directly rather than presenting a thin sample with the same confidence as a 400-possession Spotup ranking.
 
-The router disambiguates offense/defense on overlapping phrasing: "pick-and-roll," "post," and "isolation" all mean different functions depending on whether the question is about the player initiating the action or defending it. `test_router.py` now runs 35 questions (up from 23), including dedicated PRBallHandler/PRRollman disambiguation cases (Q30-Q33) and drive-efficiency cases (Q34-Q35).
+The router disambiguates offense/defense on overlapping phrasing: "pick-and-roll," "post," and "isolation" all mean different functions depending on whether the question is about the player initiating the action or defending it. `test_router.py` now runs 43 questions (up from 23), including dedicated PRBallHandler/PRRollman disambiguation cases (Q30-Q33), drive-efficiency cases (Q34-Q35), college draft-class cases (Q36-Q41), and signature play-type cases (Q42-Q43).
 
 ### Drive efficiency (complete)
 
 `drive_efficiency` (from `LeagueDashPtStats`, `pt_measure_type='Drives'`) ranks players by points scored per drive (`PTS_PER_DRIVE` — drive points including drawn fouls, not raw drive FG% alone), and surfaces drive-passing/assist/turnover rates alongside it so volume, scoring efficiency, and playmaking on drives can be read together. `PTS_PER_DRIVE` and `DRIVE_FG_PCT` correlate at only ~0.59 across qualifiers; the answer flags it directly when a player's points-per-drive is being propped up by drawn fouls rather than raw shooting. Wired into the router, the `/report` scouting-report sections, and `/compare` head-to-head (reused automatically, same as every other section).
 
-### College data validation (complete, integrated)
+### Signature play type (complete)
 
-To scope the next natural extension, prospect data outside the NBA, `explore_college.py` and `pull_2026_draft_class.py` proved out a sports-reference.com/cbb access pattern (per-player visible tables + advanced stats hidden in HTML comment blocks) against 5 known 2026 draft picks: Cameron Boozer (Duke), AJ Dybantsa (BYU), Darryn Peterson (Kansas), Keaton Wagler (Illinois), and Cameron Carr (Baylor, transferred from Tennessee). All 5 resolved correctly and their pulled stats matched public expectations (e.g. Boozer's ~39% 3P% on real volume, Dybantsa/Peterson's 33%+ usage as primary options).
+`signature_play_type` identifies a player's standout offensive category — not their single highest-PPP category, but the qualifying category where they most exceed expectations relative to how much they run it, ranked by `PERCENTILE` rather than raw efficiency. Two thresholds, both derived from the real data rather than guessed:
 
-`pull_2026_draft_class.py` is the full 60-pick batch pull, now committed and integrated as a standalone data-refresh script (it is not routed through the query agent — it produces `draft_class_2026.csv` for offline scouting/exploration, not a live query surface). It handles international picks (no NCAA data, logged as `status="international"`), unresolved school assignments, slug-collision risk (e.g. Cameron Boozer vs. twin brother Cayden Boozer), and sports-reference's rate limiting: 5-6s delay between every request, chunked batches with 60-90s pauses between chunks, 429-aware retry/backoff, and incremental CSV writes so a mid-run stop still leaves completed rows on disk. Resumable via `python pull_2026_draft_class.py <resume_from_pick>` (defaults to pick 1). A full run is ~8-10+ minutes by design — this is deliberate pacing against a rate-limited public source (see "Working With External Data Sources Responsibly" below), not something to optimize away.
+- **A tie margin of 0.04** (4 percentile points): if two or more qualifying categories are within this margin of the top one, the answer reports a genuine multi-category strength rather than arbitrarily picking a single "winner." Checked against the real cross-category percentile-gap distribution (377 players who qualify in 2+ categories): the gap between a player's best and second-best category has a median of 0.139 and a p25 of 0.051, so 0.04 is a real, selective minority case (18.8% of players), not an arbitrary cutoff.
+- **A minimum percentile floor of 0.60**: a player's own best category has to clear this before it's called a "signature" at all. Without it, a role player whose best category is merely the 45th percentile would get a "signature play type" that isn't actually a strength. The floor sits below the real median best-category percentile (0.783 across 356 multi-category players), so it's a genuine below-average bar, not an arbitrary round number.
+
+`Cut` is excluded from signature detection, consistent with `playtype_offense`'s own established reasoning that PPP/percentile isn't a meaningful efficiency signal for that category (see the offensive play-type section above).
+
+Unlike every other function in this tool, `signature_play_type` has **no deterministic `_RULES` entry** — it's LLM-fallback only. Extracting an arbitrary NBA player's name from free text isn't something the regex router can do; the college-lookup functions below only manage deterministic name matching because the 2026 draft class is a small, fixed, enumerable list of 60 names, and no equivalent full-league name list exists to build the same kind of pattern for active NBA players.
+
+Wired into `/report` and `/compare` as a "Signature Play Type" section, following the same qualified/unqualified pattern as every other section.
+
+### 2026 college draft class (complete, integrated)
+
+`compute_college.py` turns the batch-pulled college data into three queryable functions, wired into the router the same way as every NBA-side function:
+
+- **`college_player_lookup(name)`** — a single prospect's final college season stats. Case-insensitive substring matching (`"Karaban"` resolves to Alex Karaban), but raises a `ValueError` rather than silently picking a match on a genuine ambiguity (e.g. `"Cameron"` matches both Cameron Boozer and Cameron Carr) — not currently a risk with this specific 60-player list (no in-list collisions as of this dataset), but the guard costs nothing and the list isn't guaranteed to stay collision-free if it's ever extended.
+- **`college_leaderboard(metric)`** — ranks the class by any tracked stat (PTS, TRB, AST, USG%, TS%, BPM, PER). International picks (6 of 60, no NCAA data source) are always excluded, and every answer states that exclusion explicitly rather than silently narrowing the pool — the same honesty-about-scope standard Design Principle 2's caveats apply on the NBA side.
+- **`college_efficiency_volume()`** — TS% among high-usage prospects (≥24.5% USG, the qualified pool's own median), the same volume-vs-efficiency framing this tool applies everywhere else on the NBA side. When the TS% margin between the top two qualifiers is thin (checked against the real distribution: a threshold of 1.0 percentage points sits above all but 2 of 27 real consecutive-rank gaps) and the runner-up leads decisively on BPM/PER instead, the answer surfaces that explicitly rather than presenting a 0.3-point TS% edge with unearned confidence.
+
+To scope this extension, `explore_college.py` and `pull_2026_draft_class.py` first proved out a sports-reference.com/cbb access pattern (per-player visible tables + advanced stats hidden in HTML comment blocks) against 5 known 2026 draft picks, all of which resolved correctly and matched public expectations. `pull_2026_draft_class.py` is the full 60-pick batch pull that produces `draft_class_2026.csv`, the CSV the three functions above read. It handles international picks, unresolved school assignments, slug-collision risk (e.g. Cameron Boozer vs. twin brother Cayden Boozer), and sports-reference's rate limiting: 5-6s delay between every request, chunked batches with 60-90s pauses between chunks, 429-aware retry/backoff, and incremental CSV writes so a mid-run stop still leaves completed rows on disk. Resumable via `python pull_2026_draft_class.py <resume_from_pick>` (defaults to pick 1). A full run is ~8-10+ minutes by design — this is deliberate pacing against a rate-limited public source (see "Working With External Data Sources Responsibly" below), not something to optimize away. It runs as a standalone data-refresh script (via `refresh_data.sh`, below), not live at query time — the router reads the CSV it produces.
 
 ---
 
@@ -162,6 +181,12 @@ Building the offensive play-type layer confirmed that Principle 2 is bigger than
 A distinct failure mode surfaced during the college-scouting exploration, separate from the fabricated-test-pass and sign-convention bugs above: the underlying data pulled was completely accurate, but a conclusion drawn from it, "none of these players are drafted yet, they're still in college," was wrong. The data (2025-26 season stats, `Class: FR`) was real and correctly pulled; the inference built on top of it ignored a fact the data itself couldn't contain, that the 2026 draft had already happened three weeks prior.
 
 This is a sharper failure than a wrong number, because the numbers were right. Automated verification (rerun the scraper, check the table) would have passed cleanly. The only thing that caught it was the user supplying a fact outside the dataset. The lesson generalizes: verifying that a pulled number is correct is necessary but not sufficient. A claim built on top of correct data still needs to be checked against context the data source doesn't and can't cover.
+
+### 8. A correct backend answer can still render broken
+
+Adding `drive_efficiency`, `signature_play_type`, and the three college functions to the router was tested thoroughly at the API level, real curl requests, real answers, correct routing. The chat frontend's stat-card renderer was never checked against any of them until a live browser test was run afterward, and it was visibly broken: `chat/index.html` hardcoded `PLAYER_NAME`/`TEAM_ABBREVIATION` field names and a fixed metric-column map that didn't include the new functions, so their cards rendered as rows of `—`. `signature_play_type` and `college_player_lookup` also don't return a ranked list of players at all, one is a single player's own category breakdown, the other a single player's stat line, so forcing them through the "top 5 players" card template didn't just look empty, it was a mismatched concept.
+
+An audit of all 14 dispatched functions against the frontend's metric-column map confirmed exactly these 5 gaps and no others, and the fix added a distinct player-detail card template for the two non-ranking functions rather than stretching the ranked-list template to cover a shape it wasn't designed for. The general lesson: a fully-tested backend function is not the same as a fully-tested feature. The rendering layer is part of the feature, and it has its own assumptions (field names, "this table has 1 row vs. N rows") that a new function can silently violate.
 
 ---
 
@@ -232,10 +257,10 @@ This matters beyond this project. Public sports data sites are frequently the *o
 
 ## Future Direction
 
-The most natural extension is **prospect scouting across college and international data**, which is where even NBA teams' proprietary systems have the least coverage.
+College draft-class scouting (2026 class, player lookup + leaderboards + usage-vs-efficiency) is now built and integrated, covered above. The natural next extension is **international prospect data**, which is where even NBA teams' proprietary systems have the least coverage.
 
-Second Spectrum and Synergy track NBA games comprehensively. College tracking is inconsistent across conferences. International leagues (EuroLeague, Liga ACB, NBL) have even less. The public data gap is largest exactly where the scouting judgment call is hardest: evaluating a 20-year-old playing in the Turkish BSL or the French Pro A.
+Second Spectrum and Synergy track NBA games comprehensively. College tracking is inconsistent across conferences, and this tool currently covers exactly one draft class (2026) rather than a running multi-year college dataset. International leagues (EuroLeague, Liga ACB, NBL) have even less public coverage than either. The public data gap is largest exactly where the scouting judgment call is hardest: evaluating a 20-year-old playing in the Turkish BSL or the French Pro A.
 
-Public data sources for this layer include Basketball Reference (college box scores back to 1993), Sports Reference (international stats), and the NBA draft combine measurements via `nba_api`. The block% + steal% combination from college remains one of the most predictive signals of NBA defensive impact from publicly available data, a finding that holds up across multiple published analyses and that this tool's architecture is well-positioned to surface.
+Public data sources for this layer would include Sports Reference (international stats) and the NBA draft combine measurements via `nba_api`. The block% + steal% combination from college remains one of the most predictive signals of NBA defensive impact from publicly available data, a finding that holds up across multiple published analyses; the college layer already built here has the raw box-score fields to compute it, but the derived metric itself isn't built yet.
 
-The same routing architecture applies: deterministic rules for well-defined questions, LLM classification for ambiguous ones, explicit scope limits for questions that require data this tool doesn't have. The honesty about scope is a feature, not a limitation, it's what makes the tool usable for decisions that actually matter.
+The same routing architecture applies: deterministic rules for well-defined questions, LLM classification for ambiguous ones (as `signature_play_type` already demonstrates for the free-text-name case), explicit scope limits for questions that require data this tool doesn't have. The honesty about scope is a feature, not a limitation, it's what makes the tool usable for decisions that actually matter.
