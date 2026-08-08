@@ -29,9 +29,11 @@ from compute_college import (
     college_player_lookup,
     college_leaderboard,
     college_efficiency_volume,
+    youth_adjusted_leaderboard,
     format_college_lookup_answer,
     format_college_leaderboard_answer,
     format_college_efficiency_volume_answer,
+    format_youth_adjusted_leaderboard_answer,
     _load as _load_college,
     _LEADERBOARD_LABEL as _COLLEGE_LEADERBOARD_METRICS,
 )
@@ -515,6 +517,31 @@ _RULES = [
         "college_leaderboard",
         "TS%",
     ),
+    # ── youth_adjusted_leaderboard (before college_leaderboard BPM/PER: more
+    # specific — requires an underclassman/youth-framing keyword on top of
+    # the draft-class + ranking + metric context those rules already check).
+    (
+        re.compile(
+            r"(?=.*(?:draft class|2026 draft|(?:this|the) draft))"
+            r"(?=.*\bbpm\b)"
+            r"(?=.*(?:underclassm|freshm[ae]n|sophomore|adjusted for (?:class|age|year)|"
+            r"outperforming upperclassmen|young(?:er)? players? outperform))",
+            re.IGNORECASE,
+        ),
+        "youth_adjusted_leaderboard",
+        "BPM",
+    ),
+    (
+        re.compile(
+            r"(?=.*(?:draft class|2026 draft|(?:this|the) draft))"
+            r"(?=.*\bper\b)"
+            r"(?=.*(?:underclassm|freshm[ae]n|sophomore|adjusted for (?:class|age|year)|"
+            r"outperforming upperclassmen|young(?:er)? players? outperform))",
+            re.IGNORECASE,
+        ),
+        "youth_adjusted_leaderboard",
+        "PER",
+    ),
     (
         re.compile(
             r"(?=.*(?:draft class|2026 draft|(?:this|the) draft))"
@@ -538,7 +565,7 @@ _RULES = [
 ]
 
 _SYSTEM_PROMPT = """You are a routing assistant for an NBA scouting tool.
-You have access to exactly fourteen statistical functions:
+You have access to exactly fifteen statistical functions:
 
 1. deflections_per36(df, min_minutes=15, min_games=40)
    Measures: deflections per 36 minutes.
@@ -638,11 +665,22 @@ You have access to exactly fourteen statistical functions:
     qualifying category clearly above average.
     Sort column hint: the player's full name exactly as written in the question.
 
+15. youth_adjusted_leaderboard(metric)
+    Measures: same ranking as college_leaderboard(metric), but flags which freshmen/
+    sophomores rank in the top half of the qualified pool on that metric.
+    Use for: "which underclassmen/freshmen/sophomores are outperforming upperclassmen
+    in [metric] in this draft class" questions. NOT a validated age-adjusted formula —
+    a plain within-this-class observation only (no historical baseline exists to
+    support a stronger claim). Only use this instead of college_leaderboard when the
+    question explicitly asks about class year / underclassmen / freshmen / sophomores.
+    Valid metrics: same as college_leaderboard ("PTS", "TRB", "AST", "USG%", "TS%", "BPM", "PER").
+    Sort column hint: the metric code exactly as listed above.
+
 None of these functions cover: salary, trade value, draft grades, injuries, assists, or anything outside
 hustle/defense/play-type offense/drive efficiency/2026 college draft-class data/signature play type as described above.
 
 Respond ONLY with a JSON object — no prose, no markdown, no explanation. Three possible responses:
-- If the question maps to one of the fourteen functions:
+- If the question maps to one of the fifteen functions:
   {"function": "<function_name>", "sort_col": "<hint>"}
 - If the question is about a stat this tool tracks but is too vague or underspecified:
   {"needs_clarification": true}
@@ -1002,23 +1040,36 @@ def route(
                     "function_matched": "needs_clarification",
                     "answer": "Which player's signature play type did you want?",
                 }
-            sig_result = signature_play_type(player_name)
-            if not sig_result["categories"]:
+            try:
+                sig_result = signature_play_type(player_name)
+            except ValueError as e:
+                # Ambiguous roster substring match -- same rationale as the
+                # college_player_lookup ValueError handling above: this is a
+                # clarification request, not an unexpected failure.
                 return {
                     "question": question,
                     "method": method,
-                    "function_matched": func_name,
-                    "answer": (
-                        f"{player_name} doesn't qualify for any offensive play-type "
-                        f"category this season."
-                    ),
+                    "function_matched": "needs_clarification",
+                    "answer": str(e),
                 }
+            # Previously this branch had its own inline "doesn't qualify"
+            # message here, bypassing format_signature_play_type_answer()
+            # entirely and using the raw (possibly misspelled/nicknamed)
+            # player_name rather than sig_result["player_name"] (the
+            # resolved canonical name) -- that's what caused the header/body
+            # name mismatch for typo cases like "Alex Karuso" (routed here,
+            # displayed under the typo, while the LLM's own classification
+            # had already effectively resolved the real player). Always
+            # deferring to format_signature_play_type_answer() and
+            # sig_result["player_name"] fixes both the not-found case and
+            # the header/body disagreement in one place.
             answer = format_signature_play_type_answer(sig_result)
             return {
                 "question": question,
                 "method": method,
                 "function_matched": func_name,
                 "answer": answer,
+                "resolved_player_name": sig_result["player_name"],
                 "table": sig_result["categories"],
             }
 
@@ -1034,7 +1085,22 @@ def route(
                     "function_matched": "needs_clarification",
                     "answer": "Which 2026 draft-class player did you mean?",
                 }
-            row = college_player_lookup(player_name)
+            try:
+                row = college_player_lookup(player_name)
+            except ValueError as e:
+                # Ambiguous substring match (e.g. "Cameron" -> Boozer/Carr).
+                # This is functionally a clarification request, not an
+                # unexpected failure -- classified as needs_clarification
+                # (purple badge, distinct styling) rather than falling
+                # through to the generic except-Exception handler below,
+                # which would surface a raw "Function execution error: ..."
+                # string with no visual distinction from a normal answer.
+                return {
+                    "question": question,
+                    "method": method,
+                    "function_matched": "needs_clarification",
+                    "answer": str(e),
+                }
             if row is None:
                 return {
                     "question": question,
@@ -1058,6 +1124,12 @@ def route(
             result = college_leaderboard(metric)
             top = result.iloc[0]
             answer = format_college_leaderboard_answer(top, metric)
+
+        elif func_name == "youth_adjusted_leaderboard":
+            metric = sort_col if sort_col in _COLLEGE_LEADERBOARD_METRICS else "PTS"
+            result = youth_adjusted_leaderboard(metric)
+            top = result.iloc[0]
+            answer = format_youth_adjusted_leaderboard_answer(top, metric)
 
         elif func_name == "college_efficiency_volume":
             result = college_efficiency_volume()

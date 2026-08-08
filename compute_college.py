@@ -88,6 +88,78 @@ def college_leaderboard(metric: str, ascending: bool = False) -> pd.DataFrame:
     )
 
 
+_YOUTH_CLASSES = {"FR", "SO"}
+
+# NOTE ON WHAT THIS IS NOT: "youth_adjusted" names the flag, not a validated
+# adjustment. There is no historical multi-class dataset here (this project
+# has exactly one draft class, 2026) to establish what a class-year-adjusted
+# baseline should even look like -- no age curve, no cohort comparison
+# across years, nothing to regress against. The flag is a plain descriptive
+# fact within this single class only: "this FR/SO ranks in the top half of
+# THIS 54-player pool on THIS metric," not "this player is outperforming
+# what a freshman/sophomore is expected to produce" in any calibrated sense.
+# Framed explicitly as such in the docstring and the returned column name
+# (OUTPERFORMING_UPPERCLASSMEN, not e.g. AGE_ADJUSTED_SCORE) so a caller
+# can't mistake a within-class-only observation for a validated formula.
+def youth_adjusted_leaderboard(metric: str) -> pd.DataFrame:
+    """Rank the 2026 draft class by a single stat, same as college_leaderboard,
+    annotated with class_year and a top-half-of-pool flag for underclassmen.
+
+    NOT an age-adjusted or class-year-normalized formula. This dataset is a
+    single 60-pick draft class with no historical baseline to validate what
+    "adjusted for youth" should mean quantitatively. All this does is state
+    a plain fact within this one pool: whether a FR/SO ranks in the top half
+    of the 54 qualified players on the given metric. That's a real,
+    checkable observation, not a claim about age-normalized performance.
+
+    Parameters
+    ----------
+    metric : one of the same metrics college_leaderboard supports
+
+    Returns
+    -------
+    DataFrame sorted descending by metric, same columns as college_leaderboard
+    plus:
+        OUTPERFORMING_UPPERCLASSMEN : bool, True only for FR/SO rows in the
+                                       top half (by rank) of the qualified pool
+    """
+    ranked = college_leaderboard(metric)
+    halfway = len(ranked) // 2
+    ranked["OUTPERFORMING_UPPERCLASSMEN"] = (
+        ranked["class_year"].isin(_YOUTH_CLASSES) & (ranked.index < halfway)
+    )
+    return ranked
+
+
+def _school_display(school) -> str:
+    """school is a real NaN (float) for Jayden Quaintance (no school listed
+    in the source draft list — see pull_2026_draft_class.py's own docstring
+    on this), not an empty string. An f-string would print the literal text
+    "nan" without this guard."""
+    return school if isinstance(school, str) else "no school listed"
+
+
+def format_youth_adjusted_leaderboard_answer(row: pd.Series, metric: str) -> str:
+    """Format a one-sentence answer for the top youth_adjusted_leaderboard
+    result. Always states the class-year-observation framing explicitly
+    (see youth_adjusted_leaderboard's own docstring) rather than letting the
+    flag imply a validated adjustment it isn't."""
+    label = _LEADERBOARD_LABEL.get(metric, metric)
+    school = _school_display(row["school"])
+    base = (
+        f"{row['name']} ({school}, {row['class_year']}) leads the 2026 draft class in "
+        f"{label} with {row[metric]}. {_INTERNATIONAL_NOTE}"
+    )
+    if row["OUTPERFORMING_UPPERCLASSMEN"]:
+        base += (
+            f" NOTE: {row['class_year']} ranks in the top half of this specific "
+            f"draft class on {label} — this is a within-class observation, not a "
+            f"validated age-adjusted formula (no historical baseline exists in "
+            f"this dataset to support that stronger claim)."
+        )
+    return base
+
+
 # Below this USG%, a player isn't really a "high-usage prospect" in the
 # first place — ranking them on TS% here would answer "who's the most
 # efficient scorer" (already covered by a plain TS%/PER leaderboard), not

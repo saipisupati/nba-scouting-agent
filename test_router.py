@@ -56,6 +56,9 @@ questions = [
     # route successfully, same as Q8-Q11/Q13/Q23 above) ──────────────────────
     "What's Stephen Curry's signature play type?",                  # Q42 → signature_play_type
     "What does Nikola Jokic do best offensively?",                  # Q43 → signature_play_type
+    # ── Q44-Q45: youth_adjusted_leaderboard ───────────────────────────────────
+    "Which freshmen or sophomores are outperforming upperclassmen in BPM in this draft class?",  # Q44 → youth_adjusted_leaderboard, BPM
+    "Which underclassmen are outperforming upperclassmen in PER in the 2026 draft class?",       # Q45 → youth_adjusted_leaderboard, PER
 ]
 
 for i, q in enumerate(questions, 1):

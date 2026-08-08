@@ -1053,15 +1053,19 @@ function buildPlayerCard(header, subheader, rows, answer) {
 }
 
 function buildSignaturePlayTypeCard(data) {
-  const { table, question, answer } = data;
-  // question is guaranteed present and contains the player's name;
-  // signature_play_type's table rows (play_type/percentile/poss) have no
-  // player-name field at all to pull from instead.
+  const { table, question, answer, resolved_player_name } = data;
+  // Prefer the backend-resolved canonical name (e.g. the LLM matched "Alex
+  // Karuso" to the real Alex Caruso) over the raw question text, so the
+  // card header never disagrees with the answer body about which player
+  // this is about. Falls back to the raw question only if the backend
+  // didn't supply a resolved name (older API responses, or a not-found
+  // case where there's nothing to resolve to).
+  const header = resolved_player_name || question;
   const rows = table.map(c => ({
     label: (PLAYTYPE_LABELS[c.play_type] || c.play_type),
     value: (c.percentile * 100).toFixed(1) + '% pctile, ' + c.poss.toFixed(1) + ' poss/g',
   }));
-  return buildPlayerCard(question, 'Offensive play-type breakdown', rows, answer);
+  return buildPlayerCard(header, 'Offensive play-type breakdown', rows, answer);
 }
 
 // human-readable labels for signature_play_type's raw category codes,

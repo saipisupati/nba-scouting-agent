@@ -383,14 +383,66 @@ _SIGNATURE_TIE_MARGIN = 0.04
 _SIGNATURE_MIN_PERCENTILE = 0.60
 
 
+# The full-roster reference used to distinguish "this name doesn't match any
+# NBA player" from "this player exists but has no qualifying play-type data" --
+# hustle_stats includes every rostered player regardless of play-type
+# qualification (581 rows, 2025-26), unlike the union of playtype_offense's
+# own per-category CSVs, which only contains players who cleared some
+# category's possession floor somewhere (438 rows) -- a real but thin-data
+# player like Thanasis Antetokounmpo (5.2 min/g) exists in the former but not
+# the latter, which is exactly the distinction this needs.
+_ROSTER_CSV = "hustle_stats_2025_26.csv"
+
+
+def resolve_player_name(name: str) -> str | None:
+    """Case-insensitive substring match against the full NBA roster, same
+    matching convention as compute_college.college_player_lookup (reused
+    deliberately, not reimplemented, so the two lookups can't silently
+    drift into different matching behavior). Returns the canonical
+    PLAYER_NAME on a single match, or None if no player matches.
+
+    Raises ValueError on an ambiguous match against more than one player,
+    same rationale as college_player_lookup: silently picking the first
+    match risks a silent-wrong-answer, which this project's README calls
+    out as more dangerous than a crash.
+    """
+    roster = pd.read_csv(_ROSTER_CSV)
+    name_lower = name.lower().strip()
+    matches = roster[roster["PLAYER_NAME"].str.lower().str.contains(name_lower, regex=False)]
+    if matches.empty:
+        return None
+    resolved = matches["PLAYER_NAME"].unique()
+    if len(resolved) > 1:
+        candidates = ", ".join(resolved)
+        raise ValueError(
+            f"'{name}' matches multiple NBA players ({candidates}) — "
+            f"ambiguous lookup, provide a more specific name."
+        )
+    return resolved[0]
+
+
 def signature_play_type(player_name: str) -> dict:
     """Identify a player's standout offensive play type: the qualifying
     category (min-possession floor already enforced by playtype_offense())
     where they rank highest by PERCENTILE, not just their highest raw PPP.
 
+    The player name is resolved against the full NBA roster first (see
+    resolve_player_name) so that "this player doesn't exist / didn't match"
+    (player_found=False) is distinguishable from "this real player has no
+    qualifying play-type category" (player_found=True, categories=[]) --
+    previously both cases collapsed into the same empty-categories result
+    and the same "doesn't qualify" answer text, which was actively wrong
+    for a real player looked up under a nickname or minor misspelling
+    (e.g. "Steph Curry" vs. the data's "Stephen Curry").
+
     Returns a dict:
         {
-            "player_name": str,
+            "player_name": str,  -- the RESOLVED canonical name when
+                                  player_found is True (not the raw input
+                                  the caller passed), so a caller can't
+                                  display a corrected answer under an
+                                  uncorrected name
+            "player_found": bool,
             "categories": [{"play_type": str, "percentile": float, "poss": float}, ...]
                           -- every category the player qualifies for, sorted
                           descending by percentile (Cut excluded, see
@@ -403,10 +455,19 @@ def signature_play_type(player_name: str) -> dict:
                           player doesn't qualify for any category
         }
     """
+    resolved_name = resolve_player_name(player_name)
+    if resolved_name is None:
+        return {
+            "player_name": player_name,
+            "player_found": False,
+            "categories": [],
+            "signature": None,
+        }
+
     categories = []
     for play_type in sorted(_VALID_PLAY_TYPES - _SIGNATURE_EXCLUDED_TYPES):
         df = playtype_offense(play_type)
-        row = df[df["PLAYER_NAME"] == player_name]
+        row = df[df["PLAYER_NAME"] == resolved_name]
         if row.empty:
             continue
         categories.append({
@@ -418,7 +479,12 @@ def signature_play_type(player_name: str) -> dict:
     categories.sort(key=lambda c: c["percentile"], reverse=True)
 
     if not categories:
-        return {"player_name": player_name, "categories": [], "signature": None}
+        return {
+            "player_name": resolved_name,
+            "player_found": True,
+            "categories": [],
+            "signature": None,
+        }
 
     top_percentile = categories[0]["percentile"]
 
@@ -434,7 +500,8 @@ def signature_play_type(player_name: str) -> dict:
         ]
 
     return {
-        "player_name": player_name,
+        "player_name": resolved_name,
+        "player_found": True,
         "categories": categories,
         "signature": signature,
     }
@@ -443,6 +510,9 @@ def signature_play_type(player_name: str) -> dict:
 def format_signature_play_type_answer(result: dict) -> str:
     """Format a one-sentence answer for signature_play_type()'s result."""
     player = result["player_name"]
+
+    if not result.get("player_found", True):
+        return f"{player} isn't in this season's NBA player data — check the spelling, or the name may not match a current roster player."
 
     if not result["categories"]:
         return f"{player} doesn't qualify for any offensive play-type category this season."
