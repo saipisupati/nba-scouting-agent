@@ -752,6 +752,18 @@ const METRIC_COL = {
   playtype_defense:     { col: 'PPP',                     label: 'PPP allowed' },
   playtype_offense:     { col: 'PPP',                     label: 'PPP' },
   year_over_year_delta: { col: 'DELTA',                   label: 'Δ (YoY)', isSigned: true },
+  drive_efficiency:     { col: 'PTS_PER_DRIVE',            label: 'pts/drive' },
+  college_leaderboard:  { col: 'PTS',                      label: '' }, // label overridden per-metric below
+  college_efficiency_volume: { col: 'TS%',                 label: 'TS%', isPct: false },
+};
+
+// college_leaderboard ranks by whichever metric the question asked for
+// (PTS, TRB, AST, USG%, TS%, BPM, PER) -- the column itself varies per
+// result, unlike every other function here, so it's read directly off the
+// row rather than hardcoded to one column.
+const COLLEGE_LEADERBOARD_METRIC_LABEL = {
+  'PTS': 'PTS', 'TRB': 'TRB', 'AST': 'AST', 'USG%': 'USG%',
+  'TS%': 'TS%', 'BPM': 'BPM', 'PER': 'PER',
 };
 
 // team col varies by function
@@ -759,6 +771,26 @@ const TEAM_COL = {
   shot_suppression:     'PLAYER_LAST_TEAM_ABBREVIATION',
   year_over_year_delta: 'TEAM_CUR',
 };
+
+// name/team field names vary by data source: NBA-side functions use
+// PLAYER_NAME/TEAM_ABBREVIATION (or TEAM_COL override above); the college
+// draft-class layer uses name/school instead. Checked in this order so
+// existing NBA behavior is unchanged.
+function getPlayerName(row) {
+  return row.PLAYER_NAME || row.name || '—';
+}
+
+function getTeamGeneric(row, fn) {
+  const col = TEAM_COL[fn];
+  if (col && row[col]) return row[col];
+  return row.TEAM_ABBREVIATION || row.school || '—';
+}
+
+// Functions whose `table` is NOT a ranked list of players (either a single
+// player's own category breakdown, or a single player's full stat line) --
+// these get a distinct card template in buildStatCard() rather than the
+// "top 5 players" ranking treatment, since that concept doesn't apply.
+const NON_RANKING_FUNCTIONS = new Set(['signature_play_type', 'college_player_lookup']);
 
 // follow-up chips per function
 const FOLLOWUPS = {
@@ -836,11 +868,22 @@ function formatValue(v, isSigned, isPct) {
 }
 
 function getTeam(row, fn) {
-  const col = TEAM_COL[fn] || 'TEAM_ABBREVIATION';
-  return row[col] || '—';
+  return getTeamGeneric(row, fn);
 }
 
 function getMetricVal(row, fn) {
+  // college_leaderboard ranks by whichever metric the question asked for
+  // (PTS/TRB/AST/USG%/TS%/BPM/PER) -- the column present in the row IS the
+  // ranked metric, so read it directly instead of a fixed column name.
+  if (fn === 'college_leaderboard') {
+    for (const col of Object.keys(COLLEGE_LEADERBOARD_METRIC_LABEL)) {
+      if (row[col] !== undefined && row[col] !== null) {
+        return { raw: row[col], label: COLLEGE_LEADERBOARD_METRIC_LABEL[col], isPct: false, isSigned: false };
+      }
+    }
+    return null;
+  }
+
   const m = METRIC_COL[fn];
   if (!m) return null;
   const raw = row[m.col];
@@ -849,9 +892,121 @@ function getMetricVal(row, fn) {
 }
 
 /* ── stat card builder ── */
+// Player-centric card: single player, own data broken into rows (a
+// category breakdown for signature_play_type, or a full stat line for
+// college_player_lookup) -- NOT a "top N players" ranking, so no mini-list
+// of other players makes sense here. header/rows are pre-extracted by the
+// caller since the two functions' table shapes differ (signature_play_type
+// has no name field at all; college_player_lookup has name/school on a
+// single row).
+function buildPlayerCard(header, subheader, rows, answer) {
+  const card = document.createElement('div');
+  card.className = 'stat-card';
+
+  const top = document.createElement('div');
+  top.className = 'stat-card-top';
+
+  const nameEl = document.createElement('div');
+  nameEl.className = 'stat-player';
+  nameEl.textContent = header;
+  top.appendChild(nameEl);
+
+  if (subheader) {
+    const teamEl = document.createElement('div');
+    teamEl.className = 'stat-team';
+    teamEl.textContent = subheader;
+    top.appendChild(teamEl);
+  }
+  card.appendChild(top);
+
+  const seasonEl = document.createElement('div');
+  seasonEl.className = 'stat-season';
+  seasonEl.textContent = '2025–26 season';
+  card.appendChild(seasonEl);
+
+  // clean list of this player's own categories/stats — reuses mini-list's
+  // styling (rank column repurposed as a plain row number) since it's
+  // already the right visual shape for "a short list of labeled rows".
+  const mini = document.createElement('div');
+  mini.className = 'mini-list';
+  rows.forEach((r, i) => {
+    const line = document.createElement('div');
+    line.className = 'mini-row';
+
+    const rankEl = document.createElement('div');
+    rankEl.className = 'mini-rank';
+    rankEl.textContent = i + 1;
+    line.appendChild(rankEl);
+
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'mini-name';
+    nameDiv.textContent = r.label;
+    line.appendChild(nameDiv);
+
+    const valDiv = document.createElement('div');
+    valDiv.className = 'mini-val';
+    valDiv.textContent = r.value;
+    line.appendChild(valDiv);
+
+    mini.appendChild(line);
+  });
+  card.appendChild(mini);
+
+  const textEl = document.createElement('div');
+  textEl.className = 'stat-answer-text';
+  textEl.textContent = answer;
+  card.appendChild(textEl);
+
+  return card;
+}
+
+function buildSignaturePlayTypeCard(data) {
+  const { table, question, answer } = data;
+  // question is guaranteed present and contains the player's name;
+  // signature_play_type's table rows (play_type/percentile/poss) have no
+  // player-name field at all to pull from instead.
+  const rows = table.map(c => ({
+    label: (PLAYTYPE_LABELS[c.play_type] || c.play_type),
+    value: (c.percentile * 100).toFixed(1) + '% pctile, ' + c.poss.toFixed(1) + ' poss/g',
+  }));
+  return buildPlayerCard(question, 'Offensive play-type breakdown', rows, answer);
+}
+
+// human-readable labels for signature_play_type's raw category codes,
+// mirroring compute_offense.py's own _PLAYTYPE_OFFENSE_LABEL mapping so the
+// UI doesn't show raw codes like "PRBallHandler".
+const PLAYTYPE_LABELS = {
+  Isolation: 'Isolation', PRBallHandler: 'Pick-and-roll ball handler',
+  PRRollman: 'Pick-and-roll roll man', Postup: 'Post-up', Spotup: 'Spot-up',
+  Handoff: 'Dribble handoff', Cut: 'Cut', OffScreen: 'Off-screen',
+  Transition: 'Transition',
+};
+
+function buildCollegeLookupCard(data) {
+  const { table, answer } = data;
+  const row = table[0];
+  const header = row.name;
+  const subheader = row.status === 'international' ? 'International (no NCAA data)' : (row.school || '—');
+
+  if (row.status === 'international') {
+    return buildPlayerCard(header, subheader, [], answer);
+  }
+
+  const rows = [
+    { label: 'PTS / TRB / AST', value: `${row.PTS} / ${row.TRB} / ${row.AST}` },
+    { label: 'FG% / 3P% / eFG%', value: `${row['FG%']}% / ${row['3P%']}% / ${row['eFG%']}%` },
+    { label: 'USG% / TS%', value: `${row['USG%']}% / ${row['TS%']}%` },
+    { label: 'BPM / PER', value: `${row.BPM} / ${row.PER}` },
+  ];
+  return buildPlayerCard(header, subheader, rows, answer);
+}
+
 function buildStatCard(data) {
   const { table, function_matched: fn, answer } = data;
   if (!table || table.length === 0) return null;
+
+  if (fn === 'signature_play_type') return buildSignaturePlayTypeCard(data);
+  if (fn === 'college_player_lookup') return buildCollegeLookupCard(data);
 
   const row0 = table[0];
   const card = document.createElement('div');
@@ -863,7 +1018,7 @@ function buildStatCard(data) {
 
   const nameEl = document.createElement('div');
   nameEl.className = 'stat-player';
-  nameEl.textContent = row0.PLAYER_NAME || '—';
+  nameEl.textContent = getPlayerName(row0);
   top.appendChild(nameEl);
 
   const teamEl = document.createElement('div');
@@ -904,7 +1059,7 @@ function buildStatCard(data) {
 
     const nameDiv = document.createElement('div');
     nameDiv.className = 'mini-name';
-    nameDiv.textContent = row.PLAYER_NAME || '—';
+    nameDiv.textContent = getPlayerName(row);
     line.appendChild(nameDiv);
 
     const teamDiv = document.createElement('div');
@@ -1017,8 +1172,10 @@ function appendMessage(question, data) {
     const card = buildStatCard(data);
     if (card) agentRow.appendChild(card);
 
-    // full table toggle (rows 6+)
-    if (data.table.length > 5) {
+    // full table toggle (rows 6+) — doesn't apply to non-ranking functions
+    // (a single player's own category/stat breakdown isn't a "top N" list
+    // with more rows to reveal).
+    if (data.table.length > 5 && !NON_RANKING_FUNCTIONS.has(fn)) {
       const toggle = document.createElement('button');
       toggle.className = 'table-toggle';
       toggle.innerHTML = '<span class="arrow">▶</span> <span class="toggle-label">Show full rankings (#6–#' + data.table.length + ')</span>';
