@@ -346,3 +346,129 @@ def format_drive_efficiency_answer(row: pd.Series, season_label: str) -> str:
         )
 
     return base
+
+
+# ── signature play type ────────────────────────────────────────────────────
+
+# Cut is deliberately excluded from signature detection. It's the one
+# category playtype_offense() itself sorts by volume rather than PPP,
+# because per that function's own docstring, cut finishing efficiency is
+# uniformly high (~1.3-1.7 PPP) across all qualifiers -- the PERCENTILE
+# column exists and is populated for Cut, but this project's own established
+# reasoning is that it isn't a meaningful efficiency signal for this
+# category. Including it here would treat "he cuts efficiently" as
+# comparable to "he's an elite isolation scorer," which contradicts that
+# reasoning rather than extending it.
+_SIGNATURE_EXCLUDED_TYPES = {"Cut"}
+
+# Checked directly against the real cross-category percentile-gap
+# distribution (377 players who qualify in >=2 offensive play-type
+# categories, 2025-26): top1-vs-top2 gap has min=0.001, p10=0.020,
+# p25=0.051, median=0.139, p75=0.251, max=0.869 (PERCENTILE is stored as a
+# 0-1 fraction, not 0-100). A margin of 0.04 (4 percentile points) flags
+# 71 of 377 players (18.8%) as having a genuinely close multi-category
+# profile -- a real minority, not near-zero or near-everyone, which is
+# what "genuine tie" should look like against this data.
+_SIGNATURE_TIE_MARGIN = 0.04
+
+# A player's OWN best qualifying-category percentile also needs to clear a
+# floor before it's called a "signature" at all -- otherwise a role player
+# whose best category is, say, the 45th percentile gets a "signature play
+# type" that isn't actually a strength, just whichever category happened to
+# rank highest among several mediocre ones. Checked against the real
+# distribution of each player's own best percentile (356 multi-category
+# players, 2025-26): min=0.075, p10=0.434, p25=0.609, median=0.783,
+# p75=0.890 -- the median best-category percentile is already ~78th, so
+# p25 (~0.60) is a genuine below-average bar, not an arbitrary round number.
+_SIGNATURE_MIN_PERCENTILE = 0.60
+
+
+def signature_play_type(player_name: str) -> dict:
+    """Identify a player's standout offensive play type: the qualifying
+    category (min-possession floor already enforced by playtype_offense())
+    where they rank highest by PERCENTILE, not just their highest raw PPP.
+
+    Returns a dict:
+        {
+            "player_name": str,
+            "categories": [{"play_type": str, "percentile": float, "poss": float}, ...]
+                          -- every category the player qualifies for, sorted
+                          descending by percentile (Cut excluded, see
+                          _SIGNATURE_EXCLUDED_TYPES)
+            "signature": [str, ...] or None
+                          -- the top category name, or multiple names if two
+                          or more are within _SIGNATURE_TIE_MARGIN of each
+                          other (a genuine multi-category strength rather
+                          than an arbitrary single pick), or None if the
+                          player doesn't qualify for any category
+        }
+    """
+    categories = []
+    for play_type in sorted(_VALID_PLAY_TYPES - _SIGNATURE_EXCLUDED_TYPES):
+        df = playtype_offense(play_type)
+        row = df[df["PLAYER_NAME"] == player_name]
+        if row.empty:
+            continue
+        categories.append({
+            "play_type": play_type,
+            "percentile": float(row.iloc[0]["PERCENTILE"]),
+            "poss": float(row.iloc[0]["POSS"]),
+        })
+
+    categories.sort(key=lambda c: c["percentile"], reverse=True)
+
+    if not categories:
+        return {"player_name": player_name, "categories": [], "signature": None}
+
+    top_percentile = categories[0]["percentile"]
+
+    # the player's own best category has to clear _SIGNATURE_MIN_PERCENTILE
+    # before anything is called a signature at all -- ranking #1 among your
+    # own mediocre categories doesn't make a strength.
+    if top_percentile < _SIGNATURE_MIN_PERCENTILE:
+        signature = None
+    else:
+        signature = [
+            c["play_type"] for c in categories
+            if top_percentile - c["percentile"] <= _SIGNATURE_TIE_MARGIN
+        ]
+
+    return {
+        "player_name": player_name,
+        "categories": categories,
+        "signature": signature,
+    }
+
+
+def format_signature_play_type_answer(result: dict) -> str:
+    """Format a one-sentence answer for signature_play_type()'s result."""
+    player = result["player_name"]
+
+    if not result["categories"]:
+        return f"{player} doesn't qualify for any offensive play-type category this season."
+
+    signature = result["signature"]
+    top = result["categories"][0]
+
+    if signature is None:
+        return (
+            f"No clear signature play type for {player} this season — their best "
+            f"qualifying category ({_PLAYTYPE_OFFENSE_LABEL.get(top['play_type'], top['play_type'])}) "
+            f"is only in the {top['percentile']:.1%} percentile."
+        )
+
+    if len(signature) == 1:
+        label = _PLAYTYPE_OFFENSE_LABEL.get(top["play_type"], top["play_type"])
+        return (
+            f"{player}'s signature play type is {label} "
+            f"({top['percentile']:.1%} percentile, {top['poss']:.1f} poss/g)."
+        )
+
+    cats_str = " and ".join(
+        _PLAYTYPE_OFFENSE_LABEL.get(pt, pt) for pt in signature
+    )
+    return (
+        f"{player} doesn't have a single standout — {cats_str} are both genuine "
+        f"strengths this season, within {_SIGNATURE_TIE_MARGIN:.0%} percentile points "
+        f"of each other (top: {top['percentile']:.1%})."
+    )

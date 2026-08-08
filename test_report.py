@@ -23,6 +23,7 @@ EXPECTED_SECTION_TITLES = [
     "Defensive Play-Type Profile",
     "Offensive Play-Type Profile",
     "Drive Efficiency",
+    "Signature Play Type",
     "Hustle-vs-Suppression Gap",
     "Year-Over-Year Trend",
 ]
@@ -112,6 +113,33 @@ check(
     f"drive efficiency value is a positive float: {drive_row['value']!r}",
 )
 check(drive_row["better"] == "higher", "drive efficiency uses 'higher is better' convention")
+
+
+# ── Test 5: Signature Play Type section — Curry's real, verified ground truth ─
+# 99.6% Handoff percentile is the same figure independently confirmed via
+# compute_offense.signature_play_type() directly earlier in this session's
+# testing (see AUDIT_AND_SIGNATURE_DUMP.txt) — reused here as ground truth
+# rather than re-guessed.
+print("\n" + "=" * 70)
+print("Test 5: Signature Play Type section — Stephen Curry ground truth")
+print("=" * 70)
+
+curry_data = generate_scouting_report_data("Stephen Curry", "2025-26")
+curry_titles = [s["title"] for s in curry_data["sections"]]
+check(curry_titles == EXPECTED_SECTION_TITLES, f"Curry's section titles/order match expected: {curry_titles}")
+
+sig_section = curry_data["sections"][EXPECTED_SECTION_TITLES.index("Signature Play Type")]
+sig_row = sig_section["rows"][0]
+check(sig_section["title"] == "Signature Play Type", "section title is exactly 'Signature Play Type'")
+check(sig_row["qualified"] is True, "Curry qualifies for a signature play type")
+check(
+    "Handoff" in sig_row["text"] or "handoff" in sig_row["text"].lower(),
+    f"Curry's signature is Handoff, per text: {sig_row['text']!r}",
+)
+check(
+    sig_row["value"] is not None and sig_row["value"] > 0.99,
+    f"Curry's signature percentile is >99% as expected: {sig_row['value']!r}",
+)
 
 
 # ── Summary ────────────────────────────────────────────────────────────────

@@ -22,6 +22,8 @@ from compute_offense import (
     format_playtype_offense_answer,
     drive_efficiency,
     format_drive_efficiency_answer,
+    signature_play_type,
+    format_signature_play_type_answer,
 )
 from compute_college import (
     college_player_lookup,
@@ -43,7 +45,8 @@ OUT_OF_SCOPE_MSG = (
     "Synergy play-type offense "
     "(Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, Cut, OffScreen, Transition), "
     "drive efficiency (points per drive, drive FG%, playmaking on drives), "
-    "and 2026 NBA draft-class college stats (player lookup, leaderboards, usage-vs-efficiency)."
+    "2026 NBA draft-class college stats (player lookup, leaderboards, usage-vs-efficiency), "
+    "and signature play type (a player's standout offensive category by percentile)."
 )
 
 _NEEDS_CLARIFICATION_MSG = (
@@ -535,7 +538,7 @@ _RULES = [
 ]
 
 _SYSTEM_PROMPT = """You are a routing assistant for an NBA scouting tool.
-You have access to exactly thirteen statistical functions:
+You have access to exactly fourteen statistical functions:
 
 1. deflections_per36(df, min_minutes=15, min_games=40)
    Measures: deflections per 36 minutes.
@@ -623,11 +626,23 @@ You have access to exactly thirteen statistical functions:
     Use for: "who's a high-usage AND efficient prospect in this draft class" questions.
     Sort column hint: not used, leave null.
 
+14. signature_play_type(player_name)
+    Measures: which offensive play-type category a player most stands out in, ranked by
+    PERCENTILE (not raw PPP) among the categories they qualify for. Not necessarily their
+    highest-volume category — their highest-PERCENTILE one, i.e. where they most exceed
+    expectations relative to how much they run it.
+    Use for: "what's his signature play type / go-to move?", "what does he do best
+    offensively?", "what's his standout play type?" for a specific NBA player.
+    Can return multiple tied categories if two or more are within a few percentile points
+    of each other (a genuine multi-category strength), or none if the player has no
+    qualifying category clearly above average.
+    Sort column hint: the player's full name exactly as written in the question.
+
 None of these functions cover: salary, trade value, draft grades, injuries, assists, or anything outside
-hustle/defense/play-type offense/drive efficiency/2026 college draft-class data as described above.
+hustle/defense/play-type offense/drive efficiency/2026 college draft-class data/signature play type as described above.
 
 Respond ONLY with a JSON object — no prose, no markdown, no explanation. Three possible responses:
-- If the question maps to one of the thirteen functions:
+- If the question maps to one of the fourteen functions:
   {"function": "<function_name>", "sort_col": "<hint>"}
 - If the question is about a stat this tool tracks but is too vague or underspecified:
   {"needs_clarification": true}
@@ -972,6 +987,40 @@ def route(
             result = drive_efficiency()
             top = result.iloc[0]
             answer = format_drive_efficiency_answer(top, season_label)
+
+        elif func_name == "signature_play_type":
+            # sort_col carries the player name, supplied by the LLM fallback
+            # (this function has no deterministic _RULES entry — extracting
+            # an arbitrary NBA player's name from free text isn't something
+            # the regex router can do; unlike college_player_lookup, there's
+            # no small, enumerable name list to build an alternation from).
+            player_name = sort_col
+            if not player_name:
+                return {
+                    "question": question,
+                    "method": method,
+                    "function_matched": "needs_clarification",
+                    "answer": "Which player's signature play type did you want?",
+                }
+            sig_result = signature_play_type(player_name)
+            if not sig_result["categories"]:
+                return {
+                    "question": question,
+                    "method": method,
+                    "function_matched": func_name,
+                    "answer": (
+                        f"{player_name} doesn't qualify for any offensive play-type "
+                        f"category this season."
+                    ),
+                }
+            answer = format_signature_play_type_answer(sig_result)
+            return {
+                "question": question,
+                "method": method,
+                "function_matched": func_name,
+                "answer": answer,
+                "table": sig_result["categories"],
+            }
 
         elif func_name == "college_player_lookup":
             # sort_col carries the matched player name for this function

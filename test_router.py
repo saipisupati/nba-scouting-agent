@@ -50,6 +50,12 @@ questions = [
     "Who had the highest scoring average in the 2026 draft class?", # Q39 → college_leaderboard, PTS
     "Who had the highest usage rate in this draft class?",          # Q40 → college_leaderboard, USG%
     "Who's a high-usage prospect that's also efficient in this draft class?",  # Q41 → college_efficiency_volume
+    # ── Q42-Q43: signature_play_type (LLM-fallback only — no deterministic
+    # rule, since extracting an arbitrary NBA player's name from free text
+    # isn't something the regex router can do; requires GROQ_API_KEY to
+    # route successfully, same as Q8-Q11/Q13/Q23 above) ──────────────────────
+    "What's Stephen Curry's signature play type?",                  # Q42 → signature_play_type
+    "What does Nikola Jokic do best offensively?",                  # Q43 → signature_play_type
 ]
 
 for i, q in enumerate(questions, 1):

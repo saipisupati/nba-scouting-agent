@@ -44,6 +44,9 @@ from compute_offense import (
     format_playtype_offense_answer,
     drive_efficiency,
     format_drive_efficiency_answer,
+    signature_play_type,
+    format_signature_play_type_answer,
+    _PLAYTYPE_OFFENSE_LABEL,
     _PLAYTYPE_CSV as _OFF_PLAYTYPE_CSV,
 )
 from query_router import _PRROLLMAN_CAVEAT
@@ -276,6 +279,44 @@ def _drive_efficiency_section_data(player_name: str, season: str) -> dict:
     }]}
 
 
+def _signature_play_type_section_data(player_name: str, season: str) -> dict:
+    if season != "2025-26":
+        return {"title": "Signature Play Type", "rows": [{
+            "label": "Signature", "qualified": False,
+            "text": f"No play-type data available for season {season}.",
+            "caveats": [], "value": None, "better": None,
+        }]}
+
+    result = signature_play_type(player_name)
+
+    if not result["categories"]:
+        return {"title": "Signature Play Type", "rows": [{
+            "label": "Signature", "qualified": False,
+            "text": "Insufficient sample — doesn't qualify for any offensive play-type category this season.",
+            "caveats": [], "value": None, "better": None,
+        }]}
+
+    sentence = format_signature_play_type_answer(result)
+
+    if result["signature"] is None:
+        # qualifies for categories, but none clear the signature floor —
+        # same "real data, no standout" case as an unqualified row
+        # elsewhere in this file, shown explicitly rather than omitted.
+        return {"title": "Signature Play Type", "rows": [{
+            "label": "Signature", "qualified": False,
+            "text": sentence,
+            "caveats": [], "value": None, "better": None,
+        }]}
+
+    top = result["categories"][0]
+    return {"title": "Signature Play Type", "rows": [{
+        "label": "Signature", "qualified": True,
+        "text": sentence,
+        "caveats": [],
+        "value": float(top["percentile"]), "better": "higher",
+    }]}
+
+
 def _gap_section_data(player_name: str, hustle_df: pd.DataFrame, season: str) -> dict:
     csv_map = SHOT_DEFENSE_CSV.get(season)
     if csv_map is None:
@@ -409,6 +450,7 @@ def generate_scouting_report_data(player_name: str, season: str = "2025-26") -> 
         _defense_playtype_section_data(player_name, season),
         _offense_playtype_section_data(player_name, season),
         _drive_efficiency_section_data(player_name, season),
+        _signature_play_type_section_data(player_name, season),
         _gap_section_data(player_name, hustle_df, season),
         _yoy_section_data(player_name, hustle_df, prior_df),
     ]
