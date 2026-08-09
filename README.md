@@ -2,7 +2,9 @@
 
 A natural-language scouting analytics tool built on public NBA data. Ask a defensive or offensive question in plain English, get a ranked answer backed by real numbers: no hallucinated statistics, no vague summaries.
 
-Live at `http://localhost:8000` when the server is running.
+Live at [nba-scouting-agent.onrender.com](https://nba-scouting-agent.onrender.com). Free-tier hosting — the first request after a period of inactivity may take up to 50 seconds while the instance spins up. Subsequent requests are fast.
+
+Can also be run locally — see "Running the Tool" below.
 
 ---
 
