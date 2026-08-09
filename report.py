@@ -536,6 +536,209 @@ def _render_section_as_text(section: dict, number: int) -> str:
     return "\n".join(lines)
 
 
+def _section_by_title(data: dict, title: str) -> dict | None:
+    return next((s for s in data["sections"] if s["title"] == title), None)
+
+
+def _qualified_rows(section: dict | None) -> list[dict]:
+    if section is None:
+        return []
+    return [r for r in section["rows"] if r["qualified"]]
+
+
+def _lead_lower(text: str) -> str:
+    """Lowercase the first word only if it's a normal capitalized word, not
+    an acronym/all-caps term (NOT, GAP, PPP, PCT_PLUSMINUS, ...) -- naively
+    lowercasing char 0 of "NOT an official..." produces "nOT an official...",
+    which reads as broken, not as a clause. Any word that's already >1 char
+    and entirely uppercase is left alone."""
+    first, _, rest = text.partition(" ")
+    if first.isupper() and len(first) > 1:
+        return text
+    return text[0].lower() + text[1:] if text else text
+
+
+def _first_sentence(text: str, max_len: int) -> str:
+    """Return text unchanged if it's already short enough; otherwise return
+    just its first sentence (split on '. '), so a caveat's core point can
+    still be woven into a paragraph as a compressed clause instead of being
+    either dropped entirely or reproduced in full as an unreadable run-on.
+    These caveats are consistently written with the load-bearing point
+    first (see e.g. the PRRollman selection-effect caveat, which states the
+    key fact -- "PPP allowed only reflects possessions the offense chose to
+    attack" -- in its first sentence and elaborates after), so truncating to
+    the first sentence keeps the substance, not just an easy prefix."""
+    if len(text) <= max_len:
+        return text
+    first, sep, _ = text.partition(". ")
+    return first + ("." if sep else "")
+
+
+def _weave_caveats(sentence: str, rows: list[dict], max_len: int = 220) -> str:
+    """Append caveats from the given rows as trailing clauses ("— ...")
+    rather than a separate 'NOTE:' block, so a caveat this project already
+    treats as load-bearing (PRRollman selection effect, OffScreen sample
+    size, drive-efficiency archetype mixing) reads as part of one continuous
+    sentence instead of an appended disclaimer. Caveat text is used verbatim
+    from the same section data generate_scouting_report_data() produces —
+    never retyped — so it can't drift from what the structured report says.
+
+    Caveats longer than max_len are compressed to their first sentence
+    (_first_sentence) rather than dropped -- an early version of this
+    function silently skipped long caveats, which meant the PRRollman
+    selection-effect caveat (370 chars, one of the most substantively
+    important notes in this project) never appeared in Donovan Clingan's
+    summary at all. The full, uncompressed caveat text is still present
+    verbatim in generate_scouting_report_data() and generate_scouting_report()
+    -- this is a prose-specific compression, not information loss from the
+    underlying data."""
+    caveats = [c for r in rows for c in r["caveats"]]
+    if not caveats:
+        return sentence
+    # strip each clause's own trailing period before joining, then add
+    # exactly one at the very end -- without this, a caveat that already
+    # ends in "." (all of them do) produces a double period once appended
+    # ("...charges drawn..").
+    clauses = [_lead_lower(_first_sentence(c, max_len)).rstrip(".") for c in caveats]
+    return sentence.rstrip(".") + " — " + "; and — ".join(clauses) + "."
+
+
+def _hustle_paragraph(data: dict) -> str | None:
+    section = _section_by_title(data, "Hustle / Activity Profile")
+    rows = _qualified_rows(section)
+    if not rows:
+        return None
+    player = data["player_name"]
+    # Per-row caveat weaving (see _playtype_paragraph's comment for why this
+    # matters): a caveat belongs to the specific metric it was computed for
+    # (e.g. Hustle IQ Composite's "not an official NBA stat" note), not to
+    # whichever metric happens to be listed last.
+    clauses = []
+    for r in rows:
+        clause = f"{r['label'].lower()} sits at {r['text']}"
+        if r["caveats"]:
+            woven = [_lead_lower(_first_sentence(c, 220)).rstrip(".") for c in r["caveats"]]
+            clause += " (" + "; ".join(woven) + ")"
+        clauses.append(clause)
+    sentence = f"On activity metrics, {player}'s " + ", ".join(clauses) + "."
+    return sentence
+
+
+def _shot_suppression_paragraph(data: dict) -> str | None:
+    section = _section_by_title(data, "Shot Suppression")
+    rows = _qualified_rows(section)
+    if not rows:
+        return None
+    player = data["player_name"]
+    overall = next((r for r in rows if r["label"] == "Overall"), rows[0])
+    sentence = f"By shot suppression, {player}'s overall number reads {overall['text']}"
+    others = [r for r in rows if r is not overall]
+    if others:
+        clauses = [f"{r['label'].lower()} sits at {r['text']}" for r in others]
+        sentence += "; " + "; ".join(clauses)
+    return sentence + "."
+
+
+def _playtype_paragraph(data: dict, title: str, verb: str) -> str | None:
+    section = _section_by_title(data, title)
+    rows = _qualified_rows(section)
+    if not rows:
+        return None
+    player = data["player_name"]
+    # Each row's own caveat(s) are woven onto that row's own clause here,
+    # not collected globally and appended once at the end of the sentence
+    # (an earlier version did that, which attached a caveat to whichever
+    # category happened to be last in the row list -- e.g. Donovan
+    # Clingan's PRRollman selection-effect caveat was landing after his
+    # unrelated Spotup clause, since Spotup iterated last, not because the
+    # caveat had anything to do with Spotup).
+    clauses = []
+    for r in rows:
+        clause = f"as {r['label'].lower()}, {r['text']}"
+        if r["caveats"]:
+            woven = [_lead_lower(_first_sentence(c, 220)).rstrip(".") for c in r["caveats"]]
+            clause += " (" + "; ".join(woven) + ")"
+        clauses.append(clause)
+    sentence = f"By play type, {player} {verb} " + "; ".join(clauses) + "."
+    return sentence
+
+
+def _gap_paragraph(data: dict) -> str | None:
+    section = _section_by_title(data, "Hustle-vs-Suppression Gap")
+    rows = _qualified_rows(section)
+    if not rows:
+        return None
+    player = data["player_name"]
+    row = rows[0]
+    gap = row["value"]
+    # This is the explicit activity-vs-suppression contrast the underlying
+    # GAP metric already exists to state (see _gap_section_data) — phrased
+    # here as one sentence naming the contrast directly, not two separate
+    # facts left for the reader to connect themselves.
+    if gap > 0:
+        contrast = (
+            f"{player} shows more defensively than the box score of hustle stats alone "
+            f"would suggest — quieter activity numbers paired with shot suppression that "
+            f"outperforms them (GAP {gap:+.1f})"
+        )
+    else:
+        contrast = (
+            f"{player}'s hustle activity outpaces the actual shot-suppression results — "
+            f"a busy, high-effort profile that doesn't fully translate into shots missed "
+            f"(GAP {gap:+.1f})"
+        )
+    sentence = contrast + "."
+    return _weave_caveats(sentence, rows)
+
+
+def _yoy_paragraph(data: dict) -> str | None:
+    section = _section_by_title(data, "Year-Over-Year Trend")
+    rows = _qualified_rows(section)
+    if not rows:
+        return None
+    player = data["player_name"]
+    row = rows[0]
+    sentence = f"Year over year, {player}'s {row['label'].lower()}: {row['text']}."
+    return sentence
+
+
+def generate_plain_summary(player_name: str, season: str = "2025-26") -> str:
+    """Render a player's scouting report as flowing prose paragraphs instead
+    of labeled sections — no new data fetching. Every number and caveat is
+    pulled from generate_scouting_report_data()'s already-computed section
+    rows, so this can never disagree with the structured report on a value.
+
+    One paragraph per major area (hustle/activity, shot suppression,
+    defensive play-type, offensive play-type, the activity-vs-suppression
+    gap, year-over-year trend). A section the player doesn't qualify for is
+    skipped entirely — this is prose, not a data table, so there's no
+    "insufficient sample" sentence to write. If a player qualifies for
+    nothing, the summary is just the header with no body paragraphs, which
+    is itself an honest (if sparse) answer rather than an apologetic one.
+
+    Caveats (PRRollman selection effect, OffScreen sample size, drive
+    efficiency archetype mixing, etc.) are woven into their paragraph as a
+    trailing clause rather than a separate note, since prose reads more
+    naturally that way — see _weave_caveats.
+    """
+    data = generate_scouting_report_data(player_name, season)
+
+    paragraphs = [p for p in [
+        _hustle_paragraph(data),
+        _shot_suppression_paragraph(data),
+        _playtype_paragraph(data, "Defensive Play-Type Profile", "allows"),
+        _playtype_paragraph(data, "Offensive Play-Type Profile", "produces"),
+        _gap_paragraph(data),
+        _yoy_paragraph(data),
+    ] if p is not None]
+
+    header = f"{player_name} — {season}"
+    if not paragraphs:
+        return header + "\n\n" + f"No qualifying data for {player_name} this season across any tracked category."
+
+    return header + "\n\n" + "\n\n".join(paragraphs)
+
+
 def generate_scouting_report(player_name: str, season: str = "2025-26") -> str:
     """Assemble a full scouting report for one player from every relevant
     existing compute function, as a formatted plain-text string. Each
