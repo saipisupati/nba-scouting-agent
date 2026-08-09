@@ -1,0 +1,40 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run router tests
+        # test_router.py has no assertions/sys.exit -- it always exits 0,
+        # even when a question routes to the LLM fallback and no
+        # GROQ_API_KEY is configured (that path prints "error" for that
+        # one question, not a script failure). GROQ_API_KEY is passed here
+        # so the LLM-fallback questions get real coverage in CI rather than
+        # silently no-opping, but the job would still pass without it.
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: python test_router.py
+
+      - name: Run report tests
+        run: python test_report.py
+
+      - name: Smoke test the FastAPI app
+        # Confirms api.py actually starts (real lifespan startup, not just
+        # a bare import) -- catches import-time breakage AND a missing/
+        # broken data file that a plain `import api` wouldn't trigger.
+        run: python test_smoke.py
