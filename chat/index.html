@@ -1537,6 +1537,13 @@ function buildAuditBox(auditList) {
       a.qualifying_pool_size != null ? `${a.qualifying_pool_size} players` : '—'
     ));
     entry.appendChild(buildAuditKV('Routing', a.routing_method || '—'));
+    // matched_text/matched_pattern only apply to /query (a single question
+    // to match a regex against) -- report/compare sections have no question
+    // text, so these are absent there and the row is skipped entirely rather
+    // than showing an empty dash for a field that doesn't conceptually apply.
+    if (a.matched_text) {
+      entry.appendChild(buildAuditKV('Matched on', `"${a.matched_text}"`));
+    }
     entry.appendChild(buildAuditKV('Data as of', formatAuditDate(a.data_as_of) || '—'));
     box.appendChild(entry);
   });

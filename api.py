@@ -149,6 +149,8 @@ class AuditInfo(BaseModel):
     qualifying_pool_size: Optional[int] = None
     routing_method: Optional[str] = None
     data_as_of: Optional[str] = None
+    matched_text: Optional[str] = None
+    matched_pattern: Optional[str] = None
 
 
 class QueryResponse(BaseModel):

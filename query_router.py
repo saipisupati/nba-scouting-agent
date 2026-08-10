@@ -118,7 +118,13 @@ _YOY_METRIC_PATTERNS: list[tuple[re.Pattern, str]] = [
 
 def _yoy_route(question: str) -> Optional[dict]:
     """Return a YoY routing dict if question has both a clear direction AND a
-    detectable metric; return None otherwise (falls through to LLM)."""
+    detectable metric; return None otherwise (falls through to LLM).
+
+    matched_text/matched_pattern reflect the METRIC match (phase 2), not the
+    direction match (phase 1) -- the metric is what determines which compute
+    function actually runs, so it's the more useful "why this function" signal
+    for the audit trail. The direction pattern is still applied but not
+    separately surfaced here."""
     improve = bool(_YOY_IMPROVE_PATTERN.search(question))
     decline = bool(_YOY_DECLINE_PATTERN.search(question))
 
@@ -127,16 +133,26 @@ def _yoy_route(question: str) -> Optional[dict]:
         return None
 
     metric = None
+    metric_match = None
+    metric_pattern = None
     for pattern, name in _YOY_METRIC_PATTERNS:
-        if pattern.search(question):
+        m = pattern.search(question)
+        if m:
             metric = name
+            metric_match = m
+            metric_pattern = pattern
             break
 
     if metric is None:
         return None  # no detectable metric → LLM
 
     direction = "improve" if improve else "decline"
-    return {"function": "year_over_year_delta", "sort_col": f"{metric}:{direction}"}
+    return {
+        "function": "year_over_year_delta",
+        "sort_col": f"{metric}:{direction}",
+        "matched_text": metric_match.group(0),
+        "matched_pattern": metric_pattern.pattern,
+    }
 
 
 # Derived from draft_class_2026.csv at import time rather than hardcoded, so
@@ -765,6 +781,11 @@ def _deterministic_route(question: str) -> Optional[dict]:
     for pattern, func_name, hint in _RULES:
         match = pattern.search(question)
         if match:
+            base = {
+                "function": func_name,
+                "matched_text": match.group(0),
+                "matched_pattern": pattern.pattern,
+            }
             if func_name == "college_player_lookup":
                 # hint is None for this rule; the matched player name is
                 # recovered by re-matching the name alternation directly,
@@ -772,8 +793,8 @@ def _deterministic_route(question: str) -> Optional[dict]:
                 # capture it positionally.
                 name_match = re.search(_COLLEGE_NAME_ALTERNATION, question, re.IGNORECASE)
                 sort_col = name_match.group(0) if name_match else None
-                return {"function": func_name, "sort_col": sort_col}
-            return {"function": func_name, "sort_col": hint}
+                return {**base, "sort_col": sort_col}
+            return {**base, "sort_col": hint}
     return None
 
 
@@ -1119,6 +1140,8 @@ def route(
                     },
                     "qualifying_pool_size": len(sig_result["categories"]),
                     "routing_method": method,
+                    "matched_text": routing.get("matched_text"),
+                    "matched_pattern": routing.get("matched_pattern"),
                 },
             }
 
@@ -1171,6 +1194,8 @@ def route(
                     "parameters": {},
                     "qualifying_pool_size": None,
                     "routing_method": method,
+                    "matched_text": routing.get("matched_text"),
+                    "matched_pattern": routing.get("matched_pattern"),
                 },
             }
 
@@ -1256,5 +1281,7 @@ def route(
             "parameters": params,
             "qualifying_pool_size": len(result),
             "routing_method": method,
+            "matched_text": routing.get("matched_text"),
+            "matched_pattern": routing.get("matched_pattern"),
         },
     }
