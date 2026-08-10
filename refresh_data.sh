@@ -48,4 +48,10 @@ else
 fi
 
 echo ""
+echo "=================================================================="
+echo "Generating data_manifest.json"
+echo "=================================================================="
+python3 generate_manifest.py
+
+echo ""
 echo "Data refresh complete."
