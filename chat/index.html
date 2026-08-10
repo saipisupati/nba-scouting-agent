@@ -248,6 +248,56 @@
   .table-toggle .arrow { transition: transform .15s; display: inline-block; }
   .table-toggle.open .arrow { transform: rotate(90deg); }
 
+  /* ── audit toggle ("Why this answer?") — same visual treatment as
+     .table-toggle, kept as a distinct class so its own placement/spacing
+     rules don't couple to the ranking-table toggle's ── */
+  .audit-toggle {
+    font-size: .76rem;
+    color: #1d4ed8;
+    cursor: pointer;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    margin-top: 6px;
+  }
+  .audit-toggle:hover { text-decoration: underline; }
+  .audit-toggle .arrow { transition: transform .15s; display: inline-block; }
+  .audit-toggle.open .arrow { transform: rotate(90deg); }
+
+  .audit-box {
+    display: none;
+    margin-top: 8px;
+    padding: 10px 13px;
+    background: #f8f9fd;
+    border: 1px solid #e2e8f4;
+    border-radius: 8px;
+    font-size: .78rem;
+    line-height: 1.7;
+  }
+  .audit-box.visible { display: block; }
+  .audit-box .audit-entry + .audit-entry {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #e2e8f4;
+  }
+  .audit-kv { display: flex; gap: 6px; }
+  .audit-kv .audit-key {
+    flex-shrink: 0;
+    width: 108px;
+    color: #8a93a8;
+    font-weight: 600;
+  }
+  .audit-kv .audit-val {
+    color: #334060;
+    font-variant-numeric: tabular-nums;
+    word-break: break-word;
+  }
+
   /* ── full table ── */
   .table-wrap {
     display: none;
@@ -1300,6 +1350,14 @@ function appendMessage(question, data) {
     tag.textContent = `fn: ${fn}  ·  via ${data.method || '?'}`;
     agentRow.appendChild(tag);
 
+    // audit toggle ("Why this answer?") — secondary detail level below the
+    // fn/method provenance line, not competing with the primary answer.
+    const auditParts = buildAuditToggle(data.audit);
+    if (auditParts) {
+      agentRow.appendChild(auditParts.toggle);
+      agentRow.appendChild(auditParts.box);
+    }
+
     // follow-up chips
     const followups = buildFollowupChips(fn);
     if (followups) agentRow.appendChild(followups);
@@ -1426,6 +1484,86 @@ function buildCaveatBox(text) {
   return box;
 }
 
+/* ── audit box builder ("Why this answer?") ──────────────────────────────
+   Renders one or more audit entries (intent/parameters/qualifying_pool_size/
+   routing_method/data_as_of) as a clean key-value list, not raw JSON. A
+   section can carry multiple audit entries (one per underlying compute
+   call, e.g. the Hustle section bundles 4 different functions) — each
+   renders as its own labeled block, separated by a hairline, rather than
+   collapsing distinct thresholds into one misleading summary. Entries that
+   are null (e.g. a section with no data for the given season) are skipped
+   silently — there is nothing to audit for those. ── */
+function formatAuditDate(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function formatAuditParams(params) {
+  const entries = Object.entries(params || {});
+  if (entries.length === 0) return '(none)';
+  return entries.map(([k, v]) => `${k}=${v}`).join(', ');
+}
+
+function buildAuditKV(key, value) {
+  const row = document.createElement('div');
+  row.className = 'audit-kv';
+  const k = document.createElement('span');
+  k.className = 'audit-key';
+  k.textContent = key;
+  const v = document.createElement('span');
+  v.className = 'audit-val';
+  v.textContent = value;
+  row.appendChild(k);
+  row.appendChild(v);
+  return row;
+}
+
+function buildAuditBox(auditList) {
+  const entries = (Array.isArray(auditList) ? auditList : [auditList]).filter(Boolean);
+  if (entries.length === 0) return null;
+
+  const box = document.createElement('div');
+  box.className = 'audit-box';
+
+  entries.forEach(a => {
+    const entry = document.createElement('div');
+    entry.className = 'audit-entry';
+    entry.appendChild(buildAuditKV('Intent', a.intent || '—'));
+    entry.appendChild(buildAuditKV('Parameters', formatAuditParams(a.parameters)));
+    entry.appendChild(buildAuditKV(
+      'Qualifying pool',
+      a.qualifying_pool_size != null ? `${a.qualifying_pool_size} players` : '—'
+    ));
+    entry.appendChild(buildAuditKV('Routing', a.routing_method || '—'));
+    entry.appendChild(buildAuditKV('Data as of', formatAuditDate(a.data_as_of) || '—'));
+    box.appendChild(entry);
+  });
+
+  return box;
+}
+
+/* Returns {toggle, box} — caller appends both, in order, wherever the
+   toggle should sit. Mirrors the table-toggle open/close pattern exactly
+   (arrow rotation, label swap, .visible class) so the two collapsibles
+   behave identically. */
+function buildAuditToggle(auditList) {
+  const box = buildAuditBox(auditList);
+  if (!box) return null;
+
+  const toggle = document.createElement('button');
+  toggle.className = 'audit-toggle';
+  toggle.innerHTML = '<span class="arrow">▶</span> <span class="toggle-label">Why this answer?</span>';
+
+  toggle.addEventListener('click', () => {
+    const open = box.classList.toggle('visible');
+    toggle.classList.toggle('open', open);
+  });
+
+  return { toggle, box };
+}
+
 /* ── report card builder ── */
 function buildReportCard(data) {
   const card = document.createElement('div');
@@ -1478,6 +1616,16 @@ function buildReportCard(data) {
 
       sec.appendChild(rowEl);
     });
+
+    // per-section "Why this answer?" — audit is a list, one entry per
+    // underlying compute call this section bundles (e.g. Hustle covers 4
+    // distinct functions), so it lives once per section rather than once
+    // per row or as a single block at the bottom of the whole report.
+    const auditParts = buildAuditToggle(section.audit);
+    if (auditParts) {
+      sec.appendChild(auditParts.toggle);
+      sec.appendChild(auditParts.box);
+    }
 
     card.appendChild(sec);
   });
@@ -1580,6 +1728,16 @@ function buildCompareCard(data) {
 
       sec.appendChild(rowEl);
     });
+
+    // per-section "Why this answer?" — audit reflects the qualification
+    // thresholds/pool for this section's metric(s), same for both players
+    // (they're ranked against the same computed pool), so one toggle per
+    // section rather than one per player column.
+    const auditParts = buildAuditToggle(section.audit);
+    if (auditParts) {
+      sec.appendChild(auditParts.toggle);
+      sec.appendChild(auditParts.box);
+    }
 
     card.appendChild(sec);
   });
