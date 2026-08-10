@@ -118,7 +118,7 @@ def playtype_offense(play_type: str, min_poss: float | None = None) -> pd.DataFr
 
     sort_col = "POSS" if play_type in _SORT_BY_VOLUME else "PPP"
     return (
-        filtered[_RETURN_COLS]
+        _apply_current_team(filtered[_RETURN_COLS])
         .sort_values(sort_col, ascending=False)
         .reset_index(drop=True)
     )
@@ -392,6 +392,38 @@ _SIGNATURE_MIN_PERCENTILE = 0.60
 # player like Thanasis Antetokounmpo (5.2 min/g) exists in the former but not
 # the latter, which is exactly the distinction this needs.
 _ROSTER_CSV = "data/hustle_stats_2025_26.csv"
+
+
+# Synergy playtype CSVs (offense and defense, both pulled from nba_api's
+# SynergyPlayTypes endpoint) carry their own TEAM_ABBREVIATION column that
+# has been directly confirmed to lag real trades -- e.g. Kristaps
+# Porziņģis's ATL->GSW trade, and 60 other players checked the same way,
+# still show the pre-trade team when queried live against the endpoint
+# itself. This is upstream nba_api/Synergy staleness, not something a
+# fresh pull fixes (re-pulling reproduces the same stale value). By
+# contrast, hustle_stats (LeagueHustleStatsPlayer) was directly verified
+# accurate for all 581 rostered players against shot_defense and drives
+# (both 0 mismatches), so it's used here as the correction source for
+# every playtype-based function's displayed team, without altering any
+# other column (POSS/PPP/FG_PCT are Synergy-specific stats with no
+# equivalent in hustle_stats, so only TEAM_ABBREVIATION is ever replaced).
+def _current_team_map() -> dict[str, str]:
+    """PLAYER_NAME -> TEAM_ABBREVIATION from the verified-accurate roster
+    source, for overwriting stale team fields elsewhere."""
+    roster = pd.read_csv(_ROSTER_CSV)
+    return dict(zip(roster["PLAYER_NAME"], roster["TEAM_ABBREVIATION"]))
+
+
+def _apply_current_team(df: pd.DataFrame) -> pd.DataFrame:
+    """Overwrite df's TEAM_ABBREVIATION with the current value from
+    hustle_stats wherever the player exists there; leaves rows for
+    players not in hustle_stats (should not happen in practice, since
+    hustle_stats is the full 581-player roster) untouched rather than
+    guessing."""
+    team_map = _current_team_map()
+    df = df.copy()
+    df["TEAM_ABBREVIATION"] = df["PLAYER_NAME"].map(team_map).fillna(df["TEAM_ABBREVIATION"])
+    return df
 
 
 def resolve_player_name(name: str) -> str | None:

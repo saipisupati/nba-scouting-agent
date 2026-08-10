@@ -1,5 +1,7 @@
 import pandas as pd
 
+from compute_offense import _apply_current_team
+
 
 def deflections_per36(df: pd.DataFrame, min_minutes: float = 15, min_games: int = 40) -> pd.DataFrame:
     d = df[(df["MIN"] >= min_minutes) & (df["G"] >= min_games)].copy()
@@ -247,7 +249,7 @@ def playtype_defense(play_type: str, min_poss: int = None) -> pd.DataFrame:
     df = pd.read_csv(_PLAYTYPE_CSV[play_type])
     d = df[df["POSS"] >= threshold].copy()
     return (
-        d[["PLAYER_NAME", "TEAM_ABBREVIATION", "POSS", "PPP", "FG_PCT"]]
+        _apply_current_team(d[["PLAYER_NAME", "TEAM_ABBREVIATION", "POSS", "PPP", "FG_PCT"]])
         .sort_values("PPP", ascending=True)
         .reset_index(drop=True)
     )
