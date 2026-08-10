@@ -24,7 +24,7 @@ from data_schema import (
 
 _state: dict = {}
 
-_MANIFEST_PATH = "data_manifest.json"
+_MANIFEST_PATH = "data/data_manifest.json"
 
 # (file path, required columns) for every CSV the app depends on -- checked
 # at startup so a broken/stale file fails loudly here, with the exact file
@@ -41,18 +41,18 @@ _PLAYTYPE_FILES = {
 
 def _schema_check_targets() -> list[tuple[str, set[str]]]:
     targets = [
-        ("hustle_stats_2025_26.csv", HUSTLE_COLUMNS),
-        ("hustle_stats_2024_25.csv", HUSTLE_COLUMNS),
-        ("shot_defense_overall_2025_26.csv", SHOT_DEFENSE_COLUMNS["Overall"]),
-        ("shot_defense_3pt_2025_26.csv", SHOT_DEFENSE_COLUMNS["3 Pointers"]),
-        ("shot_defense_2pt_2025_26.csv", SHOT_DEFENSE_COLUMNS["2 Pointers"]),
-        ("shot_defense_rim_2025_26.csv", SHOT_DEFENSE_COLUMNS["Less Than 6Ft"]),
-        ("drives_2025_26.csv", DRIVES_COLUMNS),
-        ("draft_class_2026.csv", DRAFT_CLASS_COLUMNS),
+        ("data/hustle_stats_2025_26.csv", HUSTLE_COLUMNS),
+        ("data/hustle_stats_2024_25.csv", HUSTLE_COLUMNS),
+        ("data/shot_defense_overall_2025_26.csv", SHOT_DEFENSE_COLUMNS["Overall"]),
+        ("data/shot_defense_3pt_2025_26.csv", SHOT_DEFENSE_COLUMNS["3 Pointers"]),
+        ("data/shot_defense_2pt_2025_26.csv", SHOT_DEFENSE_COLUMNS["2 Pointers"]),
+        ("data/shot_defense_rim_2025_26.csv", SHOT_DEFENSE_COLUMNS["Less Than 6Ft"]),
+        ("data/drives_2025_26.csv", DRIVES_COLUMNS),
+        ("data/draft_class_2026.csv", DRAFT_CLASS_COLUMNS),
     ]
     for suffix in _PLAYTYPE_FILES.values():
-        targets.append((f"playtype_defense_{suffix}_2025_26.csv", PLAYTYPE_COLUMNS))
-        targets.append((f"playtype_offense_{suffix}_2025_26.csv", PLAYTYPE_COLUMNS))
+        targets.append((f"data/playtype_defense_{suffix}_2025_26.csv", PLAYTYPE_COLUMNS))
+        targets.append((f"data/playtype_offense_{suffix}_2025_26.csv", PLAYTYPE_COLUMNS))
     return targets
 
 
@@ -65,7 +65,7 @@ def validate_startup_schema() -> None:
     on defense -- see README) and are skipped here for that reason, not
     because their schema doesn't matter."""
     for path, required in _schema_check_targets():
-        if path in ("playtype_defense_cut_2025_26.csv", "playtype_defense_transition_2025_26.csv"):
+        if path in ("data/playtype_defense_cut_2025_26.csv", "data/playtype_defense_transition_2025_26.csv"):
             continue
         try:
             df = pd.read_csv(path)
@@ -100,8 +100,8 @@ async def lifespan(app: FastAPI):
     validate_startup_schema()
 
     try:
-        _state["df"] = pd.read_csv("hustle_stats_2025_26.csv")
-        _state["prior_df"] = pd.read_csv("hustle_stats_2024_25.csv")
+        _state["df"] = pd.read_csv("data/hustle_stats_2025_26.csv")
+        _state["prior_df"] = pd.read_csv("data/hustle_stats_2024_25.csv")
     except FileNotFoundError as e:
         raise RuntimeError(
             f"Missing required data file: {e.filename}. "

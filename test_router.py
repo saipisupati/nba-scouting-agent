@@ -1,8 +1,8 @@
 import pandas as pd
 from query_router import route
 
-df = pd.read_csv("hustle_stats_2025_26.csv")
-prior_df = pd.read_csv("hustle_stats_2024_25.csv")
+df = pd.read_csv("data/hustle_stats_2025_26.csv")
+prior_df = pd.read_csv("data/hustle_stats_2024_25.csv")
 
 questions = [
     "Who leads the league in deflections per 36 minutes?",

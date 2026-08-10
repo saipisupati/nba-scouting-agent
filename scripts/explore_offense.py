@@ -58,7 +58,7 @@ for i, play_type in enumerate(PLAY_TYPES):
         per_mode_simple="PerGame",
     ).get_data_frames()[0]
 
-    csv_name = f"playtype_offense_{play_type.lower()}_2025_26.csv"
+    csv_name = f"data/playtype_offense_{play_type.lower()}_2025_26.csv"
     df.to_csv(csv_name, index=False)
 
     if df.empty:
@@ -116,7 +116,7 @@ drives_df = leaguedashptstats.LeagueDashPtStats(
     per_mode_simple="PerGame",
 ).get_data_frames()[0]
 
-drives_csv = "drives_2025_26.csv"
+drives_csv = "data/drives_2025_26.csv"
 drives_df.to_csv(drives_csv, index=False)
 
 if drives_df.empty:

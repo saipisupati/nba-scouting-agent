@@ -44,7 +44,7 @@ for i, play_type in enumerate(PLAY_TYPES):
 
     df = pull_playtype(play_type)
 
-    csv_name = f"playtype_defense_{play_type.lower()}_{SEASON.replace('-', '_')}.csv"
+    csv_name = f"data/playtype_defense_{play_type.lower()}_{SEASON.replace('-', '_')}.csv"
     df.to_csv(csv_name, index=False)
 
     print(f"Shape: {df.shape}   |   Saved → {csv_name}")

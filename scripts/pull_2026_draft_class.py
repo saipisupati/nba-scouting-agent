@@ -416,7 +416,7 @@ def as_pct_str(v):
 
 
 # ── Main pull loop ─────────────────────────────────────────────────────────────
-CSV_PATH = "draft_class_2026.csv"
+CSV_PATH = "data/draft_class_2026.csv"
 CHUNK_SIZE = 15
 CHUNK_PAUSE_RANGE = (60, 90)
 REQUEST_DELAY_RANGE = (5.0, 6.0)

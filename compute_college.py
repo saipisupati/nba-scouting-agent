@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-_COLLEGE_CSV = "draft_class_2026.csv"
+_COLLEGE_CSV = "data/draft_class_2026.csv"
 
 _LEADERBOARD_LABEL = {
     "PTS": "scoring (PTS)",

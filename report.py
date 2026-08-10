@@ -52,14 +52,14 @@ from compute_offense import (
 from query_router import _PRROLLMAN_CAVEAT
 
 HUSTLE_CSV = {
-    "2025-26": "hustle_stats_2025_26.csv",
-    "2024-25": "hustle_stats_2024_25.csv",
+    "2025-26": "data/hustle_stats_2025_26.csv",
+    "2024-25": "data/hustle_stats_2024_25.csv",
 }
 SHOT_DEFENSE_CSV = {
     "2025-26": {
-        "Overall":       "shot_defense_overall_2025_26.csv",
-        "3 Pointers":    "shot_defense_3pt_2025_26.csv",
-        "Less Than 6Ft": "shot_defense_rim_2025_26.csv",
+        "Overall":       "data/shot_defense_overall_2025_26.csv",
+        "3 Pointers":    "data/shot_defense_3pt_2025_26.csv",
+        "Less Than 6Ft": "data/shot_defense_rim_2025_26.csv",
     },
 }
 

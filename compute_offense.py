@@ -5,15 +5,15 @@ import pandas as pd
 # ── play type CSV paths ───────────────────────────────────────────────────────
 
 _PLAYTYPE_CSV = {
-    "Isolation":    "playtype_offense_isolation_2025_26.csv",
-    "PRBallHandler":"playtype_offense_prballhandler_2025_26.csv",
-    "PRRollman":    "playtype_offense_prrollman_2025_26.csv",
-    "Postup":       "playtype_offense_postup_2025_26.csv",
-    "Spotup":       "playtype_offense_spotup_2025_26.csv",
-    "Handoff":      "playtype_offense_handoff_2025_26.csv",
-    "Cut":          "playtype_offense_cut_2025_26.csv",
-    "OffScreen":    "playtype_offense_offscreen_2025_26.csv",
-    "Transition":   "playtype_offense_transition_2025_26.csv",
+    "Isolation":    "data/playtype_offense_isolation_2025_26.csv",
+    "PRBallHandler":"data/playtype_offense_prballhandler_2025_26.csv",
+    "PRRollman":    "data/playtype_offense_prrollman_2025_26.csv",
+    "Postup":       "data/playtype_offense_postup_2025_26.csv",
+    "Spotup":       "data/playtype_offense_spotup_2025_26.csv",
+    "Handoff":      "data/playtype_offense_handoff_2025_26.csv",
+    "Cut":          "data/playtype_offense_cut_2025_26.csv",
+    "OffScreen":    "data/playtype_offense_offscreen_2025_26.csv",
+    "Transition":   "data/playtype_offense_transition_2025_26.csv",
 }
 
 # Thresholds derived from each category's actual POSS/g distribution.
@@ -199,7 +199,7 @@ def format_playtype_offense_answer(
 
 # ── drive efficiency (LeagueDashPtStats, pt_measure_type='Drives') ────────────
 
-_DRIVES_CSV = "drives_2025_26.csv"
+_DRIVES_CSV = "data/drives_2025_26.csv"
 
 # DRIVES in this CSV is already a per-game rate (confirmed against known
 # volume drivers: SGA shows DRIVES=18.8 across GP=68, consistent with his
@@ -391,7 +391,7 @@ _SIGNATURE_MIN_PERCENTILE = 0.60
 # category's possession floor somewhere (438 rows) -- a real but thin-data
 # player like Thanasis Antetokounmpo (5.2 min/g) exists in the former but not
 # the latter, which is exactly the distinction this needs.
-_ROSTER_CSV = "hustle_stats_2025_26.csv"
+_ROSTER_CSV = "data/hustle_stats_2025_26.csv"
 
 
 def resolve_player_name(name: str) -> str | None:

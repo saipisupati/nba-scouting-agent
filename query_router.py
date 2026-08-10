@@ -979,10 +979,10 @@ def route(
         elif func_name == "shot_suppression":
             category = sort_col if sort_col in ("Overall", "3 Pointers", "2 Pointers", "Less Than 6Ft") else "Overall"
             csv_map = {
-                "Overall":        "shot_defense_overall_2025_26.csv",
-                "3 Pointers":     "shot_defense_3pt_2025_26.csv",
-                "2 Pointers":     "shot_defense_2pt_2025_26.csv",
-                "Less Than 6Ft":  "shot_defense_rim_2025_26.csv",
+                "Overall":        "data/shot_defense_overall_2025_26.csv",
+                "3 Pointers":     "data/shot_defense_3pt_2025_26.csv",
+                "2 Pointers":     "data/shot_defense_2pt_2025_26.csv",
+                "Less Than 6Ft":  "data/shot_defense_rim_2025_26.csv",
             }
             defend_df = pd.read_csv(csv_map[category])
             result = shot_suppression(defend_df, category=category)
@@ -990,7 +990,7 @@ def route(
             answer = _format_shot_suppression(top, category, season_label)
 
         elif func_name == "hustle_vs_suppression_gap":
-            defend_df = pd.read_csv("shot_defense_overall_2025_26.csv")
+            defend_df = pd.read_csv("data/shot_defense_overall_2025_26.csv")
             result = hustle_vs_suppression_gap(df, defend_df)
             if sort_col == "negative":
                 result = result.sort_values("GAP", ascending=True).reset_index(drop=True)
@@ -1015,7 +1015,7 @@ def route(
             result = playtype_offense(play_type)
             top = result.iloc[0]
             # compute total_poss for OffScreen caveat threshold check
-            raw_csv = f"playtype_offense_{play_type.lower()}_2025_26.csv"
+            raw_csv = f"data/playtype_offense_{play_type.lower()}_2025_26.csv"
             _raw = pd.read_csv(raw_csv)
             _gp_rows = _raw[_raw["PLAYER_NAME"] == top["PLAYER_NAME"]]["GP"]
             total_poss = float(top["POSS"] * _gp_rows.values[0]) if not _gp_rows.empty else None

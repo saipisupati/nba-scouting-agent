@@ -32,16 +32,16 @@ run() {
 }
 
 run hustle_stats.py
-run explore_shot_defense.py
-run explore_playtype_defense.py
-run explore_offense.py
+run scripts/explore_shot_defense.py
+run scripts/explore_playtype_defense.py
+run scripts/explore_offense.py
 
 if [ "$SKIP_COLLEGE" = false ]; then
   echo ""
   echo "=================================================================="
   echo "Running: pull_2026_draft_class.py (slow — ~8-10+ min, rate-limited)"
   echo "=================================================================="
-  python3 pull_2026_draft_class.py
+  python3 scripts/pull_2026_draft_class.py
 else
   echo ""
   echo "Skipping pull_2026_draft_class.py (--skip-college)"

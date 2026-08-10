@@ -7,10 +7,10 @@ PLAYERS = ["Rudy Gobert", "Draymond Green", "Alex Caruso", "Herbert Jones"]
 
 # (category, csv_path, defender_fgpct_col, normal_fgpct_col, plusminus_col)
 CATEGORIES = [
-    ("Overall",       "shot_defense_overall_2025_26.csv", "D_FG_PCT",   "NORMAL_FG_PCT", "PCT_PLUSMINUS"),
-    ("3 Pointers",    "shot_defense_3pt_2025_26.csv",     "FG3_PCT",    "NS_FG3_PCT",    "PLUSMINUS"),
-    ("2 Pointers",    "shot_defense_2pt_2025_26.csv",     "FG2_PCT",    "NS_FG2_PCT",    "PLUSMINUS"),
-    ("Less Than 6Ft", "shot_defense_rim_2025_26.csv",     "LT_06_PCT",  "NS_LT_06_PCT",  "PLUSMINUS"),
+    ("Overall",       "data/shot_defense_overall_2025_26.csv", "D_FG_PCT",   "NORMAL_FG_PCT", "PCT_PLUSMINUS"),
+    ("3 Pointers",    "data/shot_defense_3pt_2025_26.csv",     "FG3_PCT",    "NS_FG3_PCT",    "PLUSMINUS"),
+    ("2 Pointers",    "data/shot_defense_2pt_2025_26.csv",     "FG2_PCT",    "NS_FG2_PCT",    "PLUSMINUS"),
+    ("Less Than 6Ft", "data/shot_defense_rim_2025_26.csv",     "LT_06_PCT",  "NS_LT_06_PCT",  "PLUSMINUS"),
 ]
 
 for category, csv_path, fgpct_col, normal_col, diff_col in CATEGORIES:

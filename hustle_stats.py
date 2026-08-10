@@ -3,8 +3,8 @@ import pandas as pd
 from nba_api.stats.endpoints import LeagueHustleStatsPlayer
 
 SEASONS = {
-    "2025-26": "hustle_stats_2025_26.csv",
-    "2024-25": "hustle_stats_2024_25.csv",
+    "2025-26": "data/hustle_stats_2025_26.csv",
+    "2024-25": "data/hustle_stats_2024_25.csv",
 }
 
 PLAYERS = ["Rudy Gobert", "Draymond Green", "Alex Caruso", "Herbert Jones"]

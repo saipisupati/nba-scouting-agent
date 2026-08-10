@@ -166,13 +166,13 @@ def hustle_vs_suppression_gap(
 
 
 _PLAYTYPE_CSV = {
-    "Isolation":    "playtype_defense_isolation_2025_26.csv",
-    "PRBallHandler":"playtype_defense_prballhandler_2025_26.csv",
-    "PRRollman":    "playtype_defense_prrollman_2025_26.csv",
-    "Postup":       "playtype_defense_postup_2025_26.csv",
-    "Spotup":       "playtype_defense_spotup_2025_26.csv",
-    "Handoff":      "playtype_defense_handoff_2025_26.csv",
-    "OffScreen":    "playtype_defense_offscreen_2025_26.csv",
+    "Isolation":    "data/playtype_defense_isolation_2025_26.csv",
+    "PRBallHandler":"data/playtype_defense_prballhandler_2025_26.csv",
+    "PRRollman":    "data/playtype_defense_prrollman_2025_26.csv",
+    "Postup":       "data/playtype_defense_postup_2025_26.csv",
+    "Spotup":       "data/playtype_defense_spotup_2025_26.csv",
+    "Handoff":      "data/playtype_defense_handoff_2025_26.csv",
+    "OffScreen":    "data/playtype_defense_offscreen_2025_26.csv",
 }
 
 # POSS distributions (2025-26, all qualified players):
@@ -326,9 +326,9 @@ def year_over_year_delta(
 
 
 if __name__ == "__main__":
-    hustle = pd.read_csv("hustle_stats_2025_26.csv")
-    defend_overall = pd.read_csv("shot_defense_overall_2025_26.csv")
-    defend_rim     = pd.read_csv("shot_defense_rim_2025_26.csv")
+    hustle = pd.read_csv("data/hustle_stats_2025_26.csv")
+    defend_overall = pd.read_csv("data/shot_defense_overall_2025_26.csv")
+    defend_rim     = pd.read_csv("data/shot_defense_rim_2025_26.csv")
 
     sections = [
         ("Deflections per 36", deflections_per36(hustle)),
