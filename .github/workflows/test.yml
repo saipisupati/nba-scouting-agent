@@ -33,6 +33,14 @@ jobs:
       - name: Run report tests
         run: python test_report.py
 
+      - name: Run fixture-based compute unit tests
+        # test_compute.py -- small hand-built DataFrames, no dependency on
+        # the live CSVs. Locks in the specific bug classes this project has
+        # actually hit (PCT_PLUSMINUS sign convention, threshold-boundary
+        # off-by-one, silent wrong-name-match) so they can't silently
+        # regress.
+        run: python test_compute.py
+
       - name: Smoke test the FastAPI app
         # Confirms api.py actually starts (real lifespan startup, not just
         # a bare import) -- catches import-time breakage AND a missing/
