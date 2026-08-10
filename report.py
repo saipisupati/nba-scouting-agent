@@ -26,6 +26,8 @@ from — the qualification logic lives in exactly one place.
 
 from __future__ import annotations
 
+import inspect
+
 import pandas as pd
 
 from compute_defense import (
@@ -38,6 +40,7 @@ from compute_defense import (
     playtype_defense,
     year_over_year_delta,
     _PLAYTYPE_CSV as _DEF_PLAYTYPE_CSV,
+    _PLAYTYPE_DEFAULT_MIN_POSS as _DEF_PLAYTYPE_DEFAULT_MIN_POSS,
 )
 from compute_offense import (
     playtype_offense,
@@ -48,8 +51,29 @@ from compute_offense import (
     format_signature_play_type_answer,
     _PLAYTYPE_OFFENSE_LABEL,
     _PLAYTYPE_CSV as _OFF_PLAYTYPE_CSV,
+    _PLAYTYPE_DEFAULT_MIN_POSS as _OFF_PLAYTYPE_DEFAULT_MIN_POSS,
+    _MIN_TOTAL_POSS as _OFF_PLAYTYPE_MIN_TOTAL_POSS,
+    _MIN_DRIVES_PER_GAME as _DRIVE_MIN_DRIVES_PER_GAME,
+    _MIN_TOTAL_DRIVES as _DRIVE_MIN_TOTAL_DRIVES,
+    _SIGNATURE_TIE_MARGIN,
+    _SIGNATURE_MIN_PERCENTILE,
 )
 from query_router import _PRROLLMAN_CAVEAT
+
+
+def _default_kwargs(fn) -> dict:
+    """Pull a function's real keyword-argument defaults via introspection,
+    so audit parameters can never drift out of sync with the actual
+    threshold a call used -- same helper as query_router._default_kwargs,
+    duplicated locally rather than imported to avoid a report<->router
+    circular-import risk (query_router already imports from this module's
+    sibling compute_* modules, and report.py already imports one constant
+    from query_router itself)."""
+    return {
+        name: p.default
+        for name, p in inspect.signature(fn).parameters.items()
+        if p.default is not inspect.Parameter.empty
+    }
 
 HUSTLE_CSV = {
     "2025-26": "data/hustle_stats_2025_26.csv",
@@ -93,21 +117,28 @@ def _strip_note_prefix(caveat: str) -> str:
 
 def _hustle_section_data(player_name: str, hustle_df: pd.DataFrame) -> dict:
     checks = [
-        ("Deflections per 36",     deflections_per36(hustle_df),      "DEFLECTIONS_PER36",  []),
-        ("Contest volume per 36",  contest_profile_per36(hustle_df),  "TOTAL_CONTESTED_PER36", []),
-        ("Boxout conversion rate", boxout_conversion(hustle_df),      "BOXOUT_CONV_RATE", []),
-        ("Hustle IQ composite",    hustle_iq_composite(hustle_df),    "HUSTLE_IQ_COMPOSITE",
+        ("Deflections per 36",     deflections_per36,      deflections_per36(hustle_df),      "DEFLECTIONS_PER36",  []),
+        ("Contest volume per 36",  contest_profile_per36,  contest_profile_per36(hustle_df),  "TOTAL_CONTESTED_PER36", []),
+        ("Boxout conversion rate", boxout_conversion,      boxout_conversion(hustle_df),      "BOXOUT_CONV_RATE", []),
+        ("Hustle IQ composite",    hustle_iq_composite,    hustle_iq_composite(hustle_df),    "HUSTLE_IQ_COMPOSITE",
          ["NOT an official NBA stat — weighted z-score of def. loose balls + charges drawn."]),
     ]
 
     rows = []
-    for label, ranked, col, caveats in checks:
+    audit = []
+    for label, fn, ranked, col, caveats in checks:
         row = _player_row(ranked, player_name)
+        intent = fn.__name__
+        parameters = _default_kwargs(fn)
         if row is None:
             rows.append({
                 "label": label, "qualified": False,
                 "text": "Insufficient sample this season (does not clear the qualification floor).",
                 "caveats": [], "value": None, "better": None,
+            })
+            audit.append({
+                "intent": intent, "parameters": parameters,
+                "qualifying_pool_size": len(ranked), "routing_method": "deterministic",
             })
             continue
         rank = _rank_of(ranked, player_name)
@@ -117,8 +148,12 @@ def _hustle_section_data(player_name: str, hustle_df: pd.DataFrame) -> dict:
             "caveats": caveats,
             "value": float(row[col]), "better": "higher",
         })
+        audit.append({
+            "intent": intent, "parameters": parameters,
+            "qualifying_pool_size": len(ranked), "routing_method": "deterministic",
+        })
 
-    return {"title": "Hustle / Activity Profile", "rows": rows}
+    return {"title": "Hustle / Activity Profile", "rows": rows, "audit": audit}
 
 
 def _shot_suppression_section_data(player_name: str, season: str) -> dict:
@@ -128,20 +163,29 @@ def _shot_suppression_section_data(player_name: str, season: str) -> dict:
             "label": "Shot suppression", "qualified": False,
             "text": f"No shot-defense data file mapping available for season {season}.",
             "caveats": [], "value": None, "better": None,
-        }]}
+        }], "audit": [None]}
 
     rows = []
+    audit = []
+    shot_suppression_defaults = _default_kwargs(shot_suppression)
     for category in ("Overall", "3 Pointers", "Less Than 6Ft"):
         df = pd.read_csv(csv_map[category])
         ranked = shot_suppression(df, category=category)
         row = _player_row(ranked, player_name)
         label = "Rim" if category == "Less Than 6Ft" else category
+        audit_entry = {
+            "intent": "shot_suppression",
+            "parameters": {**shot_suppression_defaults, "category": category},
+            "qualifying_pool_size": len(ranked),
+            "routing_method": "deterministic",
+        }
         if row is None:
             rows.append({
                 "label": label, "qualified": False,
                 "text": "Insufficient sample this season (below minimum defended FGA).",
                 "caveats": [], "value": None, "better": None,
             })
+            audit.append(audit_entry)
             continue
         rank = _rank_of(ranked, player_name)
         pm = row["PCT_PLUSMINUS"]
@@ -157,21 +201,30 @@ def _shot_suppression_section_data(player_name: str, season: str) -> dict:
             # lower PCT_PLUSMINUS = opponents shoot worse than normal = better defense
             "value": float(pm), "better": "lower",
         })
+        audit.append(audit_entry)
 
-    return {"title": "Shot Suppression", "rows": rows}
+    return {"title": "Shot Suppression", "rows": rows, "audit": audit}
 
 
 def _defense_playtype_section_data(player_name: str, season: str) -> dict:
     rows = []
+    audit = []
     for category in _DEF_PLAYTYPE_CATEGORIES:
         ranked = playtype_defense(category)
         row = _player_row(ranked, player_name)
+        audit_entry = {
+            "intent": "playtype_defense",
+            "parameters": {"play_type": category, "min_poss": _DEF_PLAYTYPE_DEFAULT_MIN_POSS[category]},
+            "qualifying_pool_size": len(ranked),
+            "routing_method": "deterministic",
+        }
         if row is None:
             rows.append({
                 "label": category, "qualified": False,
                 "text": f"Insufficient sample for {category} defense this season.",
                 "caveats": [], "value": None, "better": None,
             })
+            audit.append(audit_entry)
             continue
         rank = _rank_of(ranked, player_name)
         poss = int(row["POSS"])
@@ -186,21 +239,34 @@ def _defense_playtype_section_data(player_name: str, season: str) -> dict:
             # lower PPP allowed = better defense
             "value": float(row["PPP"]), "better": "lower",
         })
+        audit.append(audit_entry)
 
-    return {"title": "Defensive Play-Type Profile", "rows": rows}
+    return {"title": "Defensive Play-Type Profile", "rows": rows, "audit": audit}
 
 
 def _offense_playtype_section_data(player_name: str, season: str) -> dict:
     rows = []
+    audit = []
     for category in _OFF_PLAYTYPE_CATEGORIES:
         ranked = playtype_offense(category)
         row = _player_row(ranked, player_name)
+        audit_entry = {
+            "intent": "playtype_offense",
+            "parameters": {
+                "play_type": category,
+                "min_poss_per_game": _OFF_PLAYTYPE_DEFAULT_MIN_POSS[category],
+                "min_total_poss": _OFF_PLAYTYPE_MIN_TOTAL_POSS,
+            },
+            "qualifying_pool_size": len(ranked),
+            "routing_method": "deterministic",
+        }
         if row is None:
             rows.append({
                 "label": category, "qualified": False,
                 "text": f"Insufficient sample for {category} offense this season.",
                 "caveats": [], "value": None, "better": None,
             })
+            audit.append(audit_entry)
             continue
         rank = _rank_of(ranked, player_name)
         poss_per_game = row["POSS"]
@@ -237,8 +303,9 @@ def _offense_playtype_section_data(player_name: str, season: str) -> dict:
             "caveats": caveats,
             "value": float(row["PPP"]), "better": better,
         })
+        audit.append(audit_entry)
 
-    return {"title": "Offensive Play-Type Profile", "rows": rows}
+    return {"title": "Offensive Play-Type Profile", "rows": rows, "audit": audit}
 
 
 def _drive_efficiency_section_data(player_name: str, season: str) -> dict:
@@ -247,17 +314,26 @@ def _drive_efficiency_section_data(player_name: str, season: str) -> dict:
             "label": "Drives", "qualified": False,
             "text": f"No drive-tracking data available for season {season}.",
             "caveats": [], "value": None, "better": None,
-        }]}
+        }], "audit": [None]}
 
     ranked = drive_efficiency()
     row = _player_row(ranked, player_name)
+    audit_entry = {
+        "intent": "drive_efficiency",
+        "parameters": {
+            "min_drives_per_game": _DRIVE_MIN_DRIVES_PER_GAME,
+            "min_total_drives": _DRIVE_MIN_TOTAL_DRIVES,
+        },
+        "qualifying_pool_size": len(ranked),
+        "routing_method": "deterministic",
+    }
 
     if row is None:
         return {"title": "Drive Efficiency", "rows": [{
             "label": "Drives", "qualified": False,
             "text": "Insufficient sample for drive efficiency this season.",
             "caveats": [], "value": None, "better": None,
-        }]}
+        }], "audit": [audit_entry]}
 
     rank = _rank_of(ranked, player_name)
     sentence = format_drive_efficiency_answer(row, season)
@@ -276,7 +352,7 @@ def _drive_efficiency_section_data(player_name: str, season: str) -> dict:
         ),
         "caveats": caveats,
         "value": float(row["PTS_PER_DRIVE"]), "better": "higher",
-    }]}
+    }], "audit": [audit_entry]}
 
 
 def _signature_play_type_section_data(player_name: str, season: str) -> dict:
@@ -285,16 +361,25 @@ def _signature_play_type_section_data(player_name: str, season: str) -> dict:
             "label": "Signature", "qualified": False,
             "text": f"No play-type data available for season {season}.",
             "caveats": [], "value": None, "better": None,
-        }]}
+        }], "audit": [None]}
 
     result = signature_play_type(player_name)
+    audit_entry = {
+        "intent": "signature_play_type",
+        "parameters": {
+            "tie_margin": _SIGNATURE_TIE_MARGIN,
+            "min_percentile": _SIGNATURE_MIN_PERCENTILE,
+        },
+        "qualifying_pool_size": len(result["categories"]),
+        "routing_method": "deterministic",
+    }
 
     if not result["categories"]:
         return {"title": "Signature Play Type", "rows": [{
             "label": "Signature", "qualified": False,
             "text": "Insufficient sample — doesn't qualify for any offensive play-type category this season.",
             "caveats": [], "value": None, "better": None,
-        }]}
+        }], "audit": [audit_entry]}
 
     sentence = format_signature_play_type_answer(result)
 
@@ -306,7 +391,7 @@ def _signature_play_type_section_data(player_name: str, season: str) -> dict:
             "label": "Signature", "qualified": False,
             "text": sentence,
             "caveats": [], "value": None, "better": None,
-        }]}
+        }], "audit": [audit_entry]}
 
     top = result["categories"][0]
     return {"title": "Signature Play Type", "rows": [{
@@ -314,7 +399,7 @@ def _signature_play_type_section_data(player_name: str, season: str) -> dict:
         "text": sentence,
         "caveats": [],
         "value": float(top["percentile"]), "better": "higher",
-    }]}
+    }], "audit": [audit_entry]}
 
 
 def _gap_section_data(player_name: str, hustle_df: pd.DataFrame, season: str) -> dict:
@@ -324,11 +409,17 @@ def _gap_section_data(player_name: str, hustle_df: pd.DataFrame, season: str) ->
             "label": "Gap", "qualified": False,
             "text": f"No shot-defense data available for season {season}.",
             "caveats": [], "value": None, "better": None,
-        }]}
+        }], "audit": [None]}
 
     defend_df = pd.read_csv(csv_map["Overall"])
     ranked = hustle_vs_suppression_gap(hustle_df, defend_df)
     row = _player_row(ranked, player_name)
+    audit_entry = {
+        "intent": "hustle_vs_suppression_gap",
+        "parameters": _default_kwargs(hustle_vs_suppression_gap),
+        "qualifying_pool_size": len(ranked),
+        "routing_method": "deterministic",
+    }
 
     if row is None:
         return {"title": "Hustle-vs-Suppression Gap", "rows": [{
@@ -338,7 +429,7 @@ def _gap_section_data(player_name: str, hustle_df: pd.DataFrame, season: str) ->
                 "(does not clear both the hustle and shot-suppression qualification floors)."
             ),
             "caveats": [], "value": None, "better": None,
-        }]}
+        }], "audit": [audit_entry]}
 
     gap = row["GAP"]
     position = row["PLAYER_POSITION"]
@@ -390,7 +481,7 @@ def _gap_section_data(player_name: str, hustle_df: pd.DataFrame, season: str) ->
     return {"title": "Hustle-vs-Suppression Gap", "rows": [{
         "label": "Gap", "qualified": True, "text": text, "caveats": caveats,
         "value": float(gap), "better": None,
-    }]}
+    }], "audit": [audit_entry]}
 
 
 def _yoy_section_data(player_name: str, current_df: pd.DataFrame, prior_df: pd.DataFrame | None) -> dict:
@@ -399,10 +490,16 @@ def _yoy_section_data(player_name: str, current_df: pd.DataFrame, prior_df: pd.D
             "label": "Deflections/36 trend", "qualified": False,
             "text": "No prior-season data file available for comparison.",
             "caveats": [], "value": None, "better": None,
-        }]}
+        }], "audit": [None]}
 
     ranked = year_over_year_delta(current_df, prior_df, metric="deflections_per36")
     row = _player_row(ranked, player_name)
+    audit_entry = {
+        "intent": "year_over_year_delta",
+        "parameters": {**_default_kwargs(year_over_year_delta), "metric": "deflections_per36"},
+        "qualifying_pool_size": len(ranked),
+        "routing_method": "deterministic",
+    }
 
     if row is None:
         return {"title": "Year-Over-Year Trend", "rows": [{
@@ -413,7 +510,7 @@ def _yoy_section_data(player_name: str, current_df: pd.DataFrame, prior_df: pd.D
                 "didn't clear the minutes/games floor both show up as no match here)."
             ),
             "caveats": [], "value": None, "better": None,
-        }]}
+        }], "audit": [audit_entry]}
 
     delta = row["DELTA"]
     direction = "up" if delta > 0 else "down" if delta < 0 else "unchanged"
@@ -426,7 +523,7 @@ def _yoy_section_data(player_name: str, current_df: pd.DataFrame, prior_df: pd.D
         "caveats": [],
         # bigger improvement (more positive DELTA) is unambiguously "better" here
         "value": float(delta), "better": "higher",
-    }]}
+    }], "audit": [audit_entry]}
 
 
 def generate_scouting_report_data(player_name: str, season: str = "2025-26") -> dict:
@@ -511,7 +608,12 @@ def compare_players_data(player_a: str, player_b: str, season: str = "2025-26") 
                 "b": row_b,
                 "winner": _row_winner(row_a, row_b),
             })
-        sections.append({"title": section_a["title"], "rows": rows})
+        # audit reflects the qualification thresholds/pool for this section's
+        # metric(s), which are the same regardless of which player is being
+        # looked up (both players are ranked against the same computed pool)
+        # -- section_a's audit is used as the single source, not recomputed
+        # per player.
+        sections.append({"title": section_a["title"], "rows": rows, "audit": section_a["audit"]})
 
     return {
         "player_a": player_a, "player_b": player_b,

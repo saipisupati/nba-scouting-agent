@@ -5,6 +5,8 @@ import time
 from typing import Optional
 import pandas as pd
 import requests
+import inspect
+
 from compute_defense import (
     deflections_per36,
     contest_profile_per36,
@@ -16,6 +18,7 @@ from compute_defense import (
     year_over_year_delta,
     _YOY_METRIC_MAP,
     SMALL_SAMPLE_THRESHOLD,
+    _PLAYTYPE_DEFAULT_MIN_POSS,
 )
 from compute_offense import (
     playtype_offense,
@@ -24,6 +27,12 @@ from compute_offense import (
     format_drive_efficiency_answer,
     signature_play_type,
     format_signature_play_type_answer,
+    _PLAYTYPE_DEFAULT_MIN_POSS as _PLAYTYPE_OFFENSE_DEFAULT_MIN_POSS,
+    _MIN_TOTAL_POSS as _PLAYTYPE_OFFENSE_MIN_TOTAL_POSS,
+    _MIN_DRIVES_PER_GAME as _DRIVE_MIN_DRIVES_PER_GAME,
+    _MIN_TOTAL_DRIVES as _DRIVE_MIN_TOTAL_DRIVES,
+    _SIGNATURE_TIE_MARGIN,
+    _SIGNATURE_MIN_PERCENTILE,
 )
 from compute_college import (
     college_player_lookup,
@@ -36,7 +45,20 @@ from compute_college import (
     format_youth_adjusted_leaderboard_answer,
     _load as _load_college,
     _LEADERBOARD_LABEL as _COLLEGE_LEADERBOARD_METRICS,
+    _HIGH_USAGE_FLOOR as _COLLEGE_HIGH_USAGE_FLOOR,
 )
+
+
+def _default_kwargs(fn) -> dict:
+    """Pull a function's real keyword-argument defaults via introspection,
+    so audit.parameters can never drift out of sync with the actual
+    threshold a function call used -- reading the live default off the
+    function object itself rather than hand-copying the number here."""
+    return {
+        name: p.default
+        for name, p in inspect.signature(fn).parameters.items()
+        if p.default is not inspect.Parameter.empty
+    }
 
 OUT_OF_SCOPE_MSG = (
     "I don't have data to answer that — this tool covers "
@@ -951,11 +973,14 @@ def route(
     func_name = routing.get("function")
     sort_col = routing.get("sort_col")
 
+    params: dict = {}
+
     try:
         if func_name == "deflections_per36":
             result = deflections_per36(df)
             top = result.iloc[0]
             answer = _format_deflections(top, season_label)
+            params = _default_kwargs(deflections_per36)
 
         elif func_name == "contest_profile_per36":
             result = contest_profile_per36(df)
@@ -965,16 +990,19 @@ def route(
                 result = result.sort_values("CONTESTED_2PT_PER36", ascending=False).reset_index(drop=True)
             top = result.iloc[0]
             answer = _format_contest(top, sort_col, season_label)
+            params = {**_default_kwargs(contest_profile_per36), "sort_col": sort_col}
 
         elif func_name == "boxout_conversion":
             result = boxout_conversion(df)
             top = result.iloc[0]
             answer = _format_boxout(top, season_label)
+            params = _default_kwargs(boxout_conversion)
 
         elif func_name == "hustle_iq_composite":
             result = hustle_iq_composite(df)
             top = result.iloc[0]
             answer = _format_hustle_iq(top, season_label)
+            params = _default_kwargs(hustle_iq_composite)
 
         elif func_name == "shot_suppression":
             category = sort_col if sort_col in ("Overall", "3 Pointers", "2 Pointers", "Less Than 6Ft") else "Overall"
@@ -988,6 +1016,7 @@ def route(
             result = shot_suppression(defend_df, category=category)
             top = result.iloc[0]
             answer = _format_shot_suppression(top, category, season_label)
+            params = {**_default_kwargs(shot_suppression), "category": category}
 
         elif func_name == "hustle_vs_suppression_gap":
             defend_df = pd.read_csv("data/shot_defense_overall_2025_26.csv")
@@ -996,6 +1025,7 @@ def route(
                 result = result.sort_values("GAP", ascending=True).reset_index(drop=True)
             top = result.iloc[0]
             answer = _format_gap(top, season_label)
+            params = {**_default_kwargs(hustle_vs_suppression_gap), "sort": sort_col or "positive"}
 
         elif func_name == "playtype_defense":
             play_type = sort_col  # sort_col carries the play_type name for this function
@@ -1009,6 +1039,7 @@ def route(
             result = playtype_defense(play_type)
             top = result.iloc[0]
             answer = _format_playtype(top, play_type, season_label)
+            params = {"play_type": play_type, "min_poss": _PLAYTYPE_DEFAULT_MIN_POSS[play_type]}
 
         elif func_name == "playtype_offense":
             play_type = sort_col  # sort_col carries the play_type name
@@ -1020,11 +1051,20 @@ def route(
             _gp_rows = _raw[_raw["PLAYER_NAME"] == top["PLAYER_NAME"]]["GP"]
             total_poss = float(top["POSS"] * _gp_rows.values[0]) if not _gp_rows.empty else None
             answer = format_playtype_offense_answer(top, play_type, season_label, total_poss=total_poss)
+            params = {
+                "play_type": play_type,
+                "min_poss_per_game": _PLAYTYPE_OFFENSE_DEFAULT_MIN_POSS[play_type],
+                "min_total_poss": _PLAYTYPE_OFFENSE_MIN_TOTAL_POSS,
+            }
 
         elif func_name == "drive_efficiency":
             result = drive_efficiency()
             top = result.iloc[0]
             answer = format_drive_efficiency_answer(top, season_label)
+            params = {
+                "min_drives_per_game": _DRIVE_MIN_DRIVES_PER_GAME,
+                "min_total_drives": _DRIVE_MIN_TOTAL_DRIVES,
+            }
 
         elif func_name == "signature_play_type":
             # sort_col carries the player name, supplied by the LLM fallback
@@ -1071,6 +1111,15 @@ def route(
                 "answer": answer,
                 "resolved_player_name": sig_result["player_name"],
                 "table": sig_result["categories"],
+                "audit": {
+                    "intent": func_name,
+                    "parameters": {
+                        "tie_margin": _SIGNATURE_TIE_MARGIN,
+                        "min_percentile": _SIGNATURE_MIN_PERCENTILE,
+                    },
+                    "qualifying_pool_size": len(sig_result["categories"]),
+                    "routing_method": method,
+                },
             }
 
         elif func_name == "college_player_lookup":
@@ -1117,6 +1166,12 @@ def route(
                 "function_matched": func_name,
                 "answer": answer,
                 "table": [row.to_dict()],
+                "audit": {
+                    "intent": func_name,
+                    "parameters": {},
+                    "qualifying_pool_size": None,
+                    "routing_method": method,
+                },
             }
 
         elif func_name == "college_leaderboard":
@@ -1124,17 +1179,20 @@ def route(
             result = college_leaderboard(metric)
             top = result.iloc[0]
             answer = format_college_leaderboard_answer(top, metric)
+            params = {"metric": metric}
 
         elif func_name == "youth_adjusted_leaderboard":
             metric = sort_col if sort_col in _COLLEGE_LEADERBOARD_METRICS else "PTS"
             result = youth_adjusted_leaderboard(metric)
             top = result.iloc[0]
             answer = format_youth_adjusted_leaderboard_answer(top, metric)
+            params = {"metric": metric}
 
         elif func_name == "college_efficiency_volume":
             result = college_efficiency_volume()
             top = result.iloc[0]
             answer = format_college_efficiency_volume_answer(result)
+            params = {"min_usg_pct": _COLLEGE_HIGH_USAGE_FLOOR}
 
         elif func_name == "year_over_year_delta":
             # sort_col encodes "metric:direction" e.g. "deflections_per36:decline"
@@ -1165,6 +1223,11 @@ def route(
                 result = result.sort_values("DELTA", ascending=True).reset_index(drop=True)
             top = result.iloc[0]
             answer = _format_yoy(top, metric, direction, season_label, prior_label)
+            params = {
+                **_default_kwargs(year_over_year_delta),
+                "metric": metric,
+                "direction": direction,
+            }
 
         else:
             return {
@@ -1188,4 +1251,10 @@ def route(
         "function_matched": func_name,
         "answer": answer,
         "table": result.head(25).to_dict(orient="records"),
+        "audit": {
+            "intent": func_name,
+            "parameters": params,
+            "qualifying_pool_size": len(result),
+            "routing_method": method,
+        },
     }

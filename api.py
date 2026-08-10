@@ -143,6 +143,14 @@ class QueryRequest(BaseModel):
     question: str
 
 
+class AuditInfo(BaseModel):
+    intent: Optional[str] = None
+    parameters: dict = {}
+    qualifying_pool_size: Optional[int] = None
+    routing_method: Optional[str] = None
+    data_as_of: Optional[str] = None
+
+
 class QueryResponse(BaseModel):
     question: str
     response_type: str   # "answer" | "out_of_scope" | "needs_clarification" | "error"
@@ -151,6 +159,7 @@ class QueryResponse(BaseModel):
     method: Optional[str]
     table: Optional[list[dict]]
     data_as_of: Optional[str] = None
+    audit: Optional[AuditInfo] = None
 
 
 class ReportRequest(BaseModel):
@@ -170,6 +179,7 @@ class ReportSectionRow(BaseModel):
 class ReportSection(BaseModel):
     title: str
     rows: list[ReportSectionRow]
+    audit: list[Optional[AuditInfo]] = []
 
 
 class ReportResponse(BaseModel):
@@ -195,6 +205,7 @@ class CompareRow(BaseModel):
 class CompareSection(BaseModel):
     title: str
     rows: list[CompareRow]
+    audit: list[Optional[AuditInfo]] = []
 
 
 class CompareResponse(BaseModel):
@@ -230,6 +241,17 @@ def _response_type(result: dict) -> str:
     return "answer"
 
 
+def _with_data_as_of(audit: Optional[dict], data_as_of: Optional[str]) -> Optional[dict]:
+    """Stamp data_as_of onto an audit dict built by query_router/report --
+    those modules have no knowledge of data_manifest.json (that's api.py's
+    concern alone, same as the existing top-level data_as_of field), so the
+    freshness timestamp is merged in here rather than threaded through
+    every compute/router function signature."""
+    if audit is None:
+        return None
+    return {**audit, "data_as_of": data_as_of}
+
+
 # ── endpoints ─────────────────────────────────────────────────────────────────
 
 @app.get("/health")
@@ -255,6 +277,7 @@ def query(req: QueryRequest):
     )
 
     table = _sanitize(result["table"]) if result.get("table") else None
+    data_as_of = _data_as_of()
 
     return QueryResponse(
         question=result["question"],
@@ -263,20 +286,27 @@ def query(req: QueryRequest):
         function_matched=result.get("function_matched"),
         method=result.get("method"),
         table=table,
-        data_as_of=_data_as_of(),
+        data_as_of=data_as_of,
+        audit=_with_data_as_of(result.get("audit"), data_as_of),
     )
 
 
 @app.post("/report", response_model=ReportResponse)
 def report(req: ReportRequest):
     data = generate_scouting_report_data(req.player_name, req.season)
-    return ReportResponse(**data, data_as_of=_data_as_of())
+    data_as_of = _data_as_of()
+    for section in data["sections"]:
+        section["audit"] = [_with_data_as_of(a, data_as_of) for a in section.get("audit", [])]
+    return ReportResponse(**data, data_as_of=data_as_of)
 
 
 @app.post("/compare", response_model=CompareResponse)
 def compare(req: CompareRequest):
     data = compare_players_data(req.player_a, req.player_b, req.season)
-    return CompareResponse(**data, data_as_of=_data_as_of())
+    data_as_of = _data_as_of()
+    for section in data["sections"]:
+        section["audit"] = [_with_data_as_of(a, data_as_of) for a in section.get("audit", [])]
+    return CompareResponse(**data, data_as_of=data_as_of)
 
 
 # ── serve frontend ────────────────────────────────────────────────────────────
