@@ -1,160 +1,160 @@
 {
-  "generated_at": "2026-08-10T05:59:00.375646+00:00",
+  "generated_at": "2026-08-10T22:06:15.169073+00:00",
   "files": {
-    "hustle_stats_2025_26.csv": {
+    "data/hustle_stats_2025_26.csv": {
       "source_endpoint": "LeagueHustleStatsPlayer",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 581
     },
-    "hustle_stats_2024_25.csv": {
+    "data/hustle_stats_2024_25.csv": {
       "source_endpoint": "LeagueHustleStatsPlayer",
       "season": "2024-25",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 567
     },
-    "shot_defense_overall_2025_26.csv": {
+    "data/shot_defense_overall_2025_26.csv": {
       "source_endpoint": "LeagueDashPtDefend (Overall)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 581
     },
-    "shot_defense_3pt_2025_26.csv": {
+    "data/shot_defense_3pt_2025_26.csv": {
       "source_endpoint": "LeagueDashPtDefend (3 Pointers)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 576
     },
-    "shot_defense_2pt_2025_26.csv": {
+    "data/shot_defense_2pt_2025_26.csv": {
       "source_endpoint": "LeagueDashPtDefend (2 Pointers)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 579
     },
-    "shot_defense_rim_2025_26.csv": {
+    "data/shot_defense_rim_2025_26.csv": {
       "source_endpoint": "LeagueDashPtDefend (Less Than 6Ft)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 578
     },
-    "drives_2025_26.csv": {
+    "data/drives_2025_26.csv": {
       "source_endpoint": "LeagueDashPtStats (Drives)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 582
     },
-    "draft_class_2026.csv": {
+    "data/draft_class_2026.csv": {
       "source_endpoint": "sports-reference.com/cbb (via pull_2026_draft_class.py)",
       "season": "2025-26 college season",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 60
     },
-    "playtype_defense_isolation_2025_26.csv": {
+    "data/playtype_defense_isolation_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Defensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 394
     },
-    "playtype_offense_isolation_2025_26.csv": {
+    "data/playtype_offense_isolation_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Offensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 284
     },
-    "playtype_defense_prballhandler_2025_26.csv": {
+    "data/playtype_defense_prballhandler_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Defensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 415
     },
-    "playtype_offense_prballhandler_2025_26.csv": {
+    "data/playtype_offense_prballhandler_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Offensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 347
     },
-    "playtype_defense_prrollman_2025_26.csv": {
+    "data/playtype_defense_prrollman_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Defensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 386
     },
-    "playtype_offense_prrollman_2025_26.csv": {
+    "data/playtype_offense_prrollman_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Offensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 269
     },
-    "playtype_defense_postup_2025_26.csv": {
+    "data/playtype_defense_postup_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Defensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 329
     },
-    "playtype_offense_postup_2025_26.csv": {
+    "data/playtype_offense_postup_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Offensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 149
     },
-    "playtype_defense_spotup_2025_26.csv": {
+    "data/playtype_defense_spotup_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Defensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 419
     },
-    "playtype_offense_spotup_2025_26.csv": {
+    "data/playtype_offense_spotup_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Offensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 400
     },
-    "playtype_defense_handoff_2025_26.csv": {
+    "data/playtype_defense_handoff_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Defensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 313
     },
-    "playtype_offense_handoff_2025_26.csv": {
+    "data/playtype_offense_handoff_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Offensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 276
     },
-    "playtype_defense_cut_2025_26.csv": {
+    "data/playtype_defense_cut_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Defensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 0
     },
-    "playtype_offense_cut_2025_26.csv": {
+    "data/playtype_offense_cut_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Offensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 339
     },
-    "playtype_defense_offscreen_2025_26.csv": {
+    "data/playtype_defense_offscreen_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Defensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 317
     },
-    "playtype_offense_offscreen_2025_26.csv": {
+    "data/playtype_offense_offscreen_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Offensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 215
     },
-    "playtype_defense_transition_2025_26.csv": {
+    "data/playtype_defense_transition_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Defensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 0
     },
-    "playtype_offense_transition_2025_26.csv": {
+    "data/playtype_offense_transition_2025_26.csv": {
       "source_endpoint": "SynergyPlayTypes (Offensive)",
       "season": "2025-26",
-      "extracted_at": "2026-08-10T05:59:00.375646+00:00",
+      "extracted_at": "2026-08-10T22:06:15.169073+00:00",
       "row_count": 409
     }
   }
