@@ -29,6 +29,7 @@ _SOURCES = [
     ("data/shot_defense_2pt_2025_26.csv", "LeagueDashPtDefend (2 Pointers)", "2025-26"),
     ("data/shot_defense_rim_2025_26.csv", "LeagueDashPtDefend (Less Than 6Ft)", "2025-26"),
     ("data/drives_2025_26.csv", "LeagueDashPtStats (Drives)", "2025-26"),
+    ("data/usage_context_2025_26.csv", "LeagueDashPlayerStats (Advanced)", "2025-26"),
     ("data/draft_class_2026.csv", "sports-reference.com/cbb (via pull_2026_draft_class.py)", "2025-26 college season"),
 ]
 

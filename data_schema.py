@@ -66,6 +66,13 @@ DRIVES_COLUMNS = {
     "DRIVE_FG_PCT", "DRIVE_PASSES_PCT", "DRIVE_AST_PCT", "DRIVE_TOV_PCT",
 }
 
+# ── usage_context_2025_26.csv ─────────────────────────────────────────────────
+# Read by: per-team USG_PCT ranking context (identifying a roster's primary
+# usage player relative to a given reference player).
+USAGE_CONTEXT_COLUMNS = {
+    "PLAYER_NAME", "TEAM_ABBREVIATION", "USG_PCT",
+}
+
 # ── draft_class_2026.csv ──────────────────────────────────────────────────────
 # Read by: college_player_lookup, college_leaderboard, college_efficiency_volume,
 # youth_adjusted_leaderboard (compute_college.py).

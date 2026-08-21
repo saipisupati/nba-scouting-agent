@@ -16,7 +16,7 @@ from query_router import route
 from report import generate_scouting_report_data, compare_players_data
 from data_schema import (
     HUSTLE_COLUMNS, SHOT_DEFENSE_COLUMNS, PLAYTYPE_COLUMNS,
-    DRIVES_COLUMNS, DRAFT_CLASS_COLUMNS, missing_columns,
+    DRIVES_COLUMNS, DRAFT_CLASS_COLUMNS, USAGE_CONTEXT_COLUMNS, missing_columns,
 )
 
 
@@ -48,6 +48,7 @@ def _schema_check_targets() -> list[tuple[str, set[str]]]:
         ("data/shot_defense_2pt_2025_26.csv", SHOT_DEFENSE_COLUMNS["2 Pointers"]),
         ("data/shot_defense_rim_2025_26.csv", SHOT_DEFENSE_COLUMNS["Less Than 6Ft"]),
         ("data/drives_2025_26.csv", DRIVES_COLUMNS),
+        ("data/usage_context_2025_26.csv", USAGE_CONTEXT_COLUMNS),
         ("data/draft_class_2026.csv", DRAFT_CLASS_COLUMNS),
     ]
     for suffix in _PLAYTYPE_FILES.values():
