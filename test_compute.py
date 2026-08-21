@@ -207,6 +207,15 @@ with patch("compute_offense.pd.read_csv", return_value=_roster_fixture):
     check(resolve_player_name("Caruso") == "Alex Caruso", "substring match ('Caruso') resolves to full name")
     check(resolve_player_name("Karuso") is None, "typo ('Karuso', not a substring of 'Caruso') does NOT resolve -- returns None, not a wrong guess")
 
+    # Accent-insensitive fallback: unaccented input against a roster name that
+    # carries real diacritics (the NBA API's actual PLAYER_NAME values do, e.g.
+    # "Nikola Jokić", "Kristaps Porziņģis") -- a typed or LLM-extracted question
+    # typically won't include the accent. Regression case for the bug found via
+    # feature_vector.py's reference-player lookup silently dropping Jokić.
+    check(resolve_player_name("Nikola Jokic") == "Nikola Jokić", "unaccented input resolves to the accented canonical roster name")
+    check(resolve_player_name("Jokic") == "Nikola Jokić", "unaccented substring match also resolves via the accent-insensitive fallback")
+    check(resolve_player_name("Nikola Jokić") == "Nikola Jokić", "already-accented exact input still resolves via the normal (non-fallback) path")
+
     try:
         resolve_player_name("Cameron")
         check(False, "ambiguous name ('Cameron' matches 2 players) should raise ValueError, not silently pick one")

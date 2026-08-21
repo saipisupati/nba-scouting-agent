@@ -18,7 +18,7 @@ for q in QUESTIONS:
         "https://api.groq.com/openai/v1/chat/completions",
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
         json={
-            "model": "llama-3.3-70b-versatile",
+            "model": "openai/gpt-oss-20b",  # see query_router.py's _llm_route for model-vetting notes
             "max_tokens": 256,
             "messages": [
                 {"role": "system", "content": _SYSTEM_PROMPT},

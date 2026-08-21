@@ -738,7 +738,20 @@ def _llm_route(question: str) -> dict:
         )
 
     payload = {
-        "model": "llama-3.3-70b-versatile",
+        # llama-3.3-70b-versatile was removed from Groq's catalog (confirmed
+        # via GET /openai/v1/models -- 404 model_not_found on every call).
+        # Replaced 2026-08-21 after vetting openai/gpt-oss-120b,
+        # openai/gpt-oss-20b, and qwen/qwen3.6-27b against this router's
+        # exact production contract (same payload shape, no response_format
+        # flag, same _SYSTEM_PROMPT, raw-JSON-after-fence-stripping parse).
+        # qwen/qwen3.6-27b was disqualified outright: it prepends a
+        # <think>...</think> reasoning block before the JSON, which this
+        # parser cannot handle. Both gpt-oss models scored 10/10 correct,
+        # strict-JSON classifications across 10 real routing questions
+        # (function/needs_clarification/out_of_scope, including ambiguous
+        # and out-of-scope cases) on a clean re-run; 20b was selected over
+        # 120b as the smaller/faster model with equal measured reliability.
+        "model": "openai/gpt-oss-20b",
         "max_tokens": 256,
         "messages": [
             {"role": "system", "content": _SYSTEM_PROMPT},

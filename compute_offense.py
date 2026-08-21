@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import unicodedata
+
 import pandas as pd
 
 # ── play type CSV paths ───────────────────────────────────────────────────────
@@ -426,12 +428,30 @@ def _apply_current_team(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def _strip_accents(s: str) -> str:
+    """Fold accented characters to their plain-ASCII equivalent (e.g.
+    "Jokić" -> "Jokic", "Porziņģis" -> "Porzingis") via Unicode NFKD
+    decomposition + dropping combining marks. Used only as a fallback
+    match in resolve_player_name -- see there for why."""
+    return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c))
+
+
 def resolve_player_name(name: str) -> str | None:
     """Case-insensitive substring match against the full NBA roster, same
     matching convention as compute_college.college_player_lookup (reused
     deliberately, not reimplemented, so the two lookups can't silently
     drift into different matching behavior). Returns the canonical
     PLAYER_NAME on a single match, or None if no player matches.
+
+    Falls back to an accent-insensitive match (both the input and the
+    roster names run through _strip_accents) when the exact match finds
+    nothing -- the NBA API's PLAYER_NAME values use real diacritics (e.g.
+    "Nikola Jokić", "Kristaps Porziņģis", "Dennis Schröder"), but a typed
+    or LLM-extracted question typically won't ("Nikola Jokic"). The
+    accent-insensitive pass only runs when the exact pass returns zero
+    matches, so it can't change behavior for any name that already
+    resolves today, and ambiguous-match detection applies identically to
+    both passes.
 
     Raises ValueError on an ambiguous match against more than one player,
     same rationale as college_player_lookup: silently picking the first
@@ -441,6 +461,12 @@ def resolve_player_name(name: str) -> str | None:
     roster = pd.read_csv(_ROSTER_CSV)
     name_lower = name.lower().strip()
     matches = roster[roster["PLAYER_NAME"].str.lower().str.contains(name_lower, regex=False)]
+
+    if matches.empty:
+        name_folded = _strip_accents(name_lower)
+        roster_folded = roster["PLAYER_NAME"].apply(lambda n: _strip_accents(n.lower()))
+        matches = roster[roster_folded.str.contains(name_folded, regex=False)]
+
     if matches.empty:
         return None
     resolved = matches["PLAYER_NAME"].unique()
