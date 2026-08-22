@@ -116,6 +116,42 @@ boundaries, or in which of these eight (if any) survive as a clean
 cluster. No downstream logic should assume these eight are correct until
 that validation step has run.
 
+### Real result (k-means on the 305-player feature matrix)
+
+The validation step above has now run (`feature_vector.py`, full output in
+`KMEANS_CLUSTERING_OUTPUT.txt`). The eight hypotheses above are kept for
+historical record; they are not what the data actually supports.
+
+- **No strongly-separated cluster structure at any k.** A k-means sweep
+  from k=3 through k=12 on the same standardized, median-imputed feature
+  matrix used for PCA found silhouette scores ranging from 0.096 (k=3,
+  the best of the sweep) down to 0.062 — well below the ~0.25 threshold
+  generally considered evidence of real cluster structure. Player style
+  in this feature space is closer to continuous than discretely
+  clustered.
+- **The best-available k=3 split produced three coarse groups, not eight
+  clean archetypes:** a "bigs" cluster (51 players — rim protection, box
+  outs, efficient finishing), a "high-usage/high-AST ball-handler"
+  cluster (108 players, over a third of the qualified population,
+  including both Jokić and SGA despite their different offensive
+  styles), and a weak, low-signal "everyone else" cluster (146 players,
+  minimal distinguishing features).
+- **The PC3 blend observed in the earlier PCA run holds under full
+  clustering too.** PCA's PC3 had mixed "primary shot creator" and
+  "offensive hub" together (both Jokić and SGA scored high on it despite
+  different styles); direct verification confirms Jokić and SGA land in
+  the same k-means cluster even when clustering on the full feature
+  space rather than just the top principal components. This isn't a
+  PC3-specific artifact — it's a genuine property of this feature set.
+- **Design implication:** the 8-archetype hypothesis is not supported as
+  a set of clean, nameable player types in this feature space. This does
+  **not** block the rest of the model — Layers 2-5 (SVD embedding,
+  Mahalanobis comps, orthogonal-projection gap scoring, gradient
+  sensitivity/ascent) all operate on continuous style vectors directly
+  and were never dependent on discrete archetype labels. The
+  8-archetype language should be treated as retired illustrative
+  framing, not a functional component of the model going forward.
+
 ## What this replaces / what it doesn't do
 
 This model does **not** predict how a specific player would perform on a
