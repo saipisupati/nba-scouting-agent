@@ -63,6 +63,12 @@ thing. This is the only mechanism by which this model ever names another
 player — always an existing player in the dataset, never a synthetic or
 invented one.
 
+Comps reflect playing style only, not position or physical size — there
+is no position/height/weight feature anywhere in this model, so two
+players can be styled similarly while being completely different builds
+(e.g. Chet Holmgren appearing in SGA's comp list despite the size
+difference).
+
 ### Layer 4: Team roster fingerprint + orthogonal-projection gap score
 
 A team's current roster is represented as a subspace of style-space
