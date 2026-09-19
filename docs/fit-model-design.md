@@ -301,8 +301,66 @@ outlier in percentile terms too (99.7th-percentile-equivalent on his
 most extreme axis), so an outlier reference can still distort
 nearest-neighbor distance even on a bounded 0-100 scale.
 
-**Status: promising, not yet production-trustworthy.** Before relying on
-this for anything user-facing, the two remaining failures need the same
-individual-case inspection the earlier z-scored failures got (raw
-percentile values per team, which specific rostered player is nearest)
-rather than being treated as solved by the aggregate 3-of-5 improvement.
+**Status at the 5-point spectrum: promising, not yet production-
+trustworthy.** The 3-of-5 result alone is not real verification — 5
+points, several hand-picked by a magnitude-screening heuristic, is not a
+statistical sample, and "CLE should beat CHI" is a basketball-intuition
+judgment call, not a checkable external fact. This was called out
+directly and correctly: before trusting this metric further, it needed
+to be checked against real, independently-computed data at league scale,
+not more hand-picked pairwise comparisons.
+
+### League-wide verification against real, independent data (2026-09-19)
+
+`layer4_team_groundtruth.py` builds `TEAM_RIM_DEFENSE_REAL`: a
+volume-weighted mean of real `PLUSMINUS` (rim shot defense, from
+`data/shot_defense_rim_2025_26.csv`) across each team's qualified
+rostered players — a genuine, independently-computed "how well does this
+team's actual personnel suppress rim shots" number, joined on the same
+current-roster `TEAM_ABBREVIATION` every other Layer 4 module already
+uses (not the raw CSV's `PLAYER_LAST_TEAM_ABBREVIATION`, which can be
+stale for a traded player — Donovan Clingan is on POR in this season's
+data, not CLE/CHI as used in the earlier illustrative diagnostics).
+
+This was correlated against the Layer-4 percentile-space coverage score
+for two reference players, across all 30 NBA teams (not one hand-picked
+pair):
+
+| Reference player | Pearson r (n=30) | Robustness check (excl. own team, n=29) |
+|---|---|---|
+| Chet Holmgren | **−0.4490** | −0.3274 |
+| Donovan Clingan | **−0.4027** | −0.4117 |
+
+Both correlations are in the expected direction (good real rim defense →
+higher coverage of an elite rim-protector reference) and moderate in
+strength — well above `layer4_subsets.py`'s own
+`WEAK_CORRELATION_THRESHOLD = 0.05` bar — and the effect **survives
+excluding each reference player's own roster** (the one data point that
+scores a trivial 100% by construction), ruling out the concern that the
+correlation is just an artifact of that mechanical case.
+
+**Caveat, stated directly, not hidden:** this check is not fully
+independent. `TEAM_RIM_DEFENSE_REAL` and one of `RIM_PROTECTION_TRIMMED`'s
+4 input features (`SHOT_SUPPRESSION_LESS_THAN_6FT`) are both built from
+the same underlying `PLUSMINUS` values in
+`data/shot_defense_rim_2025_26.csv` — at the player level for the
+coverage metric's own inputs, aggregated to team level for the
+ground-truth stat here. So this validates that the nearest-neighbor/
+percentile-transform *mechanism* correctly propagates a real signal from
+player-level data up to a sensible team-level result — it is not a fully
+external check against an unrelated outcome variable (that would require
+something like team defensive `NET_RATING`, not yet run).
+
+**Status, honestly: this is real, citable evidence that the
+percentile-space coverage metric works as intended for the
+rim_protection subset specifically** — a moderate, correctly-signed,
+robustness-checked correlation across the full league, not 5 anecdotes.
+It is not proof the whole Layer 4 approach is sound: this checks one
+capability subset against one partially-overlapping outcome proxy. The
+honest next steps, if this is pursued further: (1) run the same
+league-wide correlation check for the other 5 capability subsets
+(perimeter_defense, primary_shot_creation, playmaking, movement_scoring,
+pace_transition), each against its own appropriate ground-truth proxy,
+and (2) find a genuinely external outcome variable (e.g. team defensive
+`NET_RATING`) to check against, since the rim-protection check above
+shares one input feature with its own ground-truth stat.
