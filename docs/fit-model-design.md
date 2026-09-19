@@ -247,4 +247,62 @@ a percentile-rank-based coverage score instead of a Euclidean-distance
 ratio, or reporting raw untransformed distance without normalizing by
 the reference player's own magnitude (which is what ties the score to
 how extreme that specific player happens to be, the common thread across
-every failure mode found so far). This has not been built or tested yet.
+every failure mode found so far).
+
+Percentile-rank was chosen as the direction to test first, over raw
+unnormalized distance, because it is bounded and comparable by
+construction across features of different raw variance (the specific
+property the z-scored magnitude-normalization failure traced to), and
+because it matches this project's existing trust-vocabulary —
+`signature_play_type` already ranks players by `PERCENTILE`, and every
+Layer 4 diagnostic so far already explains its own findings in
+percentile terms because that is the unit a scout can act on directly
+("this roster's closest comp sits 35 percentile points below the query
+player"), unlike an opaque z-scored ratio.
+
+### Percentile-space redesign: real improvement, not a full fix
+
+`layer4_percentile.py` reruns the identical 7-point reference-player
+spectrum from the middle-band test, converting each
+`RIM_PROTECTION_TRIMMED` feature to a percentile rank (0-100 across the
+305 qualified players, via the same `(series < val).mean() * 100`
+formula already used elsewhere in this codebase for percentile
+printouts) before computing nearest-rostered-player coverage, instead of
+using z-scored distance normalized by the reference player's own
+magnitude.
+
+Two of the seven spectrum players (John Konchar, Jusuf Nurkić) could not
+be tested on this subset at all: both have a genuine missing value in
+one of the 4 `RIM_PROTECTION_TRIMMED` features (insufficient possessions
+in that specific defensive play-type category, per Layer 1's
+never-zero-fill-a-missing-category policy), so no percentile or
+z-scored vector can be computed for them — this is a real data-coverage
+limit of this specific 4-feature subset, not a bug in the percentile
+transform.
+
+Of the 5 players with complete data:
+
+| Player | z-scored verdict | Percentile-space verdict |
+|---|---|---|
+| Onyeka Okongwu | FAIL | **PASS** |
+| Nique Clifford | FAIL | FAIL |
+| Anthony Gill | FAIL | **PASS** |
+| Chet Holmgren | PASS | PASS |
+| Donovan Clingan | FAIL | FAIL |
+
+3 of 5 testable points pass in percentile space, versus 2 of 7 under the
+z-scored metric — a real improvement, and notably it fixed exactly the
+failure mode the metric was built to fix (Okongwu, the near-median
+outlier-collapse case, now passes). But it is **not a full fix**: Nique
+Clifford and Donovan Clingan still produce the wrong-direction ranking.
+Percentile rank removes the magnitude-normalization defect but does not
+by itself resolve every case — Clingan in particular remains an extreme
+outlier in percentile terms too (99.7th-percentile-equivalent on his
+most extreme axis), so an outlier reference can still distort
+nearest-neighbor distance even on a bounded 0-100 scale.
+
+**Status: promising, not yet production-trustworthy.** Before relying on
+this for anything user-facing, the two remaining failures need the same
+individual-case inspection the earlier z-scored failures got (raw
+percentile values per team, which specific rostered player is nearest)
+rather than being treated as solved by the aggregate 3-of-5 improvement.
