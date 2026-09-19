@@ -179,9 +179,72 @@ current limitation to be relaxed later.
 
 ## Implementation status
 
-Not yet built. Data pipeline prerequisite (`usage_context_2025_26.csv`) is
-already pulled and schema-validated as of 2026-08-21.
+Layer 1 (feature vectors, `feature_vector.py`), the PCA/k-means archetype
+validation above, and Layer 3 (Mahalanobis comps) are built. Layer 4
+(roster fingerprint + gap score) is built but **not validated as
+trustworthy** — see below. Layer 5 (gradient sensitivity/ascent) is not
+yet started.
 
-Next step: implement Layer 1 (feature vector construction) and run PCA
-against real player data to test whether the hypothesized archetypes
-actually emerge.
+### Layer 4 status: metric found unreliable, root cause identified, fix not yet built
+
+`roster_fit.py`'s original full-28-feature orthogonal-projection gap
+score failed its own basketball-sense check: CLE (two elite shot-blocking
+bigs, Mobley + Allen) scored *worse* Donovan Clingan coverage than CHI
+(no true center at all) — the opposite of basketball intuition
+(`TEAM_FIT_LAYER4_OUTPUT.txt`).
+
+`layer4_subsets.py` investigated by (a) validating each candidate feature
+against real `NET_RATING` before trusting it, (b) restricting the gap
+score to 6 named capability subsets instead of all 28 features at once,
+and (c) replacing the orthogonal-projection method with
+nearest-rostered-player distance, since subset dimensionality (2-7
+features) is smaller than a typical roster's qualified-player count,
+which makes the SVD-span method degenerate (every roster trivially spans
+a low-dimensional subset, forcing gap → 0 for any player against any
+team). None of these fixes resolved the CLE/CHI failure on their own:
+removing the single most outlier-distorting feature
+(`CONTESTED_SHOTS_PER36`) didn't fix it, and averaging over the roster's
+3 closest players instead of just the closest didn't either. A
+reference-sensitivity test found the ranking *did* flip correctly for
+Chet Holmgren (a less statistically extreme rim protector) — but a
+second, independently-picked median-range reference (Onyeka Okongwu)
+failed to replicate that pass, in a different way: his near-population-
+average z-scored vector has small magnitude by construction, which
+mechanically compresses `pct_covered` toward 0 for every team regardless
+of actual style similarity.
+
+**Follow-up diagnostic (`layer4_middleband.py`, run 2026-09-19):** tested
+whether a genuine "middle band" of reference-player vector magnitude
+exists where `pct_covered` behaves sensibly, by screening 270 qualified
+players' `RIM_PROTECTION_TRIMMED` magnitude and testing 7 points spanning
+the full range (1.46 to 5.00) against the same CLE > CHI basketball-sense
+check:
+
+| Player | Magnitude | CLE vs. CHI |
+|---|---|---|
+| Onyeka Okongwu | 1.46 | FAIL |
+| Nique Clifford | 2.00 | FAIL |
+| John Konchar | 2.75 | **PASS** |
+| Anthony Gill | 3.42 | FAIL |
+| Chet Holmgren | 3.99 | **PASS** |
+| Jusuf Nurkić | 4.16 | FAIL |
+| Donovan Clingan | 5.00 | FAIL |
+
+Only 2 of 7 points pass, and they don't cluster: 2.75 and 3.99 are
+separated by two failing points (3.42, 4.16) in between. **This rules out
+the "middle band" hypothesis** — magnitude alone does not explain which
+reference players produce a sensible ranking and which don't. The
+Holmgren pass was not evidence of a trustworthy magnitude range; it was
+close to a coin flip.
+
+**Conclusion:** `pct_covered`, as currently defined (nearest-rostered-
+player Euclidean distance in z-scored feature space, expressed as a
+percentage of the reference player's own vector magnitude), is not a
+reliable metric at any point tested so far. The problem is in the metric
+itself, not in reference-player selection or feature-subset choice. Next
+step is a genuinely different metric — candidates worth testing:
+a percentile-rank-based coverage score instead of a Euclidean-distance
+ratio, or reporting raw untransformed distance without normalizing by
+the reference player's own magnitude (which is what ties the score to
+how extreme that specific player happens to be, the common thread across
+every failure mode found so far). This has not been built or tested yet.
