@@ -217,6 +217,8 @@ A second finding surfaced while re-verifying the fix, and it's worth stating on 
 
 **Requirements:** Python 3.9+. Install pinned dependencies from `requirements.txt`.
 
+**Always activate `.venv` before running anything.** The base/anaconda `python3` on PATH is broken for this project — it has NumPy 2.0.2 installed alongside pandas/scikit-learn built against NumPy 1.x, which crashes on import with a confusing `_ARRAY_API not found` traceback. If you see that error, you forgot to activate `.venv`.
+
 ```bash
 # Set up
 python3 -m venv .venv && source .venv/bin/activate
