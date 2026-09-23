@@ -13,3 +13,6 @@ venv/
 
 # Exploratory output images (not part of the shipped product)
 *.png
+
+# Private notes (not for public repo)
+docs/chris-mast-call-prep.md
