@@ -1,0 +1,267 @@
+Building feature matrix from Layer 1 axes (qualification floor: MIN>=15, GP>=40)...
+Feature matrix: 305 qualified players
+
+######################################################################
+# TEAM 1 OF 3: OKC -- balanced, defensively versatile roster
+# (baseline case from the original Layer 4 run)
+######################################################################
+
+======================================================================
+ROSTER SUBSPACE — OKC
+======================================================================
+  Qualified rostered players (12): Aaron Wiggins, Ajay Mitchell, Alex Caruso, Cason Wallace, Chet Holmgren, Isaiah Hartenstein, Isaiah Joe, Jared McCain, Jaylin Williams, Kenrich Williams, Luguentz Dort, Shai Gilgeous-Alexander
+  Numerical rank of subspace: 12 (out of 12 contributing player vectors)
+
+======================================================================
+GAP SCORES — OKC
+======================================================================
+  Sanity check: a OKC player already on the roster should score a
+  near-zero gap (they ARE part of the subspace). A stylistically
+  distinct outside player should score a larger gap.
+
+  Caveat: this roster's subspace has rank 12 within a 28-dimensional feature space. 12 players cannot span more than 12 dimensions regardless of who they are, so even a high 'percent covered' figure below reflects coverage relative to what a 12-player roster can possibly cover, not coverage of the full style space.
+
+  -- Players already on the OKC roster --
+  Aaron Wiggins                gap=0.0000  covered=4.7050  total=4.7050  (100.0% covered)  [already on this roster]
+  Ajay Mitchell                gap=0.0000  covered=6.5694  total=6.5694  (100.0% covered)  [already on this roster]
+  Alex Caruso                  gap=0.0000  covered=5.2662  total=5.2662  (100.0% covered)  [already on this roster]
+  Cason Wallace                gap=0.0000  covered=5.5079  total=5.5079  (100.0% covered)  [already on this roster]
+  Chet Holmgren                gap=0.0000  covered=6.8558  total=6.8558  (100.0% covered)  [already on this roster]
+  Isaiah Hartenstein           gap=0.0000  covered=7.1909  total=7.1909  (100.0% covered)  [already on this roster]
+  Isaiah Joe                   gap=0.0000  covered=5.8528  total=5.8528  (100.0% covered)  [already on this roster]
+  Jared McCain                 gap=0.0000  covered=4.1472  total=4.1472  (100.0% covered)  [already on this roster]
+  Jaylin Williams              gap=0.0000  covered=5.5890  total=5.5890  (100.0% covered)  [already on this roster]
+  Kenrich Williams             gap=0.0000  covered=5.0164  total=5.0164  (100.0% covered)  [already on this roster]
+  Luguentz Dort                gap=0.0000  covered=4.2284  total=4.2284  (100.0% covered)  [already on this roster]
+  Shai Gilgeous-Alexander      gap=0.0000  covered=7.5072  total=7.5072  (100.0% covered)  [already on this roster]
+
+  -- Reference players from earlier layers, not necessarily on OKC --
+  Stephen Curry                gap=3.6367  covered=3.7511  total=5.2246  (71.8% covered)
+  Nikola Jokić                 gap=2.8197  covered=6.3016  total=6.9037  (91.3% covered)
+  Alex Caruso                  gap=0.0000  covered=5.2662  total=5.2662  (100.0% covered)  [already on this roster]
+  Donovan Clingan              gap=2.9443  covered=5.6198  total=6.3443  (88.6% covered)
+  Shai Gilgeous-Alexander      gap=0.0000  covered=7.5072  total=7.5072  (100.0% covered)  [already on this roster]
+
+######################################################################
+# TEAM 2 OF 3: GSW -- lacks an elite rim-protecting center
+# (Horford is a stretch-5, Draymond is undersized at center;
+#  no traditional rim-protector on the qualified roster)
+######################################################################
+
+======================================================================
+ROSTER SUBSPACE — GSW
+======================================================================
+  Qualified rostered players (11): Al Horford, Brandin Podziemski, De'Anthony Melton, Draymond Green, Gary Payton II, Gui Santos, Moses Moody, Pat Spencer, Quinten Post, Stephen Curry, Will Richard
+  Numerical rank of subspace: 11 (out of 11 contributing player vectors)
+
+======================================================================
+GAP SCORES — GSW
+======================================================================
+  Sanity check: a GSW player already on the roster should score a
+  near-zero gap (they ARE part of the subspace). A stylistically
+  distinct outside player should score a larger gap.
+
+  Caveat: this roster's subspace has rank 11 within a 28-dimensional feature space. 11 players cannot span more than 11 dimensions regardless of who they are, so even a high 'percent covered' figure below reflects coverage relative to what a 11-player roster can possibly cover, not coverage of the full style space.
+
+  -- Players already on the GSW roster --
+  Al Horford                   gap=0.0000  covered=4.8757  total=4.8757  (100.0% covered)  [already on this roster]
+  Brandin Podziemski           gap=0.0000  covered=4.2939  total=4.2939  (100.0% covered)  [already on this roster]
+  De'Anthony Melton            gap=0.0000  covered=5.8611  total=5.8611  (100.0% covered)  [already on this roster]
+  Draymond Green               gap=0.0000  covered=5.6818  total=5.6818  (100.0% covered)  [already on this roster]
+  Gary Payton II               gap=0.0000  covered=4.0102  total=4.0102  (100.0% covered)  [already on this roster]
+  Gui Santos                   gap=0.0000  covered=4.2595  total=4.2595  (100.0% covered)  [already on this roster]
+  Moses Moody                  gap=0.0000  covered=3.5212  total=3.5212  (100.0% covered)  [already on this roster]
+  Pat Spencer                  gap=0.0000  covered=6.2171  total=6.2171  (100.0% covered)  [already on this roster]
+  Quinten Post                 gap=0.0000  covered=4.9824  total=4.9824  (100.0% covered)  [already on this roster]
+  Stephen Curry                gap=0.0000  covered=5.2246  total=5.2246  (100.0% covered)  [already on this roster]
+  Will Richard                 gap=0.0000  covered=4.7595  total=4.7595  (100.0% covered)  [already on this roster]
+
+  -- Reference players from earlier layers, not necessarily on GSW --
+  Stephen Curry                gap=0.0000  covered=5.2246  total=5.2246  (100.0% covered)  [already on this roster]
+  Nikola Jokić                 gap=4.7205  covered=5.0376  total=6.9037  (73.0% covered)
+  Alex Caruso                  gap=3.2066  covered=4.1774  total=5.2662  (79.3% covered)
+  Donovan Clingan              gap=4.1346  covered=4.8120  total=6.3443  (75.8% covered)
+  Shai Gilgeous-Alexander      gap=5.6410  covered=4.9535  total=7.5072  (66.0% covered)
+
+######################################################################
+# TEAM 3 OF 5: NYK -- guard-heavy, loaded with ball-dominant
+# perimeter players (Brunson, Clarkson, Alvarado, McBride, Hart)
+######################################################################
+
+======================================================================
+ROSTER SUBSPACE — NYK
+======================================================================
+  Qualified rostered players (10): Jalen Brunson, Jordan Clarkson, Jose Alvarado, Josh Hart, Karl-Anthony Towns, Landry Shamet, Mikal Bridges, Miles McBride, Mitchell Robinson, OG Anunoby
+  Numerical rank of subspace: 10 (out of 10 contributing player vectors)
+
+======================================================================
+GAP SCORES — NYK
+======================================================================
+  Sanity check: a NYK player already on the roster should score a
+  near-zero gap (they ARE part of the subspace). A stylistically
+  distinct outside player should score a larger gap.
+
+  Caveat: this roster's subspace has rank 10 within a 28-dimensional feature space. 10 players cannot span more than 10 dimensions regardless of who they are, so even a high 'percent covered' figure below reflects coverage relative to what a 10-player roster can possibly cover, not coverage of the full style space.
+
+  -- Players already on the NYK roster --
+  Jalen Brunson                gap=0.0000  covered=5.7499  total=5.7499  (100.0% covered)  [already on this roster]
+  Jordan Clarkson              gap=0.0000  covered=5.1947  total=5.1947  (100.0% covered)  [already on this roster]
+  Jose Alvarado                gap=0.0000  covered=6.2161  total=6.2161  (100.0% covered)  [already on this roster]
+  Josh Hart                    gap=0.0000  covered=4.5840  total=4.5840  (100.0% covered)  [already on this roster]
+  Karl-Anthony Towns           gap=0.0000  covered=4.7256  total=4.7256  (100.0% covered)  [already on this roster]
+  Landry Shamet                gap=0.0000  covered=4.2445  total=4.2445  (100.0% covered)  [already on this roster]
+  Mikal Bridges                gap=0.0000  covered=4.8473  total=4.8473  (100.0% covered)  [already on this roster]
+  Miles McBride                gap=0.0000  covered=5.4270  total=5.4270  (100.0% covered)  [already on this roster]
+  Mitchell Robinson            gap=0.0000  covered=7.7257  total=7.7257  (100.0% covered)  [already on this roster]
+  OG Anunoby                   gap=0.0000  covered=4.2316  total=4.2316  (100.0% covered)  [already on this roster]
+
+  -- Reference players from earlier layers, not necessarily on NYK --
+  Stephen Curry                gap=4.2364  covered=3.0577  total=5.2246  (58.5% covered)
+  Nikola Jokić                 gap=4.6827  covered=5.0727  total=6.9037  (73.5% covered)
+  Alex Caruso                  gap=3.9294  covered=3.5062  total=5.2662  (66.6% covered)
+  Donovan Clingan              gap=4.8557  covered=4.0833  total=6.3443  (64.4% covered)
+  Shai Gilgeous-Alexander      gap=5.7629  covered=4.8112  total=7.5072  (64.1% covered)
+
+######################################################################
+# TEAM 4 OF 5: CLE -- maximally obvious rim-protection-rich case:
+# TWO genuine elite shot-blocking bigs (Evan Mobley, Jarrett
+# Allen) on the roster at once. If the gap-score mechanism means
+# anything, this team should show the HIGHEST Clingan coverage
+# of every team tested.
+######################################################################
+
+======================================================================
+ROSTER SUBSPACE — CLE
+======================================================================
+  Qualified rostered players (11): Craig Porter Jr., Dean Wade, Dennis Schröder, Donovan Mitchell, Evan Mobley, James Harden, Jarrett Allen, Jaylon Tyson, Keon Ellis, Nae'Qwan Tomlin, Sam Merrill
+  Numerical rank of subspace: 11 (out of 11 contributing player vectors)
+
+======================================================================
+GAP SCORES — CLE
+======================================================================
+  Sanity check: a CLE player already on the roster should score a
+  near-zero gap (they ARE part of the subspace). A stylistically
+  distinct outside player should score a larger gap.
+
+  Caveat: this roster's subspace has rank 11 within a 28-dimensional feature space. 11 players cannot span more than 11 dimensions regardless of who they are, so even a high 'percent covered' figure below reflects coverage relative to what a 11-player roster can possibly cover, not coverage of the full style space.
+
+  -- Players already on the CLE roster --
+  Craig Porter Jr.             gap=0.0000  covered=5.5694  total=5.5694  (100.0% covered)  [already on this roster]
+  Dean Wade                    gap=0.0000  covered=6.0866  total=6.0866  (100.0% covered)  [already on this roster]
+  Dennis Schröder              gap=0.0000  covered=5.8965  total=5.8965  (100.0% covered)  [already on this roster]
+  Donovan Mitchell             gap=0.0000  covered=5.5513  total=5.5513  (100.0% covered)  [already on this roster]
+  Evan Mobley                  gap=0.0000  covered=5.2609  total=5.2609  (100.0% covered)  [already on this roster]
+  James Harden                 gap=0.0000  covered=5.5456  total=5.5456  (100.0% covered)  [already on this roster]
+  Jarrett Allen                gap=0.0000  covered=5.9585  total=5.9585  (100.0% covered)  [already on this roster]
+  Jaylon Tyson                 gap=0.0000  covered=3.5927  total=3.5927  (100.0% covered)  [already on this roster]
+  Keon Ellis                   gap=0.0000  covered=6.0746  total=6.0746  (100.0% covered)  [already on this roster]
+  Nae'Qwan Tomlin              gap=0.0000  covered=3.7571  total=3.7571  (100.0% covered)  [already on this roster]
+  Sam Merrill                  gap=0.0000  covered=4.9319  total=4.9319  (100.0% covered)  [already on this roster]
+
+  -- Reference players from earlier layers, not necessarily on CLE --
+  Stephen Curry                gap=3.4180  covered=3.9515  total=5.2246  (75.6% covered)
+  Nikola Jokić                 gap=4.6765  covered=5.0784  total=6.9037  (73.6% covered)
+  Alex Caruso                  gap=3.4871  covered=3.9463  total=5.2662  (74.9% covered)
+  Donovan Clingan              gap=4.7259  covered=4.2328  total=6.3443  (66.7% covered)
+  Shai Gilgeous-Alexander      gap=4.0594  covered=6.3150  total=7.5072  (84.1% covered)
+
+######################################################################
+# TEAM 5 OF 5: CHI -- maximally obvious rim-protection-poor case:
+# unambiguously undersized/guard-and-wing-only frontcourt, no
+# true center on the qualified roster at all (Yabusele, Jalen
+# Smith, Leonard Miller, Patrick Williams, Buzelis are combo
+# forwards, not rim protectors). Should show the LOWEST Clingan
+# coverage of every team tested.
+######################################################################
+
+======================================================================
+ROSTER SUBSPACE — CHI
+======================================================================
+  Qualified rostered players (10): Anfernee Simons, Collin Sexton, Guerschon Yabusele, Isaac Okoro, Jalen Smith, Josh Giddey, Leonard Miller, Matas Buzelis, Patrick Williams, Tre Jones
+  Numerical rank of subspace: 10 (out of 10 contributing player vectors)
+
+======================================================================
+GAP SCORES — CHI
+======================================================================
+  Sanity check: a CHI player already on the roster should score a
+  near-zero gap (they ARE part of the subspace). A stylistically
+  distinct outside player should score a larger gap.
+
+  Caveat: this roster's subspace has rank 10 within a 28-dimensional feature space. 10 players cannot span more than 10 dimensions regardless of who they are, so even a high 'percent covered' figure below reflects coverage relative to what a 10-player roster can possibly cover, not coverage of the full style space.
+
+  -- Players already on the CHI roster --
+  Anfernee Simons              gap=0.0000  covered=5.0828  total=5.0828  (100.0% covered)  [already on this roster]
+  Collin Sexton                gap=0.0000  covered=4.5739  total=4.5739  (100.0% covered)  [already on this roster]
+  Guerschon Yabusele           gap=0.0000  covered=2.9027  total=2.9027  (100.0% covered)  [already on this roster]
+  Isaac Okoro                  gap=0.0000  covered=4.1006  total=4.1006  (100.0% covered)  [already on this roster]
+  Jalen Smith                  gap=0.0000  covered=5.5834  total=5.5834  (100.0% covered)  [already on this roster]
+  Josh Giddey                  gap=0.0000  covered=6.6953  total=6.6953  (100.0% covered)  [already on this roster]
+  Leonard Miller               gap=0.0000  covered=3.5339  total=3.5339  (100.0% covered)  [already on this roster]
+  Matas Buzelis                gap=0.0000  covered=4.5812  total=4.5812  (100.0% covered)  [already on this roster]
+  Patrick Williams             gap=0.0000  covered=6.2840  total=6.2840  (100.0% covered)  [already on this roster]
+  Tre Jones                    gap=0.0000  covered=6.4158  total=6.4158  (100.0% covered)  [already on this roster]
+
+  -- Reference players from earlier layers, not necessarily on CHI --
+  Stephen Curry                gap=3.8983  covered=3.4785  total=5.2246  (66.6% covered)
+  Nikola Jokić                 gap=4.5957  covered=5.1517  total=6.9037  (74.6% covered)
+  Alex Caruso                  gap=4.2947  covered=3.0478  total=5.2662  (57.9% covered)
+  Donovan Clingan              gap=3.2680  covered=5.4379  total=6.3443  (85.7% covered)
+  Shai Gilgeous-Alexander      gap=4.5685  covered=5.9571  total=7.5072  (79.4% covered)
+
+######################################################################
+# EXPLICIT BASKETBALL-SENSE CHECKS
+######################################################################
+
+======================================================================
+BASKETBALL-SENSE CHECK — GSW
+======================================================================
+  Hypothesis: GSW lacks an elite rim-protecting center, so it should show LOW coverage / HIGH gap for a rim-protector profile like Donovan Clingan relative to the other teams in this run -- that would be a real, missing piece of this roster.
+  Result: Donovan Clingan vs. GSW roster subspace: gap=4.1346  (75.8% covered)
+  For comparison, Donovan Clingan's coverage against the other teams in this run: OKC=88.6%, NYK=64.4%, CLE=66.7%, CHI=85.7%
+  GSW's coverage of Donovan Clingan is the in between of the teams compared. Verdict: this DOES NOT CONFIRM the hypothesis.
+
+======================================================================
+BASKETBALL-SENSE CHECK — NYK
+======================================================================
+  Hypothesis: NYK is guard-heavy and already loaded with ball-dominant perimeter players, so it should show HIGH coverage / LOW gap for a ball-dominant guard profile like Shai Gilgeous-Alexander relative to the other teams in this run -- this roster likely already has that style covered.
+  Result: Shai Gilgeous-Alexander vs. NYK roster subspace: gap=5.7629  (64.1% covered)
+  Excluded from comparison: OKC -- Shai Gilgeous-Alexander is literally on that roster, so their coverage there is a trivial 100% by construction, not a real signal.
+  For comparison, Shai Gilgeous-Alexander's coverage against the other teams in this run: GSW=66.0%, CLE=84.1%, CHI=79.4%
+  NYK's coverage of Shai Gilgeous-Alexander is the lowest of the teams compared. Verdict: this DOES NOT CONFIRM the hypothesis.
+
+======================================================================
+BASKETBALL-SENSE CHECK — CLE
+======================================================================
+  Hypothesis: MAXIMALLY OBVIOUS CASE: CLE rosters TWO genuine elite shot-blocking bigs at once (Evan Mobley, Jarrett Allen). If the gap-score mechanism captures rim-protection style at all, this team should show the HIGHEST Clingan coverage of every team tested -- if it doesn't, that's real evidence the mechanism itself has a problem, not just noise from an ambiguous case.
+  Result: Donovan Clingan vs. CLE roster subspace: gap=4.7259  (66.7% covered)
+  For comparison, Donovan Clingan's coverage against the other teams in this run: OKC=88.6%, GSW=75.8%, NYK=64.4%, CHI=85.7%
+  CLE's coverage of Donovan Clingan is the in between of the teams compared. Verdict: this DOES NOT CONFIRM the hypothesis.
+
+======================================================================
+BASKETBALL-SENSE CHECK — CHI
+======================================================================
+  Hypothesis: MAXIMALLY OBVIOUS CASE: CHI has no true center on the qualified roster at all -- an unambiguously undersized, guard-and-wing-only frontcourt. This team should show the LOWEST Clingan coverage of every team tested -- if it doesn't, that's real evidence the mechanism itself has a problem, not just noise from an ambiguous case.
+  Result: Donovan Clingan vs. CHI roster subspace: gap=3.2680  (85.7% covered)
+  For comparison, Donovan Clingan's coverage against the other teams in this run: OKC=88.6%, GSW=75.8%, NYK=64.4%, CLE=66.7%
+  CHI's coverage of Donovan Clingan is the in between of the teams compared. Verdict: this DOES NOT CONFIRM the hypothesis.
+
+======================================================================
+CROSS-TEAM COMPARISON -- same 5 reference players, all 5 rosters
+======================================================================
+  Reference player                         OKC             GSW             NYK             CLE             CHI
+  Stephen Curry                     3.64 (72%)     0.00 (100%)      4.24 (59%)      3.42 (76%)      3.90 (67%)
+  Nikola Jokić                      2.82 (91%)      4.72 (73%)      4.68 (73%)      4.68 (74%)      4.60 (75%)
+  Alex Caruso                      0.00 (100%)      3.21 (79%)      3.93 (67%)      3.49 (75%)      4.29 (58%)
+  Donovan Clingan                   2.94 (89%)      4.13 (76%)      4.86 (64%)      4.73 (67%)      3.27 (86%)
+  Shai Gilgeous-Alexander          0.00 (100%)      5.64 (66%)      5.76 (64%)      4.06 (84%)      4.57 (79%)
+
+  -- Clingan-specific ranking across all 5 teams (highest coverage first) --
+    1. OKC   88.6% covered  (gap=2.9443)
+    2. CHI   85.7% covered  (gap=3.2680)
+    3. GSW   75.8% covered  (gap=4.1346)
+    4. CLE   66.7% covered  (gap=4.7259)
+    5. NYK   64.4% covered  (gap=4.8557)
+
+  Top-ranked team is OKC, bottom-ranked is NYK -- NOT the CLE-highest/CHI-lowest pattern the maximally obvious case predicts. Even in this deliberately unambiguous test, coverage does not clearly favor the size-heavy team. This is evidence the gap-score mechanism itself may not be reliably tracking the rim-protection dimension of style-space, rather than the GSW/NYK result being explainable as noise from an ambiguous middle case.
+
+Done.

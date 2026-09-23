@@ -1,0 +1,95 @@
+Building feature matrix from Layer 1 axes (qualification floor: MIN>=15, GP>=40)...
+Feature matrix: 305 qualified players
+
+======================================================================
+INVERSE COVARIANCE MATRIX
+======================================================================
+  Features used: 28
+  Method: direct inverse
+
+======================================================================
+REAL COMPS — Mahalanobis distance, 5 closest per reference player
+======================================================================
+======================================================================
+Stephen Curry  (GSW)
+======================================================================
+  [1 of 28 features were missing for Stephen Curry and median-imputed before this distance calculation -- treat this comp list with extra caution.]
+  5 closest comps by Mahalanobis distance:
+    1. Donte DiVincenzo             (MIN)  dist=4.8837  [HIGH CONFIDENCE -- 1 (query) + 0 (comp) = 1 total imputed of 56]
+    2. RJ Barrett                   (TOR)  dist=5.3582  [HIGH CONFIDENCE -- 1 (query) + 1 (comp) = 2 total imputed of 56]
+    3. De'Andre Hunter              (SAC)  dist=5.4942  [MODERATE CONFIDENCE -- 1 (query) + 3 (comp) = 4 total imputed of 56]
+    4. Nickeil Alexander-Walker     (ATL)  dist=5.5022  [HIGH CONFIDENCE -- 1 (query) + 0 (comp) = 1 total imputed of 56]
+    5. Lauri Markkanen              (UTA)  dist=5.8281  [MODERATE CONFIDENCE -- 1 (query) + 2 (comp) = 3 total imputed of 56]
+
+======================================================================
+Nikola Jokić  (DEN)
+======================================================================
+  [3 of 28 features were missing for Nikola Jokić and median-imputed before this distance calculation -- treat this comp list with extra caution.]
+  5 closest comps by Mahalanobis distance:
+    1. Cade Cunningham              (DET)  dist=6.1523  [MODERATE CONFIDENCE -- 3 (query) + 1 (comp) = 4 total imputed of 56]
+    2. De'Aaron Fox                 (SAS)  dist=6.5278  [MODERATE CONFIDENCE -- 3 (query) + 0 (comp) = 3 total imputed of 56]
+    3. Jalen Johnson                (ATL)  dist=6.5925  [MODERATE CONFIDENCE -- 3 (query) + 0 (comp) = 3 total imputed of 56]
+    4. LaMelo Ball                  (CHA)  dist=6.6041  [MODERATE CONFIDENCE -- 3 (query) + 0 (comp) = 3 total imputed of 56]
+    5. Scottie Barnes               (TOR)  dist=6.8204  [MODERATE CONFIDENCE -- 3 (query) + 0 (comp) = 3 total imputed of 56]
+
+======================================================================
+Alex Caruso  (OKC)
+======================================================================
+  [5 of 28 features were missing for Alex Caruso and median-imputed before this distance calculation -- treat this comp list with extra caution.]
+  5 closest comps by Mahalanobis distance:
+    1. Anthony Black                (ORL)  dist=5.3317  [MODERATE CONFIDENCE -- 5 (query) + 0 (comp) = 5 total imputed of 56]
+    2. Collin Murray-Boyles         (TOR)  dist=5.4152  [LOW CONFIDENCE -- 5 (query) + 6 (comp) = 11 total imputed of 56]
+    3. Ronald Holland II            (DET)  dist=5.6786  [MODERATE CONFIDENCE -- 5 (query) + 1 (comp) = 6 total imputed of 56]
+    4. Aaron Wiggins                (OKC)  dist=5.8090  [MODERATE CONFIDENCE -- 5 (query) + 0 (comp) = 5 total imputed of 56]
+    5. Mouhamed Gueye               (ATL)  dist=5.9883  [LOW CONFIDENCE -- 5 (query) + 7 (comp) = 12 total imputed of 56]
+
+======================================================================
+Donovan Clingan  (POR)
+======================================================================
+  [6 of 28 features were missing for Donovan Clingan and median-imputed before this distance calculation -- treat this comp list with extra caution.]
+  5 closest comps by Mahalanobis distance:
+    1. Isaiah Stewart               (DET)  dist=5.0596  [LOW CONFIDENCE -- 6 (query) + 6 (comp) = 12 total imputed of 56]
+    2. Santi Aldama                 (MEM)  dist=5.6260  [LOW CONFIDENCE -- 6 (query) + 3 (comp) = 9 total imputed of 56]
+    3. Maxime Raynaud               (SAC)  dist=5.9433  [LOW CONFIDENCE -- 6 (query) + 5 (comp) = 11 total imputed of 56]
+    4. Nikola Vučević               (BOS)  dist=5.9727  [LOW CONFIDENCE -- 6 (query) + 2 (comp) = 8 total imputed of 56]
+    5. Isaac Okoro                  (CHI)  dist=6.0560  [LOW CONFIDENCE -- 6 (query) + 1 (comp) = 7 total imputed of 56]
+
+======================================================================
+Shai Gilgeous-Alexander  (OKC)
+======================================================================
+  5 closest comps by Mahalanobis distance:
+    1. Collin Sexton                (CHI)  dist=6.0812  [MODERATE CONFIDENCE -- 0 (query) + 4 (comp) = 4 total imputed of 56]
+    2. Chet Holmgren                (OKC)  dist=6.1009  [HIGH CONFIDENCE -- 0 (query) + 1 (comp) = 1 total imputed of 56]
+    3. Darius Garland               (LAC)  dist=6.1265  [MODERATE CONFIDENCE -- 0 (query) + 6 (comp) = 6 total imputed of 56]
+    4. Devin Booker                 (PHX)  dist=6.1860  [HIGH CONFIDENCE -- 0 (query) + 0 (comp) = 0 total imputed of 56]
+    5. Coby White                   (CHA)  dist=6.3380  [MODERATE CONFIDENCE -- 0 (query) + 6 (comp) = 6 total imputed of 56]
+
+======================================================================
+RESTRICTED-CANDIDATE COMPARISON — candidates limited to <= 2 imputed features
+======================================================================
+  Alex Caruso -- restricted to candidates with <= 2 imputed features:
+    1. Anthony Black                (ORL)  dist=5.3317  [MODERATE CONFIDENCE -- 5 (query) + 0 (comp) = 5 total imputed]
+    2. Ronald Holland II            (DET)  dist=5.6786  [MODERATE CONFIDENCE -- 5 (query) + 1 (comp) = 6 total imputed]
+    3. Aaron Wiggins                (OKC)  dist=5.8090  [MODERATE CONFIDENCE -- 5 (query) + 0 (comp) = 5 total imputed]
+    4. De'Aaron Fox                 (SAS)  dist=6.0170  [MODERATE CONFIDENCE -- 5 (query) + 0 (comp) = 5 total imputed]
+    5. Dru Smith                    (MIA)  dist=6.2381  [LOW CONFIDENCE -- 5 (query) + 2 (comp) = 7 total imputed]
+
+    Change vs. unrestricted top-5: De'Aaron Fox, Dru Smith now appear(s) -- a more lightly-imputed comp exists further down the ranked list than the unrestricted output surfaced.
+
+  Donovan Clingan -- restricted to candidates with <= 2 imputed features:
+    1. Nikola Vučević               (BOS)  dist=5.9727  [LOW CONFIDENCE -- 6 (query) + 2 (comp) = 8 total imputed]
+    2. Isaac Okoro                  (CHI)  dist=6.0560  [LOW CONFIDENCE -- 6 (query) + 1 (comp) = 7 total imputed]
+    3. Nique Clifford               (SAC)  dist=6.0909  [MODERATE CONFIDENCE -- 6 (query) + 0 (comp) = 6 total imputed]
+    4. Alperen Sengun               (HOU)  dist=6.4360  [LOW CONFIDENCE -- 6 (query) + 2 (comp) = 8 total imputed]
+    5. Kyle Filipowski              (UTA)  dist=6.5205  [LOW CONFIDENCE -- 6 (query) + 2 (comp) = 8 total imputed]
+
+    Change vs. unrestricted top-5: Alperen Sengun, Kyle Filipowski, Nique Clifford now appear(s) -- a more lightly-imputed comp exists further down the ranked list than the unrestricted output surfaced.
+
+======================================================================
+JOKIC / SGA CROSS-CHECK
+======================================================================
+  Does Nikola Jokić's comp list include Shai Gilgeous-Alexander? False
+  Does Shai Gilgeous-Alexander's comp list include Nikola Jokić? False
+  Neither appears in the other's top-5 -- despite landing in the same k-means cluster (k=3), Mahalanobis distance over the full covariance-corrected feature space finds closer real comps for each of them than each other. This is not a contradiction: k-means at k=3 was a coarse, weakly-supported split (silhouette <=0.096, see KMEANS_CLUSTERING_OUTPUT.txt) grouping both into one large 108-player bucket, while Mahalanobis distance is a much finer-grained, continuous measure within that same space.
+
+Done.

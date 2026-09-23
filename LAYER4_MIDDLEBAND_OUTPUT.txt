@@ -1,0 +1,83 @@
+Building feature matrix from Layer 1 axes (qualification floor: MIN>=15, GP>=40)...
+Feature matrix: 305 qualified players
+
+======================================================================
+MIDDLE-BAND DIAGNOSTIC
+======================================================================
+  Question: does pct_covered behave sensibly (CLE > CHI on a
+  rim-protection reference) for SOME magnitude band between the
+  two documented failures (near-zero ~1.5, outlier ~5.0)? Same
+  RIM_PROTECTION_TRIMMED subset, same single-nearest-neighbor
+  mechanism, same CLE/CHI/OKC test as every prior diagnostic in
+  layer4_subsets.py -- only the reference player changes.
+
+  Prior results for context:
+    Donovan Clingan      total_mag=5.00  CLE=34.7%  CHI=42.8%  OKC=33.6%  -> FAIL (outlier)
+    Chet Holmgren        total_mag=3.99  CLE=63.7%  CHI=40.2%  OKC=n/a (on roster)  -> PASS
+    Onyeka Okongwu       total_mag=1.46  CLE=0.0%  CHI=5.5%  OKC=0.0%  -> FAIL (near-zero)
+
+======================================================================
+MAGNITUDE SCREEN — RIM_PROTECTION_TRIMMED total z-scored magnitude
+======================================================================
+  270 candidates screened (qualified players, excluding prior
+  references and CLE/CHI/OKC rostered players).
+  Range: 0.190 (Nikola Jović) to 4.706 (Mitchell Robinson)
+  Prior failed extremes: Okongwu=1.462 (near-zero, FAIL), Clingan=~5.0 (outlier, FAIL). Holmgren=3.99 (PASS, unreplicated).
+
+  Middle-band candidates picked (nearest real player to targets [2.0, 2.75, 3.5, 4.25], spanning between the two failed extremes):
+    Nique Clifford               total_mag=2.000
+    John Konchar                 total_mag=2.751
+    Anthony Gill                 total_mag=3.420
+    Jusuf Nurkić                 total_mag=4.155
+
+----------------------------------------------------------------------
+Nique Clifford  (total_mag=2.000)
+----------------------------------------------------------------------
+    OKC   gap=0.7858  covered=1.2143  total=2.0001  (60.7% covered)
+    CLE   gap=1.1288  covered=0.8713  total=2.0001  (43.6% covered)
+    CHI   gap=0.9078  covered=1.0924  total=2.0001  (54.6% covered)
+  FAIL: CLE <= CHI on rim-protection coverage (43.6% vs 54.6%, margin 11.1 pts)
+
+----------------------------------------------------------------------
+John Konchar  (total_mag=2.751)
+----------------------------------------------------------------------
+    OKC   gap=2.7595  covered=0.0000  total=2.7514  (0.0% covered)
+    CLE   gap=1.6670  covered=1.0844  total=2.7514  (39.4% covered)
+    CHI   gap=2.1062  covered=0.6452  total=2.7514  (23.5% covered)
+  PASS: CLE > CHI on rim-protection coverage (39.4% vs 23.5%, margin 16.0 pts)
+
+----------------------------------------------------------------------
+Anthony Gill  (total_mag=3.420)
+----------------------------------------------------------------------
+    OKC   gap=3.3475  covered=0.0726  total=3.4201  (2.1% covered)
+    CLE   gap=2.1082  covered=1.3119  total=3.4201  (38.4% covered)
+    CHI   gap=1.9075  covered=1.5126  total=3.4201  (44.2% covered)
+  FAIL: CLE <= CHI on rim-protection coverage (38.4% vs 44.2%, margin 5.9 pts)
+
+----------------------------------------------------------------------
+Jusuf Nurkić  (total_mag=4.155)
+----------------------------------------------------------------------
+    OKC   gap=2.3001  covered=1.8549  total=4.1551  (44.6% covered)
+    CLE   gap=3.4468  covered=0.7083  total=4.1551  (17.0% covered)
+    CHI   gap=1.9932  covered=2.1618  total=4.1551  (52.0% covered)
+  FAIL: CLE <= CHI on rim-protection coverage (17.0% vs 52.0%, margin 35.0 pts)
+
+======================================================================
+FULL MAGNITUDE SPECTRUM — CLE-vs-CHI verdict at each tested point
+======================================================================
+    mag= 1.46   FAIL   Onyeka Okongwu
+    mag= 2.00   FAIL   Nique Clifford
+    mag= 2.75   PASS   John Konchar
+    mag= 3.42   FAIL   Anthony Gill
+    mag= 3.99   PASS   Chet Holmgren
+    mag= 4.16   FAIL   Jusuf Nurkić
+    mag= 5.00   FAIL   Donovan Clingan
+
+======================================================================
+CONCLUSION
+======================================================================
+  2 of 7 tested points PASS. PASS magnitudes: [2.75, 3.99]. FAIL magnitudes: [1.46, 2.0, 3.42, 4.16, 5.0].
+  If PASS points cluster together and FAIL points sit outside that cluster, that supports a real middle band where pct_covered is trustworthy -- state that band explicitly before using this metric for any other reference player.
+  If PASS/FAIL are interleaved with no clean separation by magnitude, magnitude alone does not explain the failures, and pct_covered should be treated as unreliable in general, not just at the two tested extremes -- a different metric is needed, not a restricted range.
+
+Done.

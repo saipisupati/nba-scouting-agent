@@ -1,0 +1,1247 @@
+==================================================================
+1a. test_router.py -- full stdout (exit 0)
+==================================================================
+
+A module that was compiled using NumPy 1.x cannot be run in
+NumPy 2.0.2 as it may crash. To support both 1.x and 2.x
+versions of NumPy, modules must be compiled with NumPy 2.0.
+Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
+
+If you are a user of the module, the easiest solution will be to
+downgrade to 'numpy<2' or try to upgrade the affected module.
+We expect that some modules will need time to support NumPy 2.
+
+Traceback (most recent call last):  File "/Users/supersaiyan.06/Downloads/nba-scouting-agent/test_router.py", line 1, in <module>
+    import pandas as pd
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/__init__.py", line 49, in <module>
+    from pandas.core.api import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/api.py", line 28, in <module>
+    from pandas.core.arrays import Categorical
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/__init__.py", line 1, in <module>
+    from pandas.core.arrays.arrow import ArrowExtensionArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/arrow/__init__.py", line 5, in <module>
+    from pandas.core.arrays.arrow.array import ArrowExtensionArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/arrow/array.py", line 53, in <module>
+    from pandas.core import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/ops/__init__.py", line 8, in <module>
+    from pandas.core.ops.array_ops import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/ops/array_ops.py", line 56, in <module>
+    from pandas.core.computation import expressions
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/computation/expressions.py", line 21, in <module>
+    from pandas.core.computation.check import NUMEXPR_INSTALLED
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/computation/check.py", line 5, in <module>
+    ne = import_optional_dependency("numexpr", errors="warn")
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/compat/_optional.py", line 135, in import_optional_dependency
+    module = importlib.import_module(name)
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/numexpr/__init__.py", line 24, in <module>
+    from numexpr.interpreter import MAX_THREADS, use_vml, __BLOCK_SIZE1__
+AttributeError: _ARRAY_API not found
+
+A module that was compiled using NumPy 1.x cannot be run in
+NumPy 2.0.2 as it may crash. To support both 1.x and 2.x
+versions of NumPy, modules must be compiled with NumPy 2.0.
+Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
+
+If you are a user of the module, the easiest solution will be to
+downgrade to 'numpy<2' or try to upgrade the affected module.
+We expect that some modules will need time to support NumPy 2.
+
+Traceback (most recent call last):  File "/Users/supersaiyan.06/Downloads/nba-scouting-agent/test_router.py", line 1, in <module>
+    import pandas as pd
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/__init__.py", line 49, in <module>
+    from pandas.core.api import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/api.py", line 28, in <module>
+    from pandas.core.arrays import Categorical
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/__init__.py", line 1, in <module>
+    from pandas.core.arrays.arrow import ArrowExtensionArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/arrow/__init__.py", line 5, in <module>
+    from pandas.core.arrays.arrow.array import ArrowExtensionArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/arrow/array.py", line 67, in <module>
+    from pandas.core.arrays.masked import BaseMaskedArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/masked.py", line 61, in <module>
+    from pandas.core import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/nanops.py", line 52, in <module>
+    bn = import_optional_dependency("bottleneck", errors="warn")
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/compat/_optional.py", line 135, in import_optional_dependency
+    module = importlib.import_module(name)
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/bottleneck/__init__.py", line 7, in <module>
+    from .move import (move_argmax, move_argmin, move_max, move_mean, move_median,
+AttributeError: _ARRAY_API not found
+
+======================================================================
+Q1: Who leads the league in deflections per 36 minutes?
+  Routing method : deterministic
+  Function matched: deflections_per36
+  Answer: Dru Smith (MIA) leads in deflections per 36 with 6.21 in 68 games averaging 16.7 minutes [2025-26].
+
+======================================================================
+Q2: Which players contest the most shots at the rim?
+  Routing method : deterministic
+  Function matched: contest_profile_per36
+  Answer: Donovan Clingan (POR) leads in rim contests with 13.02 2PT contests per 36 (17.84 total) in 77 games [2025-26]. NOTE: This measures contest volume at the rim, not shot suppression — contesting frequently does not mean opponents miss. The volume leaders and the suppression leaders differ significantly at the rim (9 of the top-10 in contest volume are not in the top-10 in rim suppression; Clingan is #1 in volume but only #21 in suppression, Gobert is #10 in volume but #29 in suppression). For true rim shot suppression, see shot_suppression('Less Than 6Ft').
+
+======================================================================
+Q3: Who are the best perimeter closeout defenders?
+  Routing method : deterministic
+  Function matched: contest_profile_per36
+  Answer: Donovan Clingan (POR) leads in perimeter closeout contests with 4.82 3PT contests per 36 (17.84 total) in 77 games [2025-26]. NOTE: This measures contest volume, not shot suppression — high contest counts do not guarantee shooters miss. Volume leaders and suppression leaders differ significantly at the perimeter (e.g. Clingan leads in 3PT contest volume but opponents shoot above their normal rate against him). For true perimeter suppression, see shot_suppression('3 Pointers').
+
+======================================================================
+Q4: Which player boxes out most effectively?
+  Routing method : deterministic
+  Function matched: boxout_conversion
+  Answer: Andre Drummond (PHI) has the highest box-out conversion rate at 91.2% (1.35 rebounds / 1.48 box outs per game) in 62 games [2025-26].
+
+======================================================================
+Q5: Who has the highest defensive IQ based on hustle stats?
+  Routing method : deterministic
+  Function matched: hustle_iq_composite
+  Answer: T.J. McConnell (IND) ranks highest on the Hustle IQ Composite (score: 3.093) — 0.853 def loose balls/36 and 0.146 charges drawn/36 in 54 games [2025-26]. NOTE: Hustle IQ Composite is a weighted z-score (60% def loose balls + 40% charges drawn per 36). This is NOT an official NBA stat.
+
+======================================================================
+Q6: Which guards draw the most charges?
+  Routing method : deterministic
+  Function matched: hustle_iq_composite
+  Answer: T.J. McConnell (IND) ranks highest on the Hustle IQ Composite (score: 3.093) — 0.853 def loose balls/36 and 0.146 charges drawn/36 in 54 games [2025-26]. NOTE: Hustle IQ Composite is a weighted z-score (60% def loose balls + 40% charges drawn per 36). This is NOT an official NBA stat.
+
+======================================================================
+Q7: Who reads the game well defensively?
+  Routing method : deterministic
+  Function matched: hustle_iq_composite
+  Answer: T.J. McConnell (IND) ranks highest on the Hustle IQ Composite (score: 3.093) — 0.853 def loose balls/36 and 0.146 charges drawn/36 in 54 games [2025-26]. NOTE: Hustle IQ Composite is a weighted z-score (60% def loose balls + 40% charges drawn per 36). This is NOT an official NBA stat.
+
+======================================================================
+Q8: Who is the best scorer in the league?
+  Routing method : error
+  Function matched: None
+  Answer: Routing error: GROQ_API_KEY is not set — cannot use the LLM fallback for this question.
+
+======================================================================
+Q9: What's the trade value of Donovan Clingan?
+  Routing method : error
+  Function matched: None
+  Answer: Routing error: GROQ_API_KEY is not set — cannot use the LLM fallback for this question.
+
+======================================================================
+Q10: Who should my team draft this year?
+  Routing method : error
+  Function matched: None
+  Answer: Routing error: GROQ_API_KEY is not set — cannot use the LLM fallback for this question.
+
+======================================================================
+Q11: How much is Victor Wembanyama worth in a trade?
+  Routing method : error
+  Function matched: None
+  Answer: Routing error: GROQ_API_KEY is not set — cannot use the LLM fallback for this question.
+
+======================================================================
+Q12: Which player has the best defensive instincts based on the numbers?
+  Routing method : deterministic
+  Function matched: hustle_iq_composite
+  Answer: T.J. McConnell (IND) ranks highest on the Hustle IQ Composite (score: 3.093) — 0.853 def loose balls/36 and 0.146 charges drawn/36 in 54 games [2025-26]. NOTE: Hustle IQ Composite is a weighted z-score (60% def loose balls + 40% charges drawn per 36). This is NOT an official NBA stat.
+
+======================================================================
+Q13: What's Clingan's points per game?
+  Routing method : error
+  Function matched: None
+  Answer: Routing error: GROQ_API_KEY is not set — cannot use the LLM fallback for this question.
+
+======================================================================
+Q14: Which players suppress shooting the most at the rim?
+  Routing method : deterministic
+  Function matched: shot_suppression
+  Answer: Khaman Maluach (PHX) leads in shot suppression (Less Than 6Ft) with opponents shooting 44.3% vs. their normal 64.2% — 19.8% worse than average (106 FGA defended) in 35 games [2025-26].
+
+======================================================================
+Q15: Who's an underrated defender that doesn't show up in the box score?
+  Routing method : deterministic
+  Function matched: hustle_vs_suppression_gap
+  Answer: Devin Booker (PHX, G) has the largest positive hustle-vs-suppression gap (GAP=+100.0) — quiet but effective. Hustle activity rank: 124, shot suppression rank: 24 (within position group). PCT_PLUSMINUS: -0.015 [2025-26]. NOTE: GAP is a custom rank-difference metric, not an official NBA stat.
+
+======================================================================
+Q16: Which player has good hustle numbers that don't translate to results?
+  Routing method : deterministic
+  Function matched: hustle_vs_suppression_gap
+  Answer: Ben Saraf (BKN, G) has the largest negative hustle-vs-suppression gap (GAP=-93.5) — busy but not impactful. Hustle activity rank: 31, shot suppression rank: 124 (within position group). PCT_PLUSMINUS: +0.059 [2025-26]. NOTE: GAP is a custom rank-difference metric, not an official NBA stat.
+
+======================================================================
+Q17: How does he defend the pick and roll ball handler?
+  Routing method : deterministic
+  Function matched: playtype_defense
+  Answer: Shai Gilgeous-Alexander (OKC) leads in pick-and-roll ball-handler defense with 0.624 PPP allowed (31.0% FG%) on 202 possessions [2025-26].
+
+======================================================================
+Q18: Who's the best roll man defender in the league?
+  Routing method : deterministic
+  Function matched: playtype_defense
+  Answer: Julian Champagnie (SAS) leads in pick-and-roll roll-man defense with 0.696 PPP allowed (33.3% FG%) on 46 possessions [2025-26]. NOTE: This reflects PPP allowed on possessions the offense chose to attack this player in the pick-and-roll. Elite rim protectors may rank lower here because opponents avoid attacking them — only the possessions where the offense attacked get logged. Do not read this as 'best rim protector.' Pair with shot suppression (rim category) for a fuller picture of interior defense.
+
+======================================================================
+Q19: How good is he at defending cuts to the basket?
+  Routing method : deterministic
+  Function matched: playtype_defense:Cut
+  Answer: Synergy doesn't publish player-level defensive data for this play type. Cut and Transition defense are not available at the individual player level — only team-level data exists for these categories in the Synergy feed.
+
+======================================================================
+Q20: Who navigates screens best on defense?
+  Routing method : deterministic
+  Function matched: playtype_defense
+  Answer: Saddiq Bey (NOP) leads in off-screen defense with 0.333 PPP allowed (16.1% FG%) on 36 possessions [2025-26].
+
+======================================================================
+Q21: Which player has improved the most at drawing charges this year?
+  Routing method : deterministic
+  Function matched: year_over_year_delta
+  Answer: Javonte Green (DET) has improved the most in Hustle IQ Composite (2024-25: 0.135 → 2025-26: 1.938, DELTA=+1.803) in 79 games this season vs. 63 last season.
+
+======================================================================
+Q22: Who has declined the most in deflections?
+  Routing method : deterministic
+  Function matched: year_over_year_delta
+  Answer: Dyson Daniels (ATL) has declined the most in deflections per 36 (2024-25: 6.27 → 2025-26: 4.51, DELTA=-1.76) in 76 games this season vs. 76 last season.
+
+======================================================================
+Q23: Is this player trending up or down defensively?
+  Routing method : error
+  Function matched: None
+  Answer: Routing error: GROQ_API_KEY is not set — cannot use the LLM fallback for this question.
+
+======================================================================
+Q24: Who's the best scorer in isolation?
+  Routing method : deterministic
+  Function matched: playtype_offense
+  Answer: Collin Sexton (CHI) leads in isolation offense with 1.375 PPP (60.9% FG%, 1.2 poss/g, 99% percentile) [2025-26].
+
+======================================================================
+Q25: How does he score coming off screens?
+  Routing method : deterministic
+  Function matched: playtype_offense
+  Answer: Jamal Murray (DEN) leads in off-screen offense with 1.522 PPP (57.9% FG%, 0.9 poss/g, 97% percentile) [2025-26]. NOTE: Off-screen is a moderate-volume action for most players in this ranking — the top qualifiers have roughly 57–100 total possessions on the season, which is real usage but not a primary action. Rankings are somewhat threshold-sensitive: small changes to the minimum-possession floor shift who qualifies and in what order. Pair with POSS/g volume when comparing players here.
+
+======================================================================
+Q26: Who cuts the most?
+  Routing method : deterministic
+  Function matched: playtype_offense
+  Answer: Jarrett Allen (CLE) leads in cutting with 4.2 cuts per game (1.311 PPP, 66.1% FG%) [2025-26]. NOTE: Sorted by cuts per game (volume), not PPP. Finishing efficiency on cuts is uniformly high across all qualifiers (roughly 1.3–1.7 PPP, 65–85% FG%) — the range is too compressed to meaningfully rank players by efficiency. Who gets the most cuts is the real signal.
+
+======================================================================
+Q27: Who's the best off-screen scorer?
+  Routing method : deterministic
+  Function matched: playtype_offense
+  Answer: Jamal Murray (DEN) leads in off-screen offense with 1.522 PPP (57.9% FG%, 0.9 poss/g, 97% percentile) [2025-26]. NOTE: Off-screen is a moderate-volume action for most players in this ranking — the top qualifiers have roughly 57–100 total possessions on the season, which is real usage but not a primary action. Rankings are somewhat threshold-sensitive: small changes to the minimum-possession floor shift who qualifies and in what order. Pair with POSS/g volume when comparing players here.
+
+======================================================================
+Q28: How does he defend the pick and roll?
+  Routing method : deterministic
+  Function matched: playtype_defense
+  Answer: Shai Gilgeous-Alexander (OKC) leads in pick-and-roll ball-handler defense with 0.624 PPP allowed (31.0% FG%) on 202 possessions [2025-26].
+
+======================================================================
+Q29: How does he score in the pick and roll as the ball handler?
+  Routing method : deterministic
+  Function matched: playtype_offense
+  Answer: Jared McCain (PHI) leads in pick-and-roll ball-handler offense with 1.333 PPP (63.3% FG%, 1.0 poss/g, 99% percentile) [2025-26].
+
+======================================================================
+Q30: Is he a good pick and roll defender?
+  Routing method : deterministic
+  Function matched: playtype_defense
+  Answer: Shai Gilgeous-Alexander (OKC) leads in pick-and-roll ball-handler defense with 0.624 PPP allowed (31.0% FG%) on 202 possessions [2025-26].
+
+======================================================================
+Q31: Rate his offensive efficiency as a pick and roll ball handler
+  Routing method : deterministic
+  Function matched: playtype_offense
+  Answer: Jared McCain (PHI) leads in pick-and-roll ball-handler offense with 1.333 PPP (63.3% FG%, 1.0 poss/g, 99% percentile) [2025-26].
+
+======================================================================
+Q32: Can he guard ball handlers in the pick and roll?
+  Routing method : deterministic
+  Function matched: playtype_defense
+  Answer: Shai Gilgeous-Alexander (OKC) leads in pick-and-roll ball-handler defense with 0.624 PPP allowed (31.0% FG%) on 202 possessions [2025-26].
+
+======================================================================
+Q33: How efficient is he finishing as the roll man?
+  Routing method : deterministic
+  Function matched: playtype_offense
+  Answer: Mitchell Robinson (NYK) leads in pick-and-roll roll-man offense with 1.698 PPP (87.8% FG%, 0.8 poss/g, 100% percentile) [2025-26].
+
+======================================================================
+Q34: Who's the most efficient driver to the basket?
+  Routing method : deterministic
+  Function matched: drive_efficiency
+  Answer: Jalen Duren (DET) leads in points per drive with 1.00 (57.1% FG% on drives, 3.6 drives/g, 2.7% assist rate) [2025-26]. NOTE: PTS_PER_DRIVE mixes fundamentally different shot types — short-roll/rim finishes for bigs who drive rarely but efficiently, vs. contested, defense-set drives for high-volume guards — so a raw efficiency ranking here shouldn't be read as "best offensive driver" without that context. For evaluating high-volume creators specifically, pair this with DRIVES (volume) and DRIVE_AST_PCT/DRIVE_PASSES_PCT (playmaking) — PTS_PER_DRIVE alone favors a different archetype.
+
+======================================================================
+Q35: Which player scores the most points per drive?
+  Routing method : deterministic
+  Function matched: drive_efficiency
+  Answer: Jalen Duren (DET) leads in points per drive with 1.00 (57.1% FG% on drives, 3.6 drives/g, 2.7% assist rate) [2025-26]. NOTE: PTS_PER_DRIVE mixes fundamentally different shot types — short-roll/rim finishes for bigs who drive rarely but efficiently, vs. contested, defense-set drives for high-volume guards — so a raw efficiency ranking here shouldn't be read as "best offensive driver" without that context. For evaluating high-volume creators specifically, pair this with DRIVES (volume) and DRIVE_AST_PCT/DRIVE_PASSES_PCT (playmaking) — PTS_PER_DRIVE alone favors a different archetype.
+
+======================================================================
+Q36: What were AJ Dybantsa's college stats?
+  Routing method : deterministic
+  Function matched: college_player_lookup
+  Answer: AJ Dybantsa (BYU, FR, pick #1) averaged 25.5 PTS, 6.8 TRB, 3.7 AST on 51.0% FG / 33.1% 3P (55.0% eFG), with 33.9% usage and 60.0% true shooting (BPM 11.7, PER 28.1) in his final college season.
+
+======================================================================
+Q37: What was Mikel Brown Jr.'s college season like?
+  Routing method : deterministic
+  Function matched: college_player_lookup
+  Answer: Mikel Brown Jr. (Louisville, FR, pick #6) averaged 18.2 PTS, 3.3 TRB, 4.7 AST on 41.0% FG / 34.4% 3P (51.1% eFG), with 31.4% usage and 57.7% true shooting (BPM 6.6, PER 20.5) in his final college season.
+
+======================================================================
+Q38: What were Karim Lopez's college stats?
+  Routing method : deterministic
+  Function matched: college_player_lookup
+  Answer: Karim Lopez (pick #21) played internationally, not in the NCAA — no college stats available for this player in this dataset.
+
+======================================================================
+Q39: Who had the highest scoring average in the 2026 draft class?
+  Routing method : deterministic
+  Function matched: college_leaderboard
+  Answer: AJ Dybantsa (BYU) leads the 2026 draft class in scoring (PTS) with 25.5. NOTE: 6 international picks in this draft class have no NCAA data source and are excluded from this ranking.
+
+======================================================================
+Q40: Who had the highest usage rate in this draft class?
+  Routing method : deterministic
+  Function matched: college_leaderboard
+  Answer: AJ Dybantsa (BYU) leads the 2026 draft class in usage rate (USG%) with 33.9. NOTE: 6 international picks in this draft class have no NCAA data source and are excluded from this ranking.
+
+======================================================================
+Q41: Who's a high-usage prospect that's also efficient in this draft class?
+  Routing method : deterministic
+  Function matched: college_efficiency_volume
+  Answer: Tyler Bilodeau (UCLA) leads the 2026 draft class in true shooting among high-usage prospects (≥24.5% USG, the qualified pool's own median), at 65.6% TS on 25.8% usage. NOTE: 6 international picks in this draft class have no NCAA data source and are excluded from this ranking. NOTE: TS% margin over the next-closest qualifier is thin (0.3 points) — Cameron Boozer leads decisively on BPM (18.7 vs. 8.9) and PER (33.7 vs. 23.3) instead, worth weighing alongside pure shooting efficiency.
+
+======================================================================
+Q42: What's Stephen Curry's signature play type?
+  Routing method : error
+  Function matched: None
+  Answer: Routing error: GROQ_API_KEY is not set — cannot use the LLM fallback for this question.
+
+======================================================================
+Q43: What does Nikola Jokic do best offensively?
+  Routing method : error
+  Function matched: None
+  Answer: Routing error: GROQ_API_KEY is not set — cannot use the LLM fallback for this question.
+
+======================================================================
+Q44: Which freshmen or sophomores are outperforming upperclassmen in BPM in this draft class?
+  Routing method : deterministic
+  Function matched: youth_adjusted_leaderboard
+  Answer: Cameron Boozer (Duke, FR) leads the 2026 draft class in box plus-minus (BPM) with 18.7. NOTE: 6 international picks in this draft class have no NCAA data source and are excluded from this ranking. NOTE: FR ranks in the top half of this specific draft class on box plus-minus (BPM) — this is a within-class observation, not a validated age-adjusted formula (no historical baseline exists in this dataset to support that stronger claim).
+
+======================================================================
+Q45: Which underclassmen are outperforming upperclassmen in PER in the 2026 draft class?
+  Routing method : deterministic
+  Function matched: youth_adjusted_leaderboard
+  Answer: Cameron Boozer (Duke, FR) leads the 2026 draft class in PER with 33.7. NOTE: 6 international picks in this draft class have no NCAA data source and are excluded from this ranking. NOTE: FR ranks in the top half of this specific draft class on PER — this is a within-class observation, not a validated age-adjusted formula (no historical baseline exists in this dataset to support that stronger claim).
+
+==================================================================
+1b. test_report.py -- full stdout (exit 0)
+==================================================================
+
+A module that was compiled using NumPy 1.x cannot be run in
+NumPy 2.0.2 as it may crash. To support both 1.x and 2.x
+versions of NumPy, modules must be compiled with NumPy 2.0.
+Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
+
+If you are a user of the module, the easiest solution will be to
+downgrade to 'numpy<2' or try to upgrade the affected module.
+We expect that some modules will need time to support NumPy 2.
+
+Traceback (most recent call last):  File "/Users/supersaiyan.06/Downloads/nba-scouting-agent/test_report.py", line 18, in <module>
+    from report import generate_scouting_report_data, compare_players_data
+  File "/Users/supersaiyan.06/Downloads/nba-scouting-agent/report.py", line 29, in <module>
+    import pandas as pd
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/__init__.py", line 49, in <module>
+    from pandas.core.api import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/api.py", line 28, in <module>
+    from pandas.core.arrays import Categorical
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/__init__.py", line 1, in <module>
+    from pandas.core.arrays.arrow import ArrowExtensionArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/arrow/__init__.py", line 5, in <module>
+    from pandas.core.arrays.arrow.array import ArrowExtensionArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/arrow/array.py", line 53, in <module>
+    from pandas.core import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/ops/__init__.py", line 8, in <module>
+    from pandas.core.ops.array_ops import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/ops/array_ops.py", line 56, in <module>
+    from pandas.core.computation import expressions
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/computation/expressions.py", line 21, in <module>
+    from pandas.core.computation.check import NUMEXPR_INSTALLED
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/computation/check.py", line 5, in <module>
+    ne = import_optional_dependency("numexpr", errors="warn")
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/compat/_optional.py", line 135, in import_optional_dependency
+    module = importlib.import_module(name)
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/numexpr/__init__.py", line 24, in <module>
+    from numexpr.interpreter import MAX_THREADS, use_vml, __BLOCK_SIZE1__
+AttributeError: _ARRAY_API not found
+
+A module that was compiled using NumPy 1.x cannot be run in
+NumPy 2.0.2 as it may crash. To support both 1.x and 2.x
+versions of NumPy, modules must be compiled with NumPy 2.0.
+Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
+
+If you are a user of the module, the easiest solution will be to
+downgrade to 'numpy<2' or try to upgrade the affected module.
+We expect that some modules will need time to support NumPy 2.
+
+Traceback (most recent call last):  File "/Users/supersaiyan.06/Downloads/nba-scouting-agent/test_report.py", line 18, in <module>
+    from report import generate_scouting_report_data, compare_players_data
+  File "/Users/supersaiyan.06/Downloads/nba-scouting-agent/report.py", line 29, in <module>
+    import pandas as pd
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/__init__.py", line 49, in <module>
+    from pandas.core.api import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/api.py", line 28, in <module>
+    from pandas.core.arrays import Categorical
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/__init__.py", line 1, in <module>
+    from pandas.core.arrays.arrow import ArrowExtensionArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/arrow/__init__.py", line 5, in <module>
+    from pandas.core.arrays.arrow.array import ArrowExtensionArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/arrow/array.py", line 67, in <module>
+    from pandas.core.arrays.masked import BaseMaskedArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/masked.py", line 61, in <module>
+    from pandas.core import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/nanops.py", line 52, in <module>
+    bn = import_optional_dependency("bottleneck", errors="warn")
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/compat/_optional.py", line 135, in import_optional_dependency
+    module = importlib.import_module(name)
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/bottleneck/__init__.py", line 7, in <module>
+    from .move import (move_argmax, move_argmin, move_max, move_mean, move_median,
+AttributeError: _ARRAY_API not found
+======================================================================
+Test 1: generate_scouting_report_data('Alex Caruso') — structure
+======================================================================
+  ok: player_name echoed correctly
+  ok: season echoed correctly
+  ok: section titles/order match expected: ['Hustle / Activity Profile', 'Shot Suppression', 'Defensive Play-Type Profile', 'Offensive Play-Type Profile', 'Drive Efficiency', 'Signature Play Type', 'Hustle-vs-Suppression Gap', 'Year-Over-Year Trend']
+  ok: Caruso qualifies for at least one hustle row (he's a real, high-minutes NBA player)
+  ok: Caruso qualifies for shot suppression (README discusses his actual suppression numbers)
+
+======================================================================
+Test 2: generate_scouting_report_data() — nonexistent player name
+======================================================================
+  ok: unknown player yields all-unqualified rows across every section, no exception
+
+======================================================================
+Test 3: compare_players_data('Alex Caruso', 'Donovan Clingan')
+======================================================================
+  ok: player labels correct
+  ok: compare sections match single-report sections (same order)
+  ok: [Hustle / Activity Profile/Deflections per 36] winner is a valid value: 'a'
+  ok: [Hustle / Activity Profile/Deflections per 36] winner only set when both players qualify
+  ok: [Hustle / Activity Profile/Contest volume per 36] winner is a valid value: 'b'
+  ok: [Hustle / Activity Profile/Contest volume per 36] winner only set when both players qualify
+  ok: [Hustle / Activity Profile/Boxout conversion rate] winner is a valid value: 'b'
+  ok: [Hustle / Activity Profile/Boxout conversion rate] winner only set when both players qualify
+  ok: [Hustle / Activity Profile/Hustle IQ composite] winner is a valid value: 'a'
+  ok: [Hustle / Activity Profile/Hustle IQ composite] winner only set when both players qualify
+  ok: [Shot Suppression/Overall] winner is a valid value: 'b'
+  ok: [Shot Suppression/Overall] winner only set when both players qualify
+  ok: [Shot Suppression/3 Pointers] winner is a valid value: 'b'
+  ok: [Shot Suppression/3 Pointers] winner only set when both players qualify
+  ok: [Shot Suppression/Rim] winner is a valid value: 'b'
+  ok: [Shot Suppression/Rim] winner only set when both players qualify
+  ok: [Defensive Play-Type Profile/Isolation] winner is a valid value: 'a'
+  ok: [Defensive Play-Type Profile/Isolation] winner only set when both players qualify
+  ok: [Defensive Play-Type Profile/PRBallHandler] winner is a valid value: 'a'
+  ok: [Defensive Play-Type Profile/PRBallHandler] winner only set when both players qualify
+  ok: [Defensive Play-Type Profile/PRRollman] winner is a valid value: None
+  ok: [Defensive Play-Type Profile/Postup] winner is a valid value: 'b'
+  ok: [Defensive Play-Type Profile/Postup] winner only set when both players qualify
+  ok: [Defensive Play-Type Profile/Spotup] winner is a valid value: 'a'
+  ok: [Defensive Play-Type Profile/Spotup] winner only set when both players qualify
+  ok: [Defensive Play-Type Profile/Handoff] winner is a valid value: None
+  ok: [Defensive Play-Type Profile/OffScreen] winner is a valid value: None
+  ok: [Offensive Play-Type Profile/Isolation] winner is a valid value: None
+  ok: [Offensive Play-Type Profile/PRBallHandler] winner is a valid value: None
+  ok: [Offensive Play-Type Profile/PRRollman] winner is a valid value: None
+  ok: [Offensive Play-Type Profile/Postup] winner is a valid value: None
+  ok: [Offensive Play-Type Profile/Spotup] winner is a valid value: 'b'
+  ok: [Offensive Play-Type Profile/Spotup] winner only set when both players qualify
+  ok: [Offensive Play-Type Profile/Handoff] winner is a valid value: None
+  ok: [Offensive Play-Type Profile/Cut] winner is a valid value: None
+  ok: [Offensive Play-Type Profile/OffScreen] winner is a valid value: None
+  ok: [Offensive Play-Type Profile/Transition] winner is a valid value: 'a'
+  ok: [Offensive Play-Type Profile/Transition] winner only set when both players qualify
+  ok: [Drive Efficiency/Drives] winner is a valid value: None
+  ok: [Signature Play Type/Signature] winner is a valid value: 'a'
+  ok: [Signature Play Type/Signature] winner only set when both players qualify
+  ok: [Hustle-vs-Suppression Gap/Gap] winner is a valid value: None
+  ok: [Year-Over-Year Trend/Deflections/36 trend] winner is a valid value: 'a'
+  ok: [Year-Over-Year Trend/Deflections/36 trend] winner only set when both players qualify
+
+======================================================================
+Test 4: Drive Efficiency section has a numeric PTS_PER_DRIVE value
+======================================================================
+  ok: Caruso qualifies for drive efficiency (real rotation player)
+  ok: drive efficiency value is a positive float: 0.5
+  ok: drive efficiency uses 'higher is better' convention
+
+======================================================================
+Test 5: Signature Play Type section — Stephen Curry ground truth
+======================================================================
+  ok: Curry's section titles/order match expected: ['Hustle / Activity Profile', 'Shot Suppression', 'Defensive Play-Type Profile', 'Offensive Play-Type Profile', 'Drive Efficiency', 'Signature Play Type', 'Hustle-vs-Suppression Gap', 'Year-Over-Year Trend']
+  ok: section title is exactly 'Signature Play Type'
+  ok: Curry qualifies for a signature play type
+  ok: Curry's signature is Handoff, per text: "Stephen Curry's signature play type is dribble handoff offense (99.6% percentile, 2.8 poss/g)."
+  ok: Curry's signature percentile is >99% as expected: 0.996
+
+======================================================================
+All checks passed.
+
+==================================================================
+1c. test_compute.py -- full stdout (exit 0)
+==================================================================
+
+A module that was compiled using NumPy 1.x cannot be run in
+NumPy 2.0.2 as it may crash. To support both 1.x and 2.x
+versions of NumPy, modules must be compiled with NumPy 2.0.
+Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
+
+If you are a user of the module, the easiest solution will be to
+downgrade to 'numpy<2' or try to upgrade the affected module.
+We expect that some modules will need time to support NumPy 2.
+
+Traceback (most recent call last):  File "/Users/supersaiyan.06/Downloads/nba-scouting-agent/test_compute.py", line 16, in <module>
+    import pandas as pd
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/__init__.py", line 49, in <module>
+    from pandas.core.api import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/api.py", line 28, in <module>
+    from pandas.core.arrays import Categorical
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/__init__.py", line 1, in <module>
+    from pandas.core.arrays.arrow import ArrowExtensionArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/arrow/__init__.py", line 5, in <module>
+    from pandas.core.arrays.arrow.array import ArrowExtensionArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/arrow/array.py", line 53, in <module>
+    from pandas.core import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/ops/__init__.py", line 8, in <module>
+    from pandas.core.ops.array_ops import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/ops/array_ops.py", line 56, in <module>
+    from pandas.core.computation import expressions
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/computation/expressions.py", line 21, in <module>
+    from pandas.core.computation.check import NUMEXPR_INSTALLED
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/computation/check.py", line 5, in <module>
+    ne = import_optional_dependency("numexpr", errors="warn")
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/compat/_optional.py", line 135, in import_optional_dependency
+    module = importlib.import_module(name)
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/numexpr/__init__.py", line 24, in <module>
+    from numexpr.interpreter import MAX_THREADS, use_vml, __BLOCK_SIZE1__
+AttributeError: _ARRAY_API not found
+
+A module that was compiled using NumPy 1.x cannot be run in
+NumPy 2.0.2 as it may crash. To support both 1.x and 2.x
+versions of NumPy, modules must be compiled with NumPy 2.0.
+Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
+
+If you are a user of the module, the easiest solution will be to
+downgrade to 'numpy<2' or try to upgrade the affected module.
+We expect that some modules will need time to support NumPy 2.
+
+Traceback (most recent call last):  File "/Users/supersaiyan.06/Downloads/nba-scouting-agent/test_compute.py", line 16, in <module>
+    import pandas as pd
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/__init__.py", line 49, in <module>
+    from pandas.core.api import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/api.py", line 28, in <module>
+    from pandas.core.arrays import Categorical
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/__init__.py", line 1, in <module>
+    from pandas.core.arrays.arrow import ArrowExtensionArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/arrow/__init__.py", line 5, in <module>
+    from pandas.core.arrays.arrow.array import ArrowExtensionArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/arrow/array.py", line 67, in <module>
+    from pandas.core.arrays.masked import BaseMaskedArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/masked.py", line 61, in <module>
+    from pandas.core import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/nanops.py", line 52, in <module>
+    bn = import_optional_dependency("bottleneck", errors="warn")
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/compat/_optional.py", line 135, in import_optional_dependency
+    module = importlib.import_module(name)
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/bottleneck/__init__.py", line 7, in <module>
+    from .move import (move_argmax, move_argmin, move_max, move_mean, move_median,
+AttributeError: _ARRAY_API not found
+======================================================================
+1. deflections_per36 — tiny fixture, known math
+======================================================================
+  ok: thin-sample player (G=5) correctly excluded, 3 of 4 rows qualify: got 3
+  ok: ranked descending by DEFLECTIONS_PER36: got ['Fixture A', 'Fixture C', 'Fixture B']
+  ok: Fixture A math: 30/20*36 = 54.0, got 54.0
+  ok: Fixture C math: 18/18*36 = 36.0, got 36.0
+  ok: Fixture B math: 10/30*36 = 12.0, got 12.0
+
+======================================================================
+2. PCT_PLUSMINUS sign convention (report._shot_suppression_section_data)
+======================================================================
+  ok: negative PCT_PLUSMINUS (-0.07) reads as 'suppresses': '-0.070 PCT_PLUSMINUS (rank #1 of 2 qualified players) — opponents shoot 40.0% vs. their normal 47.0%, this player suppresses shooting efficiency here'
+  ok: positive PCT_PLUSMINUS (+0.08) reads as 'does not suppress': '+0.080 PCT_PLUSMINUS (rank #2 of 2 qualified players) — opponents shoot 55.0% vs. their normal 47.0%, this player does not suppress shooting efficiency here'
+
+======================================================================
+3. playtype_defense — POSS threshold boundary (below / at / above)
+======================================================================
+  ok: player 1 POSS below threshold (24.0 < 25.0) correctly excluded
+  ok: player exactly at threshold (25.0) correctly included (>=, not >)
+  ok: player above threshold (26.0) correctly included
+  ok: exactly 2 of 3 fixture rows qualify: got 2
+
+======================================================================
+4. signature_play_type — 0.04 tie-margin boundary
+======================================================================
+  ok: tie margin constant is still 0.04 (guards against silent threshold drift): got 0.04
+  ok: fixture gap (0.039999999999999925) is <= the real margin constant, confirming this pair exercises the boundary
+  ok: gap at the tie-margin boundary ties (uses <=, not <): got ['A', 'B']
+  ok: gap of 0.10 (well over the 0.04 margin) does NOT tie: got ['A']
+  ok: top category below 0.60 floor -> no signature even though within tie margin: got None
+
+======================================================================
+5. resolve_player_name — exact / substring / typo / ambiguity
+======================================================================
+  ok: exact name match resolves correctly
+  ok: substring match ('Caruso') resolves to full name
+  ok: typo ('Karuso', not a substring of 'Caruso') does NOT resolve -- returns None, not a wrong guess
+  ok: ambiguous name raises ValueError naming both candidates: 'Cameron' matches multiple NBA players (Cameron Boozer, Cameron Carr) — ambiguous lookup, provide a more specific name.
+
+======================================================================
+6. Empty qualifying pool — _player_row on a filtered-out fixture
+======================================================================
+  ok: empty qualifying pool returns None (the 'insufficient sample' signal), not a crash or a misleading row
+  ok: player genuinely absent from a non-empty pool also returns None, not a wrong row
+  ok: player present in the pool returns their real row, not None
+
+======================================================================
+All checks passed.
+
+==================================================================
+1d. test_smoke.py -- full stdout (exit 0)
+==================================================================
+
+A module that was compiled using NumPy 1.x cannot be run in
+NumPy 2.0.2 as it may crash. To support both 1.x and 2.x
+versions of NumPy, modules must be compiled with NumPy 2.0.
+Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
+
+If you are a user of the module, the easiest solution will be to
+downgrade to 'numpy<2' or try to upgrade the affected module.
+We expect that some modules will need time to support NumPy 2.
+
+Traceback (most recent call last):  File "/Users/supersaiyan.06/Downloads/nba-scouting-agent/test_smoke.py", line 16, in <module>
+    from api import app
+  File "/Users/supersaiyan.06/Downloads/nba-scouting-agent/api.py", line 9, in <module>
+    import pandas as pd
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/__init__.py", line 49, in <module>
+    from pandas.core.api import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/api.py", line 28, in <module>
+    from pandas.core.arrays import Categorical
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/__init__.py", line 1, in <module>
+    from pandas.core.arrays.arrow import ArrowExtensionArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/arrow/__init__.py", line 5, in <module>
+    from pandas.core.arrays.arrow.array import ArrowExtensionArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/arrow/array.py", line 53, in <module>
+    from pandas.core import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/ops/__init__.py", line 8, in <module>
+    from pandas.core.ops.array_ops import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/ops/array_ops.py", line 56, in <module>
+    from pandas.core.computation import expressions
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/computation/expressions.py", line 21, in <module>
+    from pandas.core.computation.check import NUMEXPR_INSTALLED
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/computation/check.py", line 5, in <module>
+    ne = import_optional_dependency("numexpr", errors="warn")
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/compat/_optional.py", line 135, in import_optional_dependency
+    module = importlib.import_module(name)
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/numexpr/__init__.py", line 24, in <module>
+    from numexpr.interpreter import MAX_THREADS, use_vml, __BLOCK_SIZE1__
+AttributeError: _ARRAY_API not found
+
+A module that was compiled using NumPy 1.x cannot be run in
+NumPy 2.0.2 as it may crash. To support both 1.x and 2.x
+versions of NumPy, modules must be compiled with NumPy 2.0.
+Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
+
+If you are a user of the module, the easiest solution will be to
+downgrade to 'numpy<2' or try to upgrade the affected module.
+We expect that some modules will need time to support NumPy 2.
+
+Traceback (most recent call last):  File "/Users/supersaiyan.06/Downloads/nba-scouting-agent/test_smoke.py", line 16, in <module>
+    from api import app
+  File "/Users/supersaiyan.06/Downloads/nba-scouting-agent/api.py", line 9, in <module>
+    import pandas as pd
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/__init__.py", line 49, in <module>
+    from pandas.core.api import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/api.py", line 28, in <module>
+    from pandas.core.arrays import Categorical
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/__init__.py", line 1, in <module>
+    from pandas.core.arrays.arrow import ArrowExtensionArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/arrow/__init__.py", line 5, in <module>
+    from pandas.core.arrays.arrow.array import ArrowExtensionArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/arrow/array.py", line 67, in <module>
+    from pandas.core.arrays.masked import BaseMaskedArray
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/masked.py", line 61, in <module>
+    from pandas.core import (
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/core/nanops.py", line 52, in <module>
+    bn = import_optional_dependency("bottleneck", errors="warn")
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/pandas/compat/_optional.py", line 135, in import_optional_dependency
+    module = importlib.import_module(name)
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "/Users/supersaiyan.06/anaconda3/lib/python3.9/site-packages/bottleneck/__init__.py", line 7, in <module>
+    from .move import (move_argmax, move_argmin, move_max, move_mean, move_median,
+AttributeError: _ARRAY_API not found
+Smoke test passed: /health returned {'status': 'ok', 'current_season_rows': 581, 'prior_season_rows': 567, 'groq_key_configured': False}
+
+==================================================================
+2a. Live uvicorn -- GET /health
+==================================================================
+{"status":"ok","current_season_rows":581,"prior_season_rows":567,"groq_key_configured":false}
+
+==================================================================
+2b. Live uvicorn -- POST /query
+    {"question":"Who leads the league in deflections per 36 minutes?"}
+==================================================================
+{
+    "question": "Who leads the league in deflections per 36 minutes?",
+    "response_type": "answer",
+    "answer": "Dru Smith (MIA) leads in deflections per 36 with 6.21 in 68 games averaging 16.7 minutes [2025-26].",
+    "function_matched": "deflections_per36",
+    "method": "deterministic",
+    "table": [
+        {
+            "PLAYER_NAME": "Dru Smith",
+            "TEAM_ABBREVIATION": "MIA",
+            "G": 68,
+            "MIN": 16.7,
+            "DEFLECTIONS_PER36": 6.21
+        },
+        {
+            "PLAYER_NAME": "Ausar Thompson",
+            "TEAM_ABBREVIATION": "DET",
+            "G": 73,
+            "MIN": 26.0,
+            "DEFLECTIONS_PER36": 6.09
+        },
+        {
+            "PLAYER_NAME": "Alex Caruso",
+            "TEAM_ABBREVIATION": "OKC",
+            "G": 56,
+            "MIN": 18.2,
+            "DEFLECTIONS_PER36": 6.07
+        },
+        {
+            "PLAYER_NAME": "Cason Wallace",
+            "TEAM_ABBREVIATION": "OKC",
+            "G": 77,
+            "MIN": 26.6,
+            "DEFLECTIONS_PER36": 5.95
+        },
+        {
+            "PLAYER_NAME": "Jordan Goodwin",
+            "TEAM_ABBREVIATION": "PHX",
+            "G": 70,
+            "MIN": 22.5,
+            "DEFLECTIONS_PER36": 5.94
+        },
+        {
+            "PLAYER_NAME": "Javonte Green",
+            "TEAM_ABBREVIATION": "DET",
+            "G": 79,
+            "MIN": 18.1,
+            "DEFLECTIONS_PER36": 5.21
+        },
+        {
+            "PLAYER_NAME": "Ziaire Williams",
+            "TEAM_ABBREVIATION": "BKN",
+            "G": 55,
+            "MIN": 23.0,
+            "DEFLECTIONS_PER36": 4.95
+        },
+        {
+            "PLAYER_NAME": "John Konchar",
+            "TEAM_ABBREVIATION": "UTA",
+            "G": 53,
+            "MIN": 20.7,
+            "DEFLECTIONS_PER36": 4.89
+        },
+        {
+            "PLAYER_NAME": "Kelly Oubre Jr.",
+            "TEAM_ABBREVIATION": "PHI",
+            "G": 50,
+            "MIN": 31.5,
+            "DEFLECTIONS_PER36": 4.85
+        },
+        {
+            "PLAYER_NAME": "Reed Sheppard",
+            "TEAM_ABBREVIATION": "HOU",
+            "G": 82,
+            "MIN": 26.2,
+            "DEFLECTIONS_PER36": 4.84
+        },
+        {
+            "PLAYER_NAME": "Gary Payton II",
+            "TEAM_ABBREVIATION": "GSW",
+            "G": 71,
+            "MIN": 15.8,
+            "DEFLECTIONS_PER36": 4.78
+        },
+        {
+            "PLAYER_NAME": "Kris Dunn",
+            "TEAM_ABBREVIATION": "LAC",
+            "G": 82,
+            "MIN": 27.2,
+            "DEFLECTIONS_PER36": 4.78
+        },
+        {
+            "PLAYER_NAME": "Keon Ellis",
+            "TEAM_ABBREVIATION": "CLE",
+            "G": 70,
+            "MIN": 20.9,
+            "DEFLECTIONS_PER36": 4.77
+        },
+        {
+            "PLAYER_NAME": "Day'Ron Sharpe",
+            "TEAM_ABBREVIATION": "BKN",
+            "G": 62,
+            "MIN": 18.7,
+            "DEFLECTIONS_PER36": 4.72
+        },
+        {
+            "PLAYER_NAME": "Josh Minott",
+            "TEAM_ABBREVIATION": "BKN",
+            "G": 48,
+            "MIN": 17.3,
+            "DEFLECTIONS_PER36": 4.72
+        },
+        {
+            "PLAYER_NAME": "Kyle Anderson",
+            "TEAM_ABBREVIATION": "MIN",
+            "G": 43,
+            "MIN": 19.8,
+            "DEFLECTIONS_PER36": 4.56
+        },
+        {
+            "PLAYER_NAME": "De'Anthony Melton",
+            "TEAM_ABBREVIATION": "GSW",
+            "G": 49,
+            "MIN": 23.0,
+            "DEFLECTIONS_PER36": 4.54
+        },
+        {
+            "PLAYER_NAME": "Ryan Rollins",
+            "TEAM_ABBREVIATION": "MIL",
+            "G": 74,
+            "MIN": 32.1,
+            "DEFLECTIONS_PER36": 4.53
+        },
+        {
+            "PLAYER_NAME": "Dyson Daniels",
+            "TEAM_ABBREVIATION": "ATL",
+            "G": 76,
+            "MIN": 33.2,
+            "DEFLECTIONS_PER36": 4.51
+        },
+        {
+            "PLAYER_NAME": "Collin Murray-Boyles",
+            "TEAM_ABBREVIATION": "TOR",
+            "G": 57,
+            "MIN": 21.9,
+            "DEFLECTIONS_PER36": 4.5
+        },
+        {
+            "PLAYER_NAME": "Jake LaRavia",
+            "TEAM_ABBREVIATION": "LAL",
+            "G": 82,
+            "MIN": 25.1,
+            "DEFLECTIONS_PER36": 4.49
+        },
+        {
+            "PLAYER_NAME": "T.J. McConnell",
+            "TEAM_ABBREVIATION": "IND",
+            "G": 54,
+            "MIN": 17.3,
+            "DEFLECTIONS_PER36": 4.47
+        },
+        {
+            "PLAYER_NAME": "Herbert Jones",
+            "TEAM_ABBREVIATION": "NOP",
+            "G": 56,
+            "MIN": 28.4,
+            "DEFLECTIONS_PER36": 4.44
+        },
+        {
+            "PLAYER_NAME": "Jalen Suggs",
+            "TEAM_ABBREVIATION": "ORL",
+            "G": 57,
+            "MIN": 27.6,
+            "DEFLECTIONS_PER36": 4.4
+        },
+        {
+            "PLAYER_NAME": "Craig Porter Jr.",
+            "TEAM_ABBREVIATION": "CLE",
+            "G": 62,
+            "MIN": 18.4,
+            "DEFLECTIONS_PER36": 4.38
+        }
+    ],
+    "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+}
+
+==================================================================
+3. Live uvicorn -- POST /report {"player_name":"Alex Caruso"}
+   Full literal JSON, all 8 section titles present
+==================================================================
+{
+    "player_name": "Alex Caruso",
+    "season": "2025-26",
+    "sections": [
+        {
+            "title": "Hustle / Activity Profile",
+            "rows": [
+                {
+                    "label": "Deflections per 36",
+                    "qualified": true,
+                    "text": "6.07 (rank #3 of 308 qualified players)",
+                    "caveats": [],
+                    "value": 6.07,
+                    "better": "higher"
+                },
+                {
+                    "label": "Contest volume per 36",
+                    "qualified": true,
+                    "text": "4.67 (rank #199 of 308 qualified players)",
+                    "caveats": [],
+                    "value": 4.67,
+                    "better": "higher"
+                },
+                {
+                    "label": "Boxout conversion rate",
+                    "qualified": true,
+                    "text": "0.5526 (rank #130 of 197 qualified players)",
+                    "caveats": [],
+                    "value": 0.5526,
+                    "better": "higher"
+                },
+                {
+                    "label": "Hustle IQ composite",
+                    "qualified": true,
+                    "text": "1.661 (rank #10 of 308 qualified players)",
+                    "caveats": [
+                        "NOT an official NBA stat \u2014 weighted z-score of def. loose balls + charges drawn."
+                    ],
+                    "value": 1.661,
+                    "better": "higher"
+                }
+            ]
+        },
+        {
+            "title": "Shot Suppression",
+            "rows": [
+                {
+                    "label": "Overall",
+                    "qualified": true,
+                    "text": "-0.018 PCT_PLUSMINUS (rank #118 of 449 qualified players) \u2014 opponents shoot 45.3% vs. their normal 47.1%, this player suppresses shooting efficiency here",
+                    "caveats": [],
+                    "value": -0.018,
+                    "better": "lower"
+                },
+                {
+                    "label": "3 Pointers",
+                    "qualified": true,
+                    "text": "+0.031 PCT_PLUSMINUS (rank #291 of 346 qualified players) \u2014 opponents shoot 38.8% vs. their normal 35.7%, this player does not suppress shooting efficiency here",
+                    "caveats": [],
+                    "value": 0.031,
+                    "better": "lower"
+                },
+                {
+                    "label": "Rim",
+                    "qualified": true,
+                    "text": "+0.022 PCT_PLUSMINUS (rank #272 of 345 qualified players) \u2014 opponents shoot 66.1% vs. their normal 63.9%, this player does not suppress shooting efficiency here",
+                    "caveats": [],
+                    "value": 0.022,
+                    "better": "lower"
+                }
+            ]
+        },
+        {
+            "title": "Defensive Play-Type Profile",
+            "rows": [
+                {
+                    "label": "Isolation",
+                    "qualified": true,
+                    "text": "0.778 PPP allowed (33.3% FG%) on 27 possessions (rank #51 of 300 qualified players)",
+                    "caveats": [],
+                    "value": 0.778,
+                    "better": "lower"
+                },
+                {
+                    "label": "PRBallHandler",
+                    "qualified": true,
+                    "text": "0.815 PPP allowed (39.8% FG%) on 135 possessions (rank #75 of 308 qualified players)",
+                    "caveats": [],
+                    "value": 0.815,
+                    "better": "lower"
+                },
+                {
+                    "label": "PRRollman",
+                    "qualified": false,
+                    "text": "Insufficient sample for PRRollman defense this season.",
+                    "caveats": [],
+                    "value": null,
+                    "better": null
+                },
+                {
+                    "label": "Postup",
+                    "qualified": true,
+                    "text": "1.333 PPP allowed (72.2% FG%) on 21 possessions (rank #197 of 206 qualified players)",
+                    "caveats": [],
+                    "value": 1.333,
+                    "better": "lower"
+                },
+                {
+                    "label": "Spotup",
+                    "qualified": true,
+                    "text": "1.035 PPP allowed (39.2% FG%) on 141 possessions (rank #135 of 314 qualified players)",
+                    "caveats": [],
+                    "value": 1.035,
+                    "better": "lower"
+                },
+                {
+                    "label": "Handoff",
+                    "qualified": false,
+                    "text": "Insufficient sample for Handoff defense this season.",
+                    "caveats": [],
+                    "value": null,
+                    "better": null
+                },
+                {
+                    "label": "OffScreen",
+                    "qualified": false,
+                    "text": "Insufficient sample for OffScreen defense this season.",
+                    "caveats": [],
+                    "value": null,
+                    "better": null
+                }
+            ]
+        },
+        {
+            "title": "Offensive Play-Type Profile",
+            "rows": [
+                {
+                    "label": "Isolation",
+                    "qualified": false,
+                    "text": "Insufficient sample for Isolation offense this season.",
+                    "caveats": [],
+                    "value": null,
+                    "better": null
+                },
+                {
+                    "label": "PRBallHandler",
+                    "qualified": false,
+                    "text": "Insufficient sample for PRBallHandler offense this season.",
+                    "caveats": [],
+                    "value": null,
+                    "better": null
+                },
+                {
+                    "label": "PRRollman",
+                    "qualified": false,
+                    "text": "Insufficient sample for PRRollman offense this season.",
+                    "caveats": [],
+                    "value": null,
+                    "better": null
+                },
+                {
+                    "label": "Postup",
+                    "qualified": false,
+                    "text": "Insufficient sample for Postup offense this season.",
+                    "caveats": [],
+                    "value": null,
+                    "better": null
+                },
+                {
+                    "label": "Spotup",
+                    "qualified": true,
+                    "text": "0.95 PPP (33.3% FG%), 2.7 poss/game (~138 total this season) (rank #262 of 363 qualified players)",
+                    "caveats": [],
+                    "value": 0.95,
+                    "better": "higher"
+                },
+                {
+                    "label": "Handoff",
+                    "qualified": false,
+                    "text": "Insufficient sample for Handoff offense this season.",
+                    "caveats": [],
+                    "value": null,
+                    "better": null
+                },
+                {
+                    "label": "Cut",
+                    "qualified": false,
+                    "text": "Insufficient sample for Cut offense this season.",
+                    "caveats": [],
+                    "value": null,
+                    "better": null
+                },
+                {
+                    "label": "OffScreen",
+                    "qualified": false,
+                    "text": "Insufficient sample for OffScreen offense this season.",
+                    "caveats": [],
+                    "value": null,
+                    "better": null
+                },
+                {
+                    "label": "Transition",
+                    "qualified": true,
+                    "text": "1.269 PPP (58.2% FG%), 1.3 poss/game (~66 total this season) (rank #60 of 319 qualified players)",
+                    "caveats": [],
+                    "value": 1.269,
+                    "better": "higher"
+                }
+            ]
+        },
+        {
+            "title": "Drive Efficiency",
+            "rows": [
+                {
+                    "label": "Drives",
+                    "qualified": true,
+                    "text": "0.50 points/drive (44.2% FG% on drives), 1.8 drives/game, 11.0% assist rate, 7.0% turnover rate (rank #195 of 309 qualified players)",
+                    "caveats": [
+                        "PTS_PER_DRIVE mixes fundamentally different shot types \u2014 short-roll/rim finishes for bigs who drive rarely but efficiently, vs. contested, defense-set drives for high-volume guards \u2014 so a raw efficiency ranking here shouldn't be read as \"best offensive driver\" without that context. For evaluating high-volume creators specifically, pair this with DRIVES (volume) and DRIVE_AST_PCT/DRIVE_PASSES_PCT (playmaking) \u2014 PTS_PER_DRIVE alone favors a different archetype."
+                    ],
+                    "value": 0.5,
+                    "better": "higher"
+                }
+            ]
+        },
+        {
+            "title": "Signature Play Type",
+            "rows": [
+                {
+                    "label": "Signature",
+                    "qualified": true,
+                    "text": "Alex Caruso's signature play type is transition offense (78.7% percentile, 1.3 poss/g).",
+                    "caveats": [],
+                    "value": 0.787,
+                    "better": "higher"
+                }
+            ]
+        },
+        {
+            "title": "Hustle-vs-Suppression Gap",
+            "rows": [
+                {
+                    "label": "Gap",
+                    "qualified": true,
+                    "text": "GAP: +8.0 -> quiet but effective. Hustle activity rank: #28 of 130 (position group: G) | Suppression rank: #20 of 130 (position group: G). Deflections/36: 6.07 | Contested shots/36: 4.67 | Suppression PCT_PLUSMINUS: -0.018. 3PT suppression (for contrast): +0.031 PCT_PLUSMINUS (rank #291 of 346 qualified players)",
+                    "caveats": [
+                        "GAP is a custom rank-difference metric, not an official NBA stat. Hustle activity rank here is a blend of deflections and contest volume, ranked only within this player's position group \u2014 it will not match the league-wide, single-metric ranks shown in the Hustle/Activity section, which measure different things.",
+                        "This GAP is calculated from Overall shot suppression, not the 3PT-specific category \u2014 a player can suppress efficiency overall while being weaker from a specific zone. See the Shot Suppression section for the category breakdown; the same player's 3PT suppression figure is repeated below for direct contrast with the Overall number above."
+                    ],
+                    "value": 8.0,
+                    "better": null
+                }
+            ]
+        },
+        {
+            "title": "Year-Over-Year Trend",
+            "rows": [
+                {
+                    "label": "Deflections/36 trend",
+                    "qualified": true,
+                    "text": "Deflections/36: 6.45 -> 6.07 (-0.38, trending down)",
+                    "caveats": [],
+                    "value": -0.38,
+                    "better": "higher"
+                }
+            ]
+        }
+    ],
+    "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+}
+
+==================================================================
+4a. git status --porcelain
+==================================================================
+ M README.md
+ M api.py
+ M compute_college.py
+ M compute_defense.py
+ M compute_offense.py
+R  data_manifest.json -> data/data_manifest.json
+R  draft_class_2026.csv -> data/draft_class_2026.csv
+R  drives_2025_26.csv -> data/drives_2025_26.csv
+R  hustle_stats_2024_25.csv -> data/hustle_stats_2024_25.csv
+R  hustle_stats_2025_26.csv -> data/hustle_stats_2025_26.csv
+R  playtype_defense_cut_2025_26.csv -> data/playtype_defense_cut_2025_26.csv
+R  playtype_defense_handoff_2025_26.csv -> data/playtype_defense_handoff_2025_26.csv
+R  playtype_defense_isolation_2025_26.csv -> data/playtype_defense_isolation_2025_26.csv
+R  playtype_defense_offscreen_2025_26.csv -> data/playtype_defense_offscreen_2025_26.csv
+R  playtype_defense_postup_2025_26.csv -> data/playtype_defense_postup_2025_26.csv
+R  playtype_defense_prballhandler_2025_26.csv -> data/playtype_defense_prballhandler_2025_26.csv
+R  playtype_defense_prrollman_2025_26.csv -> data/playtype_defense_prrollman_2025_26.csv
+R  playtype_defense_spotup_2025_26.csv -> data/playtype_defense_spotup_2025_26.csv
+R  playtype_defense_transition_2025_26.csv -> data/playtype_defense_transition_2025_26.csv
+R  playtype_offense_cut_2025_26.csv -> data/playtype_offense_cut_2025_26.csv
+R  playtype_offense_handoff_2025_26.csv -> data/playtype_offense_handoff_2025_26.csv
+R  playtype_offense_isolation_2025_26.csv -> data/playtype_offense_isolation_2025_26.csv
+R  playtype_offense_offscreen_2025_26.csv -> data/playtype_offense_offscreen_2025_26.csv
+R  playtype_offense_postup_2025_26.csv -> data/playtype_offense_postup_2025_26.csv
+R  playtype_offense_prballhandler_2025_26.csv -> data/playtype_offense_prballhandler_2025_26.csv
+R  playtype_offense_prrollman_2025_26.csv -> data/playtype_offense_prrollman_2025_26.csv
+R  playtype_offense_spotup_2025_26.csv -> data/playtype_offense_spotup_2025_26.csv
+R  playtype_offense_transition_2025_26.csv -> data/playtype_offense_transition_2025_26.csv
+R  shot_defense_2pt_2025_26.csv -> data/shot_defense_2pt_2025_26.csv
+R  shot_defense_3pt_2025_26.csv -> data/shot_defense_3pt_2025_26.csv
+R  shot_defense_overall_2025_26.csv -> data/shot_defense_overall_2025_26.csv
+R  shot_defense_rim_2025_26.csv -> data/shot_defense_rim_2025_26.csv
+R  compare_caruso_jones.png -> docs/screenshots/compare_caruso_jones.png
+R  nba_crossside_followup.png -> docs/screenshots/nba_crossside_followup.png
+R  nba_offense_chips.png -> docs/screenshots/nba_offense_chips.png
+R  nba_offscreen_answer.png -> docs/screenshots/nba_offscreen_answer.png
+R  report_Alex_Caruso.png -> docs/screenshots/report_Alex_Caruso.png
+R  report_Alex_Caruso_full.png -> docs/screenshots/report_Alex_Caruso_full.png
+ M generate_manifest.py
+ M hustle_stats.py
+ M query_router.py
+ M refresh_data.sh
+ M report.py
+R  explore_college.py -> scripts/explore_college.py
+RM explore_offense.py -> scripts/explore_offense.py
+RM explore_playtype_defense.py -> scripts/explore_playtype_defense.py
+RM explore_shot_defense.py -> scripts/explore_shot_defense.py
+RM pull_2026_draft_class.py -> scripts/pull_2026_draft_class.py
+ M test_router.py
+?? SCHEMA_VALIDATION_TEST_OUTPUT.txt
+
+==================================================================
+4b. git diff --stat
+==================================================================
+ README.md                           |  6 +++---
+ api.py                              | 28 ++++++++++++++--------------
+ compute_college.py                  |  2 +-
+ compute_defense.py                  | 20 ++++++++++----------
+ compute_offense.py                  | 22 +++++++++++-----------
+ generate_manifest.py                | 22 +++++++++++-----------
+ hustle_stats.py                     |  4 ++--
+ query_router.py                     | 12 ++++++------
+ refresh_data.sh                     |  8 ++++----
+ report.py                           | 10 +++++-----
+ scripts/explore_offense.py          |  4 ++--
+ scripts/explore_playtype_defense.py |  2 +-
+ scripts/explore_shot_defense.py     |  8 ++++----
+ scripts/pull_2026_draft_class.py    |  2 +-
+ test_router.py                      |  4 ++--
+ 15 files changed, 77 insertions(+), 77 deletions(-)

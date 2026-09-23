@@ -1,0 +1,400 @@
+==================================================================
+1. deflections_per36 -- audit block (POST /query)
+   question: "Who leads the league in deflections per 36 minutes?"
+==================================================================
+function_matched: deflections_per36
+answer: Dru Smith (MIA) leads in deflections per 36 with 6.21 in 68 games averaging 16.7 minutes [2025-26].
+{
+  "intent": "deflections_per36",
+  "parameters": {
+    "min_minutes": 15,
+    "min_games": 40
+  },
+  "qualifying_pool_size": 308,
+  "routing_method": "deterministic",
+  "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+}
+
+==================================================================
+2. shot_suppression (rim category) -- audit block (POST /query)
+   question: "Which players suppress shooting the most at the rim?"
+==================================================================
+function_matched: shot_suppression
+answer: Khaman Maluach (PHX) leads in shot suppression (Less Than 6Ft) with opponents shooting 44.3% vs. their normal 64.2% — 19.8% worse than average (106 FGA defended) in 35 games [2025-26].
+{
+  "intent": "shot_suppression",
+  "parameters": {
+    "category": "Less Than 6Ft",
+    "min_def_fga": 100
+  },
+  "qualifying_pool_size": 345,
+  "routing_method": "deterministic",
+  "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+}
+
+==================================================================
+3. playtype_defense PRRollman -- audit block (POST /query)
+   question: "Who is the best roll man defender in the league?"
+==================================================================
+function_matched: playtype_defense
+answer: Julian Champagnie (SAS) leads in pick-and-roll roll-man defense with 0.696 PPP allowed (33.3% FG%) on 46 possessions [2025-26]. NOTE: This reflects PPP allowed on possessions the offense chose to attack this player in the pick-and-roll. Elite rim protectors may rank lower here because opponents avoid attacking them — only the possessions where the offense attacked get logged. Do not read this as 'best rim protector.' Pair with shot suppression (rim category) for a fuller picture of interior defense.
+{
+  "intent": "playtype_defense",
+  "parameters": {
+    "play_type": "PRRollman",
+    "min_poss": 27
+  },
+  "qualifying_pool_size": 291,
+  "routing_method": "deterministic",
+  "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+}
+
+==================================================================
+4. college_efficiency_volume -- audit block (POST /query)
+   question: "Who is a high-usage prospect that is also efficient in this draft class?"
+==================================================================
+function_matched: college_efficiency_volume
+answer: Tyler Bilodeau (UCLA) leads the 2026 draft class in true shooting among high-usage prospects (≥24.5% USG, the qualified pool's own median), at 65.6% TS on 25.8% usage. NOTE: 6 international picks in this draft class have no NCAA data source and are excluded from this ranking. NOTE: TS% margin over the next-closest qualifier is thin (0.3 points) — Cameron Boozer leads decisively on BPM (18.7 vs. 8.9) and PER (33.7 vs. 23.3) instead, worth weighing alongside pure shooting efficiency.
+{
+  "intent": "college_efficiency_volume",
+  "parameters": {
+    "min_usg_pct": 24.5
+  },
+  "qualifying_pool_size": 28,
+  "routing_method": "deterministic",
+  "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+}
+
+==================================================================
+5. POST /report {"player_name":"Alex Caruso"}
+   Full Hustle / Activity Profile and Defensive Play-Type Profile
+   sections, including per-section audit list
+==================================================================
+player_name: Alex Caruso
+season: 2025-26
+data_as_of: 2026-08-10T05:59:00.375646+00:00
+
+=== SECTION: Hustle / Activity Profile ===
+{
+  "title": "Hustle / Activity Profile",
+  "rows": [
+    {
+      "label": "Deflections per 36",
+      "qualified": true,
+      "text": "6.07 (rank #3 of 308 qualified players)",
+      "caveats": [],
+      "value": 6.07,
+      "better": "higher"
+    },
+    {
+      "label": "Contest volume per 36",
+      "qualified": true,
+      "text": "4.67 (rank #199 of 308 qualified players)",
+      "caveats": [],
+      "value": 4.67,
+      "better": "higher"
+    },
+    {
+      "label": "Boxout conversion rate",
+      "qualified": true,
+      "text": "0.5526 (rank #130 of 197 qualified players)",
+      "caveats": [],
+      "value": 0.5526,
+      "better": "higher"
+    },
+    {
+      "label": "Hustle IQ composite",
+      "qualified": true,
+      "text": "1.661 (rank #10 of 308 qualified players)",
+      "caveats": [
+        "NOT an official NBA stat \u2014 weighted z-score of def. loose balls + charges drawn."
+      ],
+      "value": 1.661,
+      "better": "higher"
+    }
+  ],
+  "audit": [
+    {
+      "intent": "deflections_per36",
+      "parameters": {
+        "min_minutes": 15,
+        "min_games": 40
+      },
+      "qualifying_pool_size": 308,
+      "routing_method": "deterministic",
+      "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+    },
+    {
+      "intent": "contest_profile_per36",
+      "parameters": {
+        "min_minutes": 15,
+        "min_games": 40
+      },
+      "qualifying_pool_size": 308,
+      "routing_method": "deterministic",
+      "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+    },
+    {
+      "intent": "boxout_conversion",
+      "parameters": {
+        "min_boxouts": 20,
+        "min_games": 40
+      },
+      "qualifying_pool_size": 197,
+      "routing_method": "deterministic",
+      "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+    },
+    {
+      "intent": "hustle_iq_composite",
+      "parameters": {
+        "min_minutes": 15,
+        "min_games": 40
+      },
+      "qualifying_pool_size": 308,
+      "routing_method": "deterministic",
+      "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+    }
+  ]
+}
+
+=== SECTION: Defensive Play-Type Profile ===
+{
+  "title": "Defensive Play-Type Profile",
+  "rows": [
+    {
+      "label": "Isolation",
+      "qualified": true,
+      "text": "0.778 PPP allowed (33.3% FG%) on 27 possessions (rank #51 of 300 qualified players)",
+      "caveats": [],
+      "value": 0.778,
+      "better": "lower"
+    },
+    {
+      "label": "PRBallHandler",
+      "qualified": true,
+      "text": "0.815 PPP allowed (39.8% FG%) on 135 possessions (rank #75 of 308 qualified players)",
+      "caveats": [],
+      "value": 0.815,
+      "better": "lower"
+    },
+    {
+      "label": "PRRollman",
+      "qualified": false,
+      "text": "Insufficient sample for PRRollman defense this season.",
+      "caveats": [],
+      "value": null,
+      "better": null
+    },
+    {
+      "label": "Postup",
+      "qualified": true,
+      "text": "1.333 PPP allowed (72.2% FG%) on 21 possessions (rank #197 of 206 qualified players)",
+      "caveats": [],
+      "value": 1.333,
+      "better": "lower"
+    },
+    {
+      "label": "Spotup",
+      "qualified": true,
+      "text": "1.035 PPP allowed (39.2% FG%) on 141 possessions (rank #135 of 314 qualified players)",
+      "caveats": [],
+      "value": 1.035,
+      "better": "lower"
+    },
+    {
+      "label": "Handoff",
+      "qualified": false,
+      "text": "Insufficient sample for Handoff defense this season.",
+      "caveats": [],
+      "value": null,
+      "better": null
+    },
+    {
+      "label": "OffScreen",
+      "qualified": false,
+      "text": "Insufficient sample for OffScreen defense this season.",
+      "caveats": [],
+      "value": null,
+      "better": null
+    }
+  ],
+  "audit": [
+    {
+      "intent": "playtype_defense",
+      "parameters": {
+        "play_type": "Isolation",
+        "min_poss": 25
+      },
+      "qualifying_pool_size": 300,
+      "routing_method": "deterministic",
+      "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+    },
+    {
+      "intent": "playtype_defense",
+      "parameters": {
+        "play_type": "PRBallHandler",
+        "min_poss": 90
+      },
+      "qualifying_pool_size": 308,
+      "routing_method": "deterministic",
+      "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+    },
+    {
+      "intent": "playtype_defense",
+      "parameters": {
+        "play_type": "PRRollman",
+        "min_poss": 27
+      },
+      "qualifying_pool_size": 291,
+      "routing_method": "deterministic",
+      "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+    },
+    {
+      "intent": "playtype_defense",
+      "parameters": {
+        "play_type": "Postup",
+        "min_poss": 19
+      },
+      "qualifying_pool_size": 206,
+      "routing_method": "deterministic",
+      "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+    },
+    {
+      "intent": "playtype_defense",
+      "parameters": {
+        "play_type": "Spotup",
+        "min_poss": 76
+      },
+      "qualifying_pool_size": 314,
+      "routing_method": "deterministic",
+      "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+    },
+    {
+      "intent": "playtype_defense",
+      "parameters": {
+        "play_type": "Handoff",
+        "min_poss": 24
+      },
+      "qualifying_pool_size": 196,
+      "routing_method": "deterministic",
+      "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+    },
+    {
+      "intent": "playtype_defense",
+      "parameters": {
+        "play_type": "OffScreen",
+        "min_poss": 20
+      },
+      "qualifying_pool_size": 195,
+      "routing_method": "deterministic",
+      "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+    }
+  ]
+}
+
+==================================================================
+6. POST /compare {"player_a":"Alex Caruso","player_b":"Donovan Clingan"}
+   Shot Suppression section, including per-section audit list
+==================================================================
+player_a: Alex Caruso
+player_b: Donovan Clingan
+season: 2025-26
+
+=== SECTION: Shot Suppression ===
+{
+  "title": "Shot Suppression",
+  "rows": [
+    {
+      "label": "Overall",
+      "a": {
+        "label": "Overall",
+        "qualified": true,
+        "text": "-0.018 PCT_PLUSMINUS (rank #118 of 449 qualified players) \u2014 opponents shoot 45.3% vs. their normal 47.1%, this player suppresses shooting efficiency here",
+        "caveats": [],
+        "value": -0.018,
+        "better": "lower"
+      },
+      "b": {
+        "label": "Overall",
+        "qualified": true,
+        "text": "-0.042 PCT_PLUSMINUS (rank #39 of 449 qualified players) \u2014 opponents shoot 45.4% vs. their normal 49.6%, this player suppresses shooting efficiency here",
+        "caveats": [],
+        "value": -0.042,
+        "better": "lower"
+      },
+      "winner": "b"
+    },
+    {
+      "label": "3 Pointers",
+      "a": {
+        "label": "3 Pointers",
+        "qualified": true,
+        "text": "+0.031 PCT_PLUSMINUS (rank #291 of 346 qualified players) \u2014 opponents shoot 38.8% vs. their normal 35.7%, this player does not suppress shooting efficiency here",
+        "caveats": [],
+        "value": 0.031,
+        "better": "lower"
+      },
+      "b": {
+        "label": "3 Pointers",
+        "qualified": true,
+        "text": "+0.026 PCT_PLUSMINUS (rank #279 of 346 qualified players) \u2014 opponents shoot 38.4% vs. their normal 35.8%, this player does not suppress shooting efficiency here",
+        "caveats": [],
+        "value": 0.026,
+        "better": "lower"
+      },
+      "winner": "b"
+    },
+    {
+      "label": "Rim",
+      "a": {
+        "label": "Rim",
+        "qualified": true,
+        "text": "+0.022 PCT_PLUSMINUS (rank #272 of 345 qualified players) \u2014 opponents shoot 66.1% vs. their normal 63.9%, this player does not suppress shooting efficiency here",
+        "caveats": [],
+        "value": 0.022,
+        "better": "lower"
+      },
+      "b": {
+        "label": "Rim",
+        "qualified": true,
+        "text": "-0.099 PCT_PLUSMINUS (rank #21 of 345 qualified players) \u2014 opponents shoot 54.6% vs. their normal 64.5%, this player suppresses shooting efficiency here",
+        "caveats": [],
+        "value": -0.099,
+        "better": "lower"
+      },
+      "winner": "b"
+    }
+  ],
+  "audit": [
+    {
+      "intent": "shot_suppression",
+      "parameters": {
+        "category": "Overall",
+        "min_def_fga": 100
+      },
+      "qualifying_pool_size": 449,
+      "routing_method": "deterministic",
+      "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+    },
+    {
+      "intent": "shot_suppression",
+      "parameters": {
+        "category": "3 Pointers",
+        "min_def_fga": 100
+      },
+      "qualifying_pool_size": 346,
+      "routing_method": "deterministic",
+      "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+    },
+    {
+      "intent": "shot_suppression",
+      "parameters": {
+        "category": "Less Than 6Ft",
+        "min_def_fga": 100
+      },
+      "qualifying_pool_size": 345,
+      "routing_method": "deterministic",
+      "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+    }
+  ]
+}

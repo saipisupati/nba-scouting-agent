@@ -1,0 +1,458 @@
+======================================================================
+GROQ MODEL FIX — COMPLETE LITERAL OUTPUT
+======================================================================
+Date: 2026-08-21
+
+
+######################################################################
+# PART 1 — MODEL CANDIDATE TEST RESULTS
+######################################################################
+
+======================================================================
+qwen/qwen3.6-27b — DISQUALIFYING <think> BLOCK FAILURE (first vetting pass)
+======================================================================
+Same payload as query_router.py's _llm_route: real _SYSTEM_PROMPT, no
+response_format flag, parsed via raw.strip().strip("```json").strip("```").strip()
+then json.loads().
+
+[FAIL] Q: Who is the best scorer in the league?
+  expected        : out_of_scope
+  raw response    : '\n<think>\nThe user is asking "Who is the best scorer in the league?".\nThis is a general basketball question about scoring.\nLooking at the available functions:\n1. deflections_per36 - defense/hustle\n2. contest_profile_per36 - defense\n3. boxout_conversion - rebounding/defense\n4. hustle_iq_composite - hustle/defense\n5. shot_suppression - defense\n6. hustle_vs_suppression_gap - defense\n7. playtype_defense - defense\n8. playtype_offense - offense/playtype PPP. Could relate to scoring, but specific to playtypes.\n9. year_over_year_delta - improvement\n10. drive_efficiency - driving\n11. college_player_lookup - 2026 draft\n12. college_leaderboard - 2026 draft\n13. college_efficiency_volume - 2026 draft\n14. signature_play_type - specific player\n15. youth_adjusted_leaderboard - 2026 draft\n\nNone of these functions cover "best scorer in the league" in general terms (like total points, scoring average, or scoring efficiency in the NBA). The tool is focused on hustle, defense, play'
+  JSON valid      : False  (JSONDecodeError: Expecting value: line 1 column 1 (char 0))
+  classification  : invalid
+
+[FAIL] Q: What's the trade value of Donovan Clingan?
+  expected        : out_of_scope
+  raw response    : '\n<think>\nThe user is asking about the "trade value" of Donovan Clingan.\nLooking at the available functions, none of them cover trade value. Function 11 (`college_player_lookup`) covers college stats for 2026 draft-class prospects. The prompt explicitly states: "None of these functions cover: salary, trade value, draft grades, injuries, assists, or anything outside hustle/defense/play-type offense/drive efficiency/2026 college draft-class data/signature play type as described above."\nTherefore, this question is out of scope.\nI will return `{"out_of_scope": true}`.\nNo other considerations needed.\nDone. \nOutput matches the required format.✅\n</think>\n\n{"out_of_scope": true}'
+  JSON valid      : False  (JSONDecodeError: Expecting value: line 1 column 1 (char 0))
+  classification  : invalid
+
+[FAIL] Q: Who should my team draft this year?
+  expected        : out_of_scope
+  raw response    : '\n<think>\nThe user is asking "Who should my team draft this year?"\nThis is a general draft advice question.\nThe available functions are strictly statistical (deflections, contest profile, boxout conversion, hustle IQ, shot suppression, hustle vs suppression gap, playtype defense, playtype offense, year over year delta, drive efficiency, college player lookup, college leaderboard, college efficiency volume, signature play type, youth adjusted leaderboard).\nNone of these functions provide draft advice, rankings, or "who to draft" recommendations.\nThe tool does not cover draft grades, trade value, or general draft strategy.\nTherefore, this question is out of scope.\nResponse: {"out_of_scope": true}\nCheck constraints: Respond ONLY with a JSON object.\nMatches constraint.\nProceed. \nNo other interpretation fits. It\'s a direct request for draft advice.\nDone. \nOutput: {"out_of_scope": true}\n</think>\n\n{"out_of_scope": true}'
+  JSON valid      : False  (JSONDecodeError: Expecting value: line 1 column 1 (char 0))
+  classification  : invalid
+
+[FAIL] Q: How much is Victor Wembanyama worth in a trade?
+  expected        : out_of_scope
+  raw response    : ''
+  JSON valid      : False  (HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.6-27b` in organization `org_01kxbq9tk4fcc8dh9r8ez8fyd1` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7317, Requested 2347. Please try again in 12.479999999s. Need more tokens? Upgrade to Dev Tier today at https://)
+  classification  : invalid
+
+[FAIL] Q: Which player has the best defensive instincts based on the numbers?
+  expected        : function (hustle_iq_composite)
+  raw response    : ''
+  JSON valid      : False  (HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.6-27b` in organization `org_01kxbq9tk4fcc8dh9r8ez8fyd1` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7300, Requested 2346. Please try again in 12.344999999s. Need more tokens? Upgrade to Dev Tier today at https://)
+  classification  : invalid
+
+[FAIL] Q: What's Clingan's points per game?
+  expected        : out_of_scope
+  raw response    : ''
+  JSON valid      : False  (HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.6-27b` in organization `org_01kxbq9tk4fcc8dh9r8ez8fyd1` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7282, Requested 2343. Please try again in 12.1875s. Need more tokens? Upgrade to Dev Tier today at https://conso)
+  classification  : invalid
+
+[FAIL] Q: Is this player trending up or down defensively?
+  expected        : needs_clarification
+  raw response    : ''
+  JSON valid      : False  (HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.6-27b` in organization `org_01kxbq9tk4fcc8dh9r8ez8fyd1` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7259, Requested 2343. Please try again in 12.015s. Need more tokens? Upgrade to Dev Tier today at https://consol)
+  classification  : invalid
+
+[FAIL] Q: What's Stephen Curry's signature play type?
+  expected        : function (signature_play_type)
+  raw response    : ''
+  JSON valid      : False  (HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.6-27b` in organization `org_01kxbq9tk4fcc8dh9r8ez8fyd1` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7241, Requested 2343. Please try again in 11.88s. Need more tokens? Upgrade to Dev Tier today at https://console)
+  classification  : invalid
+
+[FAIL] Q: What does Nikola Jokic do best offensively?
+  expected        : function (signature_play_type)
+  raw response    : ''
+  JSON valid      : False  (HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.6-27b` in organization `org_01kxbq9tk4fcc8dh9r8ez8fyd1` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7221, Requested 2344. Please try again in 11.737499999s. Need more tokens? Upgrade to Dev Tier today at https://)
+  classification  : invalid
+
+[FAIL] Q: Tell me about his hustle stats
+  expected        : needs_clarification
+  raw response    : ''
+  JSON valid      : False  (HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.6-27b` in organization `org_01kxbq9tk4fcc8dh9r8ez8fyd1` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7192, Requested 2340. Please try again in 11.49s. Need more tokens? Upgrade to Dev Tier today at https://console)
+  classification  : invalid
+
+[FAIL] Q: What is LeBron James's salary this season?
+  expected        : out_of_scope
+  raw response    : ''
+  JSON valid      : False  (HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.6-27b` in organization `org_01kxbq9tk4fcc8dh9r8ez8fyd1` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7182, Requested 2343. Please try again in 11.4375s. Need more tokens? Upgrade to Dev Tier today at https://conso)
+  classification  : invalid
+
+  --- qwen/qwen3.6-27b: 0/11 valid JSON, 0/11 correct classification ---
+
+DECISION: disqualified outright on the first 3 non-rate-limited calls above.
+The <think>...</think> block appears BEFORE the JSON on every single
+response, including ones that eventually contain a syntactically correct
+{"out_of_scope": true} at the end -- query_router.py's parser
+(.strip("```json").strip("```") then json.loads) has no logic to strip a
+<think> block, so every real production call to this model would raise
+JSONDecodeError. Not re-tested further after this evidence; the 429s on
+the remaining questions are irrelevant to the disqualification, which was
+already established.
+
+
+======================================================================
+openai/gpt-oss-120b and openai/gpt-oss-20b — CORRECTED 10-QUESTION RUN
+======================================================================
+Test set corrected after discovering 2 originally-planned questions were
+actually caught by the deterministic regex router in production (verified
+via query_router._deterministic_route(q) returning non-None for both) --
+those were dropped and replaced with genuinely LLM-only questions,
+confirmed via the same check returning None for all 10 below.
+
+------------------------------------------------------------------------
+MODEL: openai/gpt-oss-120b
+------------------------------------------------------------------------
+
+[PASS] Q: Who is the best scorer in the league?
+  expected        : out_of_scope
+  raw response    : '{"out_of_scope": true}'
+  JSON valid      : True
+  classification  : out_of_scope
+
+[PASS] Q: What's the trade value of Donovan Clingan?
+  expected        : out_of_scope
+  raw response    : '{"out_of_scope": true}'
+  JSON valid      : True
+  classification  : out_of_scope
+
+[FAIL] Q: Who should my team draft this year?
+  expected        : out_of_scope
+  raw response    : '{"needs_clarification": true}'
+  JSON valid      : True
+  classification  : needs_clarification
+
+[PASS] Q: How much is Victor Wembanyama worth in a trade?
+  expected        : out_of_scope
+  raw response    : '{"out_of_scope": true}'
+  JSON valid      : True
+  classification  : out_of_scope
+
+[PASS] Q: What's Clingan's points per game?
+  expected        : out_of_scope
+  raw response    : '{"out_of_scope": true}'
+  JSON valid      : True
+  classification  : out_of_scope
+
+[PASS] Q: What's Stephen Curry's signature play type?
+  expected        : function (signature_play_type)
+  raw response    : '{"function": "signature_play_type", "sort_col": "Stephen Curry"}'
+  JSON valid      : True
+  classification  : function (signature_play_type)
+
+[PASS] Q: What does Nikola Jokic do best offensively?
+  expected        : function (signature_play_type)
+  raw response    : '{"function": "signature_play_type", "sort_col": "Nikola Jokic"}'
+  JSON valid      : True
+  classification  : function (signature_play_type)
+
+[PASS] Q: Give me his numbers
+  expected        : needs_clarification
+  raw response    : '{"needs_clarification": true}'
+  JSON valid      : True
+  classification  : needs_clarification
+
+[PASS] Q: How is he doing this year?
+  expected        : needs_clarification
+  raw response    : '{"needs_clarification": true}'
+  JSON valid      : True
+  classification  : needs_clarification
+
+[PASS] Q: What is LeBron James's salary?
+  expected        : out_of_scope
+  raw response    : '{"out_of_scope": true}'
+  JSON valid      : True
+  classification  : out_of_scope
+
+  --- openai/gpt-oss-120b: 10/10 valid JSON, 9/10 correct classification ---
+
+REPEAT TRIAL — the one miss above ("Who should my team draft this year?")
+re-tested 3 more times in isolation, 12+ second delay between calls:
+
+  attempt 1: '{"out_of_scope": true}'
+  attempt 2: '{"out_of_scope": true}'
+  attempt 3: '{"out_of_scope": true}'
+
+-> 3/3 correct on repeat. Combined with the first pass: 12/13 correct
+   across every call made against this model. The single miss was
+   sampling variance, not a reproducible contract violation.
+
+------------------------------------------------------------------------
+MODEL: openai/gpt-oss-20b
+------------------------------------------------------------------------
+
+[PASS] Q: Who is the best scorer in the league?
+  expected        : out_of_scope
+  raw response    : '{"out_of_scope": true}'
+  JSON valid      : True
+  classification  : out_of_scope
+
+[PASS] Q: What's the trade value of Donovan Clingan?
+  expected        : out_of_scope
+  raw response    : '{"out_of_scope": true}'
+  JSON valid      : True
+  classification  : out_of_scope
+
+[PASS] Q: Who should my team draft this year?
+  expected        : out_of_scope
+  raw response    : '{"out_of_scope": true}'
+  JSON valid      : True
+  classification  : out_of_scope
+
+[PASS] Q: How much is Victor Wembanyama worth in a trade?
+  expected        : out_of_scope
+  raw response    : '{"out_of_scope": true}'
+  JSON valid      : True
+  classification  : out_of_scope
+
+[PASS] Q: What's Clingan's points per game?
+  expected        : out_of_scope
+  raw response    : '{"out_of_scope": true}'
+  JSON valid      : True
+  classification  : out_of_scope
+
+[PASS] Q: What's Stephen Curry's signature play type?
+  expected        : function (signature_play_type)
+  raw response    : '{"function":"signature_play_type","sort_col":"Stephen Curry"}'
+  JSON valid      : True
+  classification  : function (signature_play_type)
+
+[PASS] Q: What does Nikola Jokic do best offensively?
+  expected        : function (signature_play_type)
+  raw response    : '{"function":"signature_play_type","sort_col":"Nikola Jokic"}'
+  JSON valid      : True
+  classification  : function (signature_play_type)
+
+[PASS] Q: Give me his numbers
+  expected        : needs_clarification
+  raw response    : '{"needs_clarification": true}'
+  JSON valid      : True
+  classification  : needs_clarification
+
+[PASS] Q: How is he doing this year?
+  expected        : needs_clarification
+  raw response    : '{"needs_clarification": true}'
+  JSON valid      : True
+  classification  : needs_clarification
+
+[PASS] Q: What is LeBron James's salary?
+  expected        : out_of_scope
+  raw response    : '{"out_of_scope": true}'
+  JSON valid      : True
+  classification  : out_of_scope
+
+  --- openai/gpt-oss-20b: 10/10 valid JSON, 10/10 correct classification ---
+
+REPEAT TRIAL — 3 most uncertain-looking questions re-tested again
+(2 attempts each, 12+ second delay between calls):
+
+  'Give me his numbers'                 attempt 1: '{"needs_clarification": true}'
+  'Give me his numbers'                 attempt 2: '{"needs_clarification": true}'
+  'How is he doing this year?'          attempt 1: '{"needs_clarification": true}'
+  'How is he doing this year?'          attempt 2: '{"needs_clarification": true}'
+  'Who should my team draft this year?' attempt 1: '{"out_of_scope": true}'
+  'Who should my team draft this year?' attempt 2: '{"out_of_scope": true}'
+
+-> 6/6 correct on repeat. Combined with the first pass: 16/16 correct
+   across every call made against this model.
+
+------------------------------------------------------------------------
+CANDIDATE SUMMARY
+------------------------------------------------------------------------
+openai/gpt-oss-120b             valid_json=10/10  correct=9/10  (12/13 incl. repeats)
+openai/gpt-oss-20b              valid_json=10/10  correct=10/10 (16/16 incl. repeats)
+qwen/qwen3.6-27b                DISQUALIFIED — <think> block breaks the production JSON parser
+
+DECISION: openai/gpt-oss-20b selected for query_router.py and
+test_llm_fallback.py. Equal measured reliability to 120b once sampling
+variance is accounted for; smaller/faster model chosen as the tiebreaker.
+
+
+######################################################################
+# PART 2 — test_router.py's 8 LLM-fallback questions: BEFORE vs. AFTER
+######################################################################
+
+======================================================================
+BEFORE THE FIX — genuine pre-fix query_router.py (git commit 13f6761,
+"model": "llama-3.3-70b-versatile"), re-checked out and re-run live
+against the real (still-broken) Groq endpoint to capture this exact
+literal output, then immediately restored (git status confirmed clean,
+zero diff, before continuing)
+======================================================================
+
+======================================================================
+Q8: Who is the best scorer in the league?
+  Routing method : error
+  Function matched: None
+  Answer: Routing error: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/chat/completions
+
+======================================================================
+Q9: What's the trade value of Donovan Clingan?
+  Routing method : error
+  Function matched: None
+  Answer: Routing error: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/chat/completions
+
+======================================================================
+Q10: Who should my team draft this year?
+  Routing method : error
+  Function matched: None
+  Answer: Routing error: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/chat/completions
+
+======================================================================
+Q11: How much is Victor Wembanyama worth in a trade?
+  Routing method : error
+  Function matched: None
+  Answer: Routing error: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/chat/completions
+
+======================================================================
+Q13: What's Clingan's points per game?
+  Routing method : error
+  Function matched: None
+  Answer: Routing error: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/chat/completions
+
+======================================================================
+Q23: Is this player trending up or down defensively?
+  Routing method : error
+  Function matched: None
+  Answer: Routing error: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/chat/completions
+
+======================================================================
+Q42: What's Stephen Curry's signature play type?
+  Routing method : error
+  Function matched: None
+  Answer: Routing error: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/chat/completions
+
+======================================================================
+Q43: What does Nikola Jokic do best offensively?
+  Routing method : error
+  Function matched: None
+  Answer: Routing error: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/chat/completions
+
+
+======================================================================
+AFTER THE FIX — fixed query_router.py ("model": "openai/gpt-oss-20b"),
+same 8 questions, live Groq calls
+======================================================================
+
+======================================================================
+Q8: Who is the best scorer in the league?
+  Routing method : llm_fallback
+  Function matched: out_of_scope
+  Answer: I don't have data to answer that — this tool covers deflections, rim/perimeter contests, box-out efficiency, hustle-play composites, shot suppression (opponent FG%), hustle-vs-suppression gap analysis, Synergy play-type defense (Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, OffScreen), Synergy play-type offense (Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, Cut, OffScreen, Transition), drive efficiency (points per drive, drive FG%, playmaking on drives), 2026 NBA draft-class college stats (player lookup, leaderboards, usage-vs-efficiency), and signature play type (a player's standout offensive category by percentile).
+
+======================================================================
+Q9: What's the trade value of Donovan Clingan?
+  Routing method : llm_fallback
+  Function matched: out_of_scope
+  Answer: I don't have data to answer that — this tool covers deflections, rim/perimeter contests, box-out efficiency, hustle-play composites, shot suppression (opponent FG%), hustle-vs-suppression gap analysis, Synergy play-type defense (Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, OffScreen), Synergy play-type offense (Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, Cut, OffScreen, Transition), drive efficiency (points per drive, drive FG%, playmaking on drives), 2026 NBA draft-class college stats (player lookup, leaderboards, usage-vs-efficiency), and signature play type (a player's standout offensive category by percentile).
+
+======================================================================
+Q10: Who should my team draft this year?
+  Routing method : llm_fallback
+  Function matched: out_of_scope
+  Answer: I don't have data to answer that — this tool covers deflections, rim/perimeter contests, box-out efficiency, hustle-play composites, shot suppression (opponent FG%), hustle-vs-suppression gap analysis, Synergy play-type defense (Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, OffScreen), Synergy play-type offense (Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, Cut, OffScreen, Transition), drive efficiency (points per drive, drive FG%, playmaking on drives), 2026 NBA draft-class college stats (player lookup, leaderboards, usage-vs-efficiency), and signature play type (a player's standout offensive category by percentile).
+
+======================================================================
+Q11: How much is Victor Wembanyama worth in a trade?
+  Routing method : llm_fallback
+  Function matched: out_of_scope
+  Answer: I don't have data to answer that — this tool covers deflections, rim/perimeter contests, box-out efficiency, hustle-play composites, shot suppression (opponent FG%), hustle-vs-suppression gap analysis, Synergy play-type defense (Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, OffScreen), Synergy play-type offense (Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, Cut, OffScreen, Transition), drive efficiency (points per drive, drive FG%, playmaking on drives), 2026 NBA draft-class college stats (player lookup, leaderboards, usage-vs-efficiency), and signature play type (a player's standout offensive category by percentile).
+
+======================================================================
+Q13: What's Clingan's points per game?
+  Routing method : llm_fallback
+  Function matched: out_of_scope
+  Answer: I don't have data to answer that — this tool covers deflections, rim/perimeter contests, box-out efficiency, hustle-play composites, shot suppression (opponent FG%), hustle-vs-suppression gap analysis, Synergy play-type defense (Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, OffScreen), Synergy play-type offense (Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, Cut, OffScreen, Transition), drive efficiency (points per drive, drive FG%, playmaking on drives), 2026 NBA draft-class college stats (player lookup, leaderboards, usage-vs-efficiency), and signature play type (a player's standout offensive category by percentile).
+
+======================================================================
+Q23: Is this player trending up or down defensively?
+  Routing method : llm_fallback
+  Function matched: needs_clarification
+  Answer: I can track year-over-year trends, but I need to know which stat (deflections, contests, box-outs, or hustle IQ) and which direction (improving or declining) you're asking about.
+  [NOTE: within test_router.py's full 45-question run, this specific
+  question hit a genuine 429 from that run's own call volume against the
+  free-tier 8000 TPM cap, exhausting _llm_route's built-in 4-attempt
+  retry. Isolated re-run above, immediately after, succeeded cleanly.]
+
+======================================================================
+Q42: What's Stephen Curry's signature play type?
+  Routing method : llm_fallback
+  Function matched: signature_play_type
+  Answer: Stephen Curry's signature play type is dribble handoff offense (99.6% percentile, 2.8 poss/g).
+
+======================================================================
+Q43: What does Nikola Jokic do best offensively?
+  Routing method : llm_fallback
+  Function matched: signature_play_type
+  Answer: Nikola Jokić's signature play type is off-screen offense (94.9% percentile, 1.2 poss/g).
+  [also confirms the separate resolve_player_name accent-fold fix in the
+  same commit: unaccented "Nikola Jokic" input resolved to the roster's
+  actual "Nikola Jokić" in the answer text]
+
+RESULT: all 8 previously-broken LLM-fallback questions (Q8, Q9, Q10, Q11,
+Q13, Q23, Q42, Q43) now pass for real. All other 37 deterministically-
+routed questions in test_router.py were unaffected by this change.
+
+
+######################################################################
+# PART 3 — LIVE-SITE CONFIRMATION (real deployed URL, not localhost)
+######################################################################
+Live URL: https://nba-scouting-agent.onrender.com (per README.md)
+Deploy: git commit 8108e66 pushed to origin/master
+
+------------------------------------------------------------------------
+Live check immediately after push (before Render's deploy had rolled out
+-- included here to show the deploy-in-progress state was real, not
+assumed):
+------------------------------------------------------------------------
+
+REQUEST:
+  POST https://nba-scouting-agent.onrender.com/query
+  Content-Type: application/json
+  {"question": "What is LeBron James's salary?"}
+
+RESPONSE:
+  {"question":"What is LeBron James's salary?","response_type":"out_of_scope","answer":"Routing error: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/chat/completions","function_matched":null,"method":"error","table":null,"data_as_of":"2026-08-21T02:11:22.727331+00:00","audit":null}
+
+(confirms the old broken model was still live at this point -- the fix
+had not rolled out yet)
+
+------------------------------------------------------------------------
+LIVE CHECK 1 — after waiting for Render's build+deploy cycle to complete
+------------------------------------------------------------------------
+
+REQUEST:
+  POST https://nba-scouting-agent.onrender.com/query
+  Content-Type: application/json
+  {"question": "What is LeBron James's salary?"}
+
+RESPONSE:
+  {"question":"What is LeBron James's salary?","response_type":"out_of_scope","answer":"I don't have data to answer that — this tool covers deflections, rim/perimeter contests, box-out efficiency, hustle-play composites, shot suppression (opponent FG%), hustle-vs-suppression gap analysis, Synergy play-type defense (Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, OffScreen), Synergy play-type offense (Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, Cut, OffScreen, Transition), drive efficiency (points per drive, drive FG%, playmaking on drives), 2026 NBA draft-class college stats (player lookup, leaderboards, usage-vs-efficiency), and signature play type (a player's standout offensive category by percentile).","function_matched":"out_of_scope","method":"llm_fallback","table":null,"data_as_of":"2026-08-21T02:11:22.727331+00:00","audit":null}
+
+CONFIRMED: method="llm_fallback" (not "error") -- the deployed instance
+is running the fixed model.
+
+------------------------------------------------------------------------
+LIVE CHECK 2 — function-match case, also exercising the accent-fold fix
+------------------------------------------------------------------------
+
+REQUEST:
+  POST https://nba-scouting-agent.onrender.com/query
+  Content-Type: application/json
+  {"question": "What does Nikola Jokic do best offensively?"}
+
+RESPONSE:
+  {"question":"What does Nikola Jokic do best offensively?","response_type":"answer","answer":"Nikola Jokić's signature play type is off-screen offense (94.9% percentile, 1.2 poss/g).","function_matched":"signature_play_type","method":"llm_fallback","table":[{"play_type":"OffScreen","percentile":0.949,"poss":1.2},{"play_type":"Isolation","percentile":0.876,"poss":1.7},{"play_type":"PRRollman","percentile":0.758,"poss":2.8},{"play_type":"Postup","percentile":0.75,"poss":5.5},{"play_type":"Spotup","percentile":0.682,"poss":2.4},{"play_type":"PRBallHandler","percentile":0.379,"poss":2.1},{"play_type":"Transition","percentile":0.228,"poss":2.2}],"data_as_of":"2026-08-21T02:11:22.727331+00:00","audit":{"intent":"signature_play_type","parameters":{"tie_margin":0.04,"min_percentile":0.6},"qualifying_pool_size":7,"routing_method":"llm_fallback","data_as_of":"2026-08-21T02:11:22.727331+00:00","matched_text":null,"matched_pattern":null}}
+
+CONFIRMED: correct function-match classification via the new model, AND
+unaccented "Nikola Jokic" input resolved to "Nikola Jokić" in the live
+answer text -- both fixes verified working together on the real deployed
+URL.
+
+
+======================================================================
+END OF RECORD
+======================================================================

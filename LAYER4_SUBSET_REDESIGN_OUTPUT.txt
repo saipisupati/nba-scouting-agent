@@ -1,0 +1,359 @@
+Building feature matrix from Layer 1 axes (qualification floor: MIN>=15, GP>=40)...
+Feature matrix: 305 qualified players
+
+Loading NET_RATING from data/usage_context_2025_26.csv for validation...
+NET_RATING loaded for all 305 qualified players.
+
+======================================================================
+VALIDATION — feature correlation with real NET_RATING
+======================================================================
+  28 features checked across 6 subsets, against NET_RATING from data/usage_context_2025_26.csv.
+  Flag threshold: |r| < 0.05 (near-zero relationship to real winning impact)
+
+  -- rim_protection --
+    SHOT_SUPPRESSION_LESS_THAN_6FT     r=-0.2717
+    DEF_PPP_POSTUP                     r=-0.1970
+    DEF_PPP_PRROLLMAN                  r=-0.2074
+    BOX_OUTS_PER36                     r=+0.0828
+    CONTESTED_SHOTS_PER36              r=+0.0136  <-- WEAK, candidate for removal
+
+  -- perimeter_defense --
+    SHOT_SUPPRESSION_3_POINTERS        r=-0.1574
+    SHOT_SUPPRESSION_2_POINTERS        r=-0.4001
+    DEF_PPP_ISOLATION                  r=-0.1133
+    DEF_PPP_SPOTUP                     r=-0.1476
+    DEF_PPP_HANDOFF                    r=-0.0659
+    DEF_PPP_OFFSCREEN                  r=-0.1404
+    DEFLECTIONS_PER36                  r=+0.1159
+
+  -- primary_shot_creation --
+    SELF_CREATION_SHARE                r=-0.0425  <-- WEAK, candidate for removal
+    USG_PCT                            r=+0.0547
+    DRIVE_FG_PCT                       r=+0.1107
+    EFG_PCT                            r=+0.2389
+    TS_PCT                             r=+0.2546
+
+  -- playmaking --
+    AST_PCT                            r=+0.0194  <-- WEAK, candidate for removal
+    AST_TO                             r=+0.1815
+    AST_RATIO                          r=+0.0274  <-- WEAK, candidate for removal
+    DRIVE_AST_PCT                      r=+0.0416  <-- WEAK, candidate for removal
+    DRIVE_PASSES_PCT                   r=+0.0575
+
+  -- movement_scoring --
+    SPOTUP_SHARE                       r=-0.1275
+    CUT_OFFSCREEN_SHARE                r=+0.0073  <-- WEAK, candidate for removal
+    EFG_PCT                            r=+0.2389
+    TS_PCT                             r=+0.2546
+
+  -- pace_transition --
+    PACE                               r=-0.2624
+    TRANSITION_PPP                     r=+0.1910
+
+======================================================================
+WEAK-FEATURE SUMMARY -- 6 feature(s) flagged
+======================================================================
+  [rim_protection] CONTESTED_SHOTS_PER36  r=+0.0136
+  [primary_shot_creation] SELF_CREATION_SHARE  r=-0.0425
+  [playmaking] AST_PCT  r=+0.0194
+  [playmaking] AST_RATIO  r=+0.0274
+  [playmaking] DRIVE_AST_PCT  r=+0.0416
+  [movement_scoring] CUT_OFFSCREEN_SHARE  r=+0.0073
+
+======================================================================
+THE ACTUAL TEST — rim_protection subset only: CLE vs. CHI vs. OKC
+======================================================================
+  Prior result (all 28 features, see TEAM_FIT_LAYER4_OUTPUT.txt):
+    CLE (2 elite shot-blockers) scored WORSE Clingan coverage (66.7%)
+    than CHI (no true center) at 85.7% -- the opposite of basketball
+    intuition. Pass/fail bar for this redesign: does restricting to
+    the rim_protection subset fix this?
+
+  NOTE -- mechanism had to change mid-build: the first attempt at this
+  test reused roster_fit.py's original SVD-orthogonal-projection gap
+  score unmodified, just restricted to the 5-column rim_protection
+  subset. That produced OKC=CLE=CHI=100.0% coverage, an uninformative
+  3-way tie -- a real bug, not a real result. Cause: with only 5
+  columns in the subset and 10-14 qualified players per roster, every
+  team's roster trivially SPANS the entire 5-dimensional subset space
+  (rank 5 of 5), so the orthogonal residual is mathematically forced
+  to ~0 for ANY player against ANY team, regardless of actual style
+  similarity. Fixed by switching the per-subset gap score from
+  "orthogonal residual to the roster's full span" to "distance to the
+  roster's single closest player" (nearest-neighbor in the subset's
+  z-scored space) -- well-defined at any dimensionality, and still
+  answers "does this roster already have a player who plays this
+  specific dimension of the query player's game."
+
+    OKC: subset dim=5, roster size=12, SVD rank=5 -> SVD-span degenerate: True
+    CLE: subset dim=5, roster size=11, SVD rank=5 -> SVD-span degenerate: True
+    CHI: subset dim=5, roster size=10, SVD rank=5 -> SVD-span degenerate: True
+
+  -- Sanity check: every rostered player should score gap=0.0000
+     against their OWN team's rim_protection subspace --
+
+  OKC:
+    Aaron Wiggins                gap=0.000000  [OK]
+    Ajay Mitchell                gap=0.000000  [OK]
+    Alex Caruso                  gap=0.000000  [OK]
+    Cason Wallace                gap=0.000000  [OK]
+    Chet Holmgren                gap=0.000000  [OK]
+    Isaiah Hartenstein           gap=0.000000  [OK]
+    Isaiah Joe                   gap=0.000000  [OK]
+    Jared McCain                 gap=0.000000  [OK]
+    Jaylin Williams              gap=0.000000  [OK]
+    Kenrich Williams             gap=0.000000  [OK]
+    Luguentz Dort                gap=0.000000  [OK]
+    Shai Gilgeous-Alexander      gap=0.000000  [OK]
+    -> ALL PASS
+
+  CLE:
+    Craig Porter Jr.             gap=0.000000  [OK]
+    Dean Wade                    gap=0.000000  [OK]
+    Dennis Schröder              gap=0.000000  [OK]
+    Donovan Mitchell             gap=0.000000  [OK]
+    Evan Mobley                  gap=0.000000  [OK]
+    James Harden                 gap=0.000000  [OK]
+    Jarrett Allen                gap=0.000000  [OK]
+    Jaylon Tyson                 gap=0.000000  [OK]
+    Keon Ellis                   gap=0.000000  [OK]
+    Nae'Qwan Tomlin              gap=0.000000  [OK]
+    Sam Merrill                  gap=0.000000  [OK]
+    -> ALL PASS
+
+  CHI:
+    Anfernee Simons              gap=0.000000  [OK]
+    Collin Sexton                gap=0.000000  [OK]
+    Guerschon Yabusele           gap=0.000000  [OK]
+    Isaac Okoro                  gap=0.000000  [OK]
+    Jalen Smith                  gap=0.000000  [OK]
+    Josh Giddey                  gap=0.000000  [OK]
+    Leonard Miller               gap=0.000000  [OK]
+    Matas Buzelis                gap=0.000000  [OK]
+    Patrick Williams             gap=0.000000  [OK]
+    Tre Jones                    gap=0.000000  [OK]
+    -> ALL PASS
+
+  -- Clingan rim_protection-subset gap score vs. each team --
+
+    OKC   gap=2.4685  covered=2.5309  total=4.9994  (50.6% covered)
+    CLE   gap=4.0127  covered=0.9867  total=4.9994  (19.7% covered)
+    CHI   gap=3.1053  covered=1.8941  total=4.9994  (37.9% covered)
+
+  Ranking (highest rim_protection coverage first):
+    1. OKC   50.6% covered  (gap=2.4685)
+    2. CHI   37.9% covered  (gap=3.1053)
+    3. CLE   19.7% covered  (gap=4.0127)
+
+  -- Why: raw rim_protection feature values + league percentile --
+     (checked directly against the raw feature matrix, not the
+     z-scored/nearest-neighbor pipeline, to rule out a scaling
+     artifact before trusting this as a real finding)
+
+    Evan Mobley:
+      SHOT_SUPPRESSION_LESS_THAN_6FT       -0.109   (2.7th percentile of 305 qualified players)
+      DEF_PPP_POSTUP                        0.690   (4.0th percentile of 305 qualified players)
+      DEF_PPP_PRROLLMAN                     1.038   (24.5th percentile of 305 qualified players)
+      BOX_OUTS_PER36                        1.772   (84.7th percentile of 305 qualified players)
+      CONTESTED_SHOTS_PER36                11.646   (94.7th percentile of 305 qualified players)
+
+    Jarrett Allen:
+      SHOT_SUPPRESSION_LESS_THAN_6FT       -0.085   (8.1th percentile of 305 qualified players)
+      DEF_PPP_POSTUP                        0.731   (8.6th percentile of 305 qualified players)
+      DEF_PPP_PRROLLMAN                     1.057   (27.2th percentile of 305 qualified players)
+      BOX_OUTS_PER36                        1.846   (86.7th percentile of 305 qualified players)
+      CONTESTED_SHOTS_PER36                10.627   (89.7th percentile of 305 qualified players)
+
+    Donovan Clingan:
+      SHOT_SUPPRESSION_LESS_THAN_6FT       -0.099   (4.1th percentile of 305 qualified players)
+      DEF_PPP_POSTUP                        1.222   (84.3th percentile of 305 qualified players)
+      DEF_PPP_PRROLLMAN                     1.089   (35.4th percentile of 305 qualified players)
+      BOX_OUTS_PER36                        2.303   (91.0th percentile of 305 qualified players)
+      CONTESTED_SHOTS_PER36                17.841   (99.7th percentile of 305 qualified players)
+
+======================================================================
+PASS/FAIL VERDICT
+======================================================================
+  FAIL: CLE's rim_protection coverage of Clingan (19.7%) is still NOT higher than CHI's (37.9%) (CHI leads/ties by 18.1 points).
+  Restricting to the rim_protection-specific feature subset does NOT fix the documented bug in this maximally obvious test case. Even with distance computed over only 5 rim-protection-relevant features via nearest-rostered-player matching (not the degenerate SVD-span method), a roster with two genuine elite shot-blocking bigs does not clearly outscore a roster with no true center at all.
+
+  Root cause, confirmed against the raw feature values above: Donovan Clingan is not a representative 'elite rim protector' reference point -- he is a statistical OUTLIER even among elite bigs. His CONTESTED_SHOTS_PER36 (17.8) sits at the 99.7th percentile of all 305 qualified players -- the single highest value in the dataset -- while Mobley (94.7th) and Allen (89.7th) are themselves elite but meaningfully less extreme. His DEF_PPP_POSTUP and BOX_OUTS_PER36 are similarly the highest or near-highest of the three. Nearest-neighbor distance to an extreme outlier penalizes even genuinely elite comps for not being AS extreme as the single most extreme player in the league on that exact dimension -- this is a real limitation of using Clingan specifically as the rim-protection reference point in a nearest-single-player-distance metric, not evidence that the rim_protection subset's features are poorly chosen (their NET_RATING correlations above are among the strongest of any subset checked). A reference point closer to the profile's centroid, or scoring against the roster's best-N players' average rather than its single closest player, would likely behave differently and is worth testing next.
+
+Done.
+======================================================================
+FOLLOW-UP TEST — rim_protection TRIMMED (CONTESTED_SHOTS_PER36 removed):
+CLE vs. CHI vs. OKC
+======================================================================
+  One variable at a time: same 3 teams, same nearest-rostered-player
+  mechanism as the prior rim_protection test above -- the ONLY change
+  is removing CONTESTED_SHOTS_PER36 from the subset (5 features -> 4):
+    Before: ['SHOT_SUPPRESSION_LESS_THAN_6FT', 'DEF_PPP_POSTUP', 'DEF_PPP_PRROLLMAN', 'BOX_OUTS_PER36', 'CONTESTED_SHOTS_PER36']
+    After:  ['SHOT_SUPPRESSION_LESS_THAN_6FT', 'DEF_PPP_POSTUP', 'DEF_PPP_PRROLLMAN', 'BOX_OUTS_PER36']
+
+  Prior (5-feature) result: CLE=19.7% covered, CHI=37.9% covered, OKC=50.6% covered -- CLE lost to CHI, opposite of basketball intuition.
+
+  -- Sanity check: every rostered player should score gap=0.0000
+     against their OWN team's trimmed rim_protection subspace --
+
+  OKC:
+    Aaron Wiggins                gap=0.000000  [OK]
+    Ajay Mitchell                gap=0.000000  [OK]
+    Alex Caruso                  gap=0.000000  [OK]
+    Cason Wallace                gap=0.000000  [OK]
+    Chet Holmgren                gap=0.000000  [OK]
+    Isaiah Hartenstein           gap=0.000000  [OK]
+    Isaiah Joe                   gap=0.000000  [OK]
+    Jared McCain                 gap=0.000000  [OK]
+    Jaylin Williams              gap=0.000000  [OK]
+    Kenrich Williams             gap=0.000000  [OK]
+    Luguentz Dort                gap=0.000000  [OK]
+    Shai Gilgeous-Alexander      gap=0.000000  [OK]
+    -> ALL PASS
+
+  CLE:
+    Craig Porter Jr.             gap=0.000000  [OK]
+    Dean Wade                    gap=0.000000  [OK]
+    Dennis Schröder              gap=0.000000  [OK]
+    Donovan Mitchell             gap=0.000000  [OK]
+    Evan Mobley                  gap=0.000000  [OK]
+    James Harden                 gap=0.000000  [OK]
+    Jarrett Allen                gap=0.000000  [OK]
+    Jaylon Tyson                 gap=0.000000  [OK]
+    Keon Ellis                   gap=0.000000  [OK]
+    Nae'Qwan Tomlin              gap=0.000000  [OK]
+    Sam Merrill                  gap=0.000000  [OK]
+    -> ALL PASS
+
+  CHI:
+    Anfernee Simons              gap=0.000000  [OK]
+    Collin Sexton                gap=0.000000  [OK]
+    Guerschon Yabusele           gap=0.000000  [OK]
+    Isaac Okoro                  gap=0.000000  [OK]
+    Jalen Smith                  gap=0.000000  [OK]
+    Josh Giddey                  gap=0.000000  [OK]
+    Leonard Miller               gap=0.000000  [OK]
+    Matas Buzelis                gap=0.000000  [OK]
+    Patrick Williams             gap=0.000000  [OK]
+    Tre Jones                    gap=0.000000  [OK]
+    -> ALL PASS
+
+  -- Clingan trimmed-rim_protection-subset gap score vs. each team --
+
+    OKC   gap=1.8703  covered=0.9474  total=2.8176  (33.6% covered)
+    CLE   gap=1.8393  covered=0.9783  total=2.8176  (34.7% covered)
+    CHI   gap=1.6118  covered=1.2058  total=2.8176  (42.8% covered)
+
+  Ranking (highest trimmed rim_protection coverage first):
+    1. CHI   42.8% covered  (gap=1.6118)
+    2. CLE   34.7% covered  (gap=1.8393)
+    3. OKC   33.6% covered  (gap=1.8703)
+
+  -- For reference: Clingan's percentile on the 4 remaining features --
+    Evan Mobley:
+      SHOT_SUPPRESSION_LESS_THAN_6FT       -0.109   (2.7th percentile of 305 qualified players)
+      DEF_PPP_POSTUP                        0.690   (4.0th percentile of 305 qualified players)
+      DEF_PPP_PRROLLMAN                     1.038   (24.5th percentile of 305 qualified players)
+      BOX_OUTS_PER36                        1.772   (84.7th percentile of 305 qualified players)
+
+    Jarrett Allen:
+      SHOT_SUPPRESSION_LESS_THAN_6FT       -0.085   (8.1th percentile of 305 qualified players)
+      DEF_PPP_POSTUP                        0.731   (8.6th percentile of 305 qualified players)
+      DEF_PPP_PRROLLMAN                     1.057   (27.2th percentile of 305 qualified players)
+      BOX_OUTS_PER36                        1.846   (86.7th percentile of 305 qualified players)
+
+    Donovan Clingan:
+      SHOT_SUPPRESSION_LESS_THAN_6FT       -0.099   (4.1th percentile of 305 qualified players)
+      DEF_PPP_POSTUP                        1.222   (84.3th percentile of 305 qualified players)
+      DEF_PPP_PRROLLMAN                     1.089   (35.4th percentile of 305 qualified players)
+      BOX_OUTS_PER36                        2.303   (91.0th percentile of 305 qualified players)
+
+======================================================================
+PASS/FAIL VERDICT — trimmed subset
+======================================================================
+  FAIL: CLE's trimmed rim_protection coverage of Clingan (34.7%) is STILL NOT higher than CHI's (42.8%) (CHI leads/ties by 8.1 points).
+  Removing CONTESTED_SHOTS_PER36 does NOT fix the ranking. The problem persists even without the specific feature that drove Clingan's outlier distortion, which is evidence the issue is NOT isolated to that one feature -- it is upstream of it, in either the reference player choice (Clingan may simply be an outlier on multiple axes at once, not just CONTESTED_SHOTS_PER36) or the single-nearest-neighbor aggregation itself (one player's distance, rather than an average across a roster's best comparable players, stays sensitive to whichever single dimension the query player is most extreme on). The average-of-best-N and reference-point-sensitivity ideas flagged earlier are the next things worth testing, not further feature-by-feature removal from this subset.
+
+======================================================================
+AVERAGE-OF-BEST-3 TEST — rim_protection TRIMMED subset: CLE vs. CHI vs. OKC
+======================================================================
+  Same 4-feature RIM_PROTECTION_TRIMMED subset and same reference player (Donovan Clingan) as the trimmed single-nearest-neighbor test above. The ONLY change: gap score is now the AVERAGE distance to the 3 closest rostered players, not just the single closest.
+
+  Prior (single-nearest-neighbor, trimmed subset) result: CLE=34.7% covered, CHI=42.8% covered, OKC=33.6% covered -- CLE still lost to CHI.
+
+    OKC   gap=2.1165  covered=0.7012  total=2.8176  (24.9% covered)
+    CLE   gap=2.5743  covered=0.2433  total=2.8176  (8.6% covered)
+    CHI   gap=1.9613  covered=0.8563  total=2.8176  (30.4% covered)
+
+  Ranking (highest avg-of-best-3 rim_protection coverage first):
+    1. CHI   30.4% covered  (gap=1.9613, n_used=3)
+    2. OKC   24.9% covered  (gap=2.1165, n_used=3)
+    3. CLE   8.6% covered  (gap=2.5743, n_used=3)
+
+======================================================================
+PASS/FAIL VERDICT — average-of-best-3
+======================================================================
+  FAIL: CLE's avg-of-best-3 rim_protection coverage of Clingan (8.6%) is STILL NOT higher than CHI's (30.4%) (CHI leads/ties by 21.8 points).
+  Averaging over the 3 closest rostered players does NOT fix the ranking either. The problem survives both a feature-subset change and an aggregation-method change, which is stronger evidence still that the issue is not mechanism-shaped at all -- it is likely in what these specific engineered features (postup/pick-and-roll defensive PPP, shot suppression at the rim, box-outs per 36) actually capture about individual defensive role and scheme, or in Clingan specifically being a poor universal reference point for 'elite rim protector' regardless of how the comparison is aggregated.
+
+======================================================================
+REFERENCE-SENSITIVITY TEST — Chet Holmgren instead of Clingan:
+CLE vs. CHI vs. OKC (original 5-feature subset, single-nearest-neighbor)
+======================================================================
+  Same mechanism and same subset as the very first rim_protection test (5 features including CONTESTED_SHOTS_PER36, single-nearest-neighbor gap score). The ONLY change: reference player is Chet Holmgren (OKC), not Donovan Clingan.
+
+  Prior (Clingan, same mechanism/subset) result: CLE=19.7% covered, CHI=37.9% covered, OKC=88.6% covered -- but OKC's 88.6% partly reflects Clingan not being on OKC's roster, so it is a genuine outside comparison there too. Holmgren, by contrast, IS on OKC's roster, so OKC's coverage of him will be trivially 100% by construction -- flagged explicitly below, not silently included in the CLE vs. CHI comparison.
+
+    OKC   gap=0.0000  covered=3.9898  total=3.9898  (100.0% covered)  [Holmgren is on this roster -- trivially 100% by construction]
+    CLE   gap=1.4500  covered=2.5398  total=3.9898  (63.7% covered)
+    CHI   gap=2.3867  covered=1.6031  total=3.9898  (40.2% covered)
+
+  -- Holmgren's raw rim_protection feature values + league percentile, for comparison against Mobley/Allen/Clingan (see earlier sections) --
+
+    Chet Holmgren:
+      SHOT_SUPPRESSION_LESS_THAN_6FT       -0.152   (0.0th percentile of 305 qualified players)
+      DEF_PPP_POSTUP                        0.852   (23.7th percentile of 305 qualified players)
+      DEF_PPP_PRROLLMAN                     0.974   (13.2th percentile of 305 qualified players)
+      BOX_OUTS_PER36                        1.594   (83.3th percentile of 305 qualified players)
+      CONTESTED_SHOTS_PER36                12.407   (96.0th percentile of 305 qualified players)
+
+======================================================================
+PASS/FAIL VERDICT — reference-sensitivity (Holmgren)
+======================================================================
+  PASS: with Holmgren as the reference, CLE's rim_protection coverage (63.7%) is HIGHER than CHI's (40.2%), by 23.5 points.
+  A less statistically extreme rim-protector reference produces the basketball-sensible ranking. This is real evidence that Clingan specifically -- as an outlier reference point -- was driving the earlier failures, not a fundamental flaw in the subset/mechanism combination itself.
+
+======================================================================
+CONFIRMATORY TEST — Onyeka Okongwu (median-range, not an outlier):
+CLE vs. CHI vs. OKC (original 5-feature subset, single-nearest-neighbor)
+======================================================================
+  Screen: percentile rank (of 305 qualified players) on each of the 4 RIM_PROTECTION_TRIMMED features, for a list of plausible rostered rim protectors not already used as a reference player in this file. Ranked by 'max deviation from the 50th percentile on any single feature' -- the same failure mode (one wildly extreme dimension) that made Clingan a bad reference is what this screen is selecting AGAINST.
+
+    Onyeka Okongwu         max_dev_from_median= 31.0   SHOT_SUPPRESSION_LESS_THAN_6FT=49th, DEF_PPP_POSTUP=41th, DEF_PPP_PRROLLMAN=25th, BOX_OUTS_PER36=81th
+    Alperen Sengun         max_dev_from_median= 36.9   SHOT_SUPPRESSION_LESS_THAN_6FT=44th, DEF_PPP_POSTUP=26th, DEF_PPP_PRROLLMAN=13th, BOX_OUTS_PER36=84th
+    Bam Adebayo            max_dev_from_median= 41.5   SHOT_SUPPRESSION_LESS_THAN_6FT=44th, DEF_PPP_POSTUP=44th, DEF_PPP_PRROLLMAN=41th, BOX_OUTS_PER36=91th
+    Jarrett Allen          max_dev_from_median= 44.4   SHOT_SUPPRESSION_LESS_THAN_6FT=8th, DEF_PPP_POSTUP=6th, DEF_PPP_PRROLLMAN=23th, BOX_OUTS_PER36=85th
+    Rudy Gobert            max_dev_from_median= 44.4   SHOT_SUPPRESSION_LESS_THAN_6FT=6th, DEF_PPP_POSTUP=9th, DEF_PPP_PRROLLMAN=23th, BOX_OUTS_PER36=94th
+    Wendell Carter Jr.     max_dev_from_median= 44.4   SHOT_SUPPRESSION_LESS_THAN_6FT=28th, DEF_PPP_POSTUP=19th, DEF_PPP_PRROLLMAN=68th, BOX_OUTS_PER36=94th
+    Jaren Jackson Jr.      max_dev_from_median= 47.0   SHOT_SUPPRESSION_LESS_THAN_6FT=13th, DEF_PPP_POSTUP=28th, DEF_PPP_PRROLLMAN=3th, BOX_OUTS_PER36=70th
+    Nic Claxton            max_dev_from_median= 48.7   SHOT_SUPPRESSION_LESS_THAN_6FT=20th, DEF_PPP_POSTUP=1th, DEF_PPP_PRROLLMAN=47th, BOX_OUTS_PER36=82th
+
+  Picked: Onyeka Okongwu -- lowest max-deviation-from-median of any candidate with complete data on all 4 features, on ATL (not CLE, CHI, or OKC, so no trivial-100%-by-construction issue).
+
+  Same mechanism and same subset as the Clingan and Holmgren tests above (5 features including CONTESTED_SHOTS_PER36, single-nearest-neighbor gap score). The ONLY change: reference player is Onyeka Okongwu (ATL), not Clingan or Holmgren.
+
+  Prior results, same mechanism/subset:
+    Clingan (extreme outlier):  CLE=19.7% covered, CHI=37.9% covered -- FAILED
+    Holmgren (clean, less extreme): CLE=63.7% covered, CHI=40.2% covered -- PASSED
+
+    OKC   gap=1.6644  covered=0.0000  total=1.4616  (0.0% covered)
+    CLE   gap=2.1457  covered=0.0000  total=1.4616  (0.0% covered)
+    CHI   gap=1.3808  covered=0.0808  total=1.4616  (5.5% covered)
+
+======================================================================
+PASS/FAIL VERDICT — confirmatory (Onyeka Okongwu)
+======================================================================
+  FAIL: with Onyeka Okongwu as the reference, CLE's rim_protection coverage (0.0%) is STILL NOT higher than CHI's (5.5%) (CHI leads/ties by 5.5 points).
+  This does NOT replicate the Holmgren result. A second, independently median-range reference player still produces the wrong-direction ranking, which complicates the 'outlier reference player' explanation -- Holmgren's PASS may have been a property of Holmgren specifically (or of OKC's own roster composition, since OKC was the excluded/home team in that test) rather than evidence the mechanism generalizes to any non-extreme rim protector. There is more going on than reference-player extremity alone, and this needs further investigation before the redesign can be trusted for production use.
+
+  Additional wrinkle, checked directly against the raw numbers: Onyeka Okongwu's total z-scored vector magnitude in this run (total=1.4616) is roughly a third of Clingan's (~5.0) or Holmgren's (~4.0) from the earlier tests. That is a DIRECT, mechanical consequence of being near the population mean on every one of the 5 features at once -- a z-scored vector for a genuinely average player has small magnitude by construction, since z-scoring centers each feature at 0. With a small total, almost ANY roster's nearest player ends up representing a large fraction of that small total, which mechanically compresses percent-covered toward 0 for every team, median-range player or not -- not just for CLE. This is a separate, previously undocumented problem from the 'outlier reference distorts the ranking' one Clingan exposed: the pct_covered metric itself appears unreliable at BOTH ends of the reference-player-extremity spectrum, for different mechanical reasons, and may only behave sensibly in some middle band. Worth checking directly before trusting this metric further.
+

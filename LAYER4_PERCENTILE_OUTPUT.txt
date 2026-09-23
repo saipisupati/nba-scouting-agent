@@ -1,0 +1,63 @@
+Building feature matrix from Layer 1 axes (qualification floor: MIN>=15, GP>=40)...
+Feature matrix: 305 qualified players
+
+======================================================================
+PERCENTILE-SPACE VALIDATION — same 7-point spectrum as layer4_middleband.py
+======================================================================
+  Subset: ['SHOT_SUPPRESSION_LESS_THAN_6FT', 'DEF_PPP_POSTUP', 'DEF_PPP_PRROLLMAN', 'BOX_OUTS_PER36']
+  Same reference players, same CLE/CHI/OKC test, same pass bar
+  (CLE > CHI on rim-protection coverage) as the z-scored diagnostic
+  this is meant to replace. Coverage is now nearest-rostered-player
+  percentile-space distance, expressed as a fraction of the maximum
+  possible distance in that space -- NOT normalized by the reference
+  player's own vector magnitude, which is the specific defect the
+  middle-band test traced the z-scored failures to.
+
+----------------------------------------------------------------------
+Onyeka Okongwu
+    OKC   nearest_dist= 37.25  (81.4% covered)
+    CLE   nearest_dist= 40.12  (79.9% covered)
+    CHI   nearest_dist= 44.72  (77.6% covered)
+  PASS: CLE > CHI (79.9% vs 77.6%, margin 2.3 pts)  [prior z-scored verdict: FAIL]  [CHANGED from z-scored: was FAIL]
+----------------------------------------------------------------------
+Nique Clifford
+    OKC   nearest_dist= 54.23  (72.9% covered)
+    CLE   nearest_dist= 36.67  (81.7% covered)
+    CHI   nearest_dist= 17.61  (91.2% covered)
+  FAIL: CLE <= CHI (81.7% vs 91.2%, margin 9.5 pts)  [prior z-scored verdict: FAIL]
+----------------------------------------------------------------------
+John Konchar  [could not compute for: ['OKC', 'CLE', 'CHI']]
+----------------------------------------------------------------------
+Anthony Gill
+    OKC   nearest_dist= 64.86  (67.6% covered)
+    CLE   nearest_dist= 28.23  (85.9% covered)
+    CHI   nearest_dist= 32.86  (83.6% covered)
+  PASS: CLE > CHI (85.9% vs 83.6%, margin 2.3 pts)  [prior z-scored verdict: FAIL]  [CHANGED from z-scored: was FAIL]
+----------------------------------------------------------------------
+Chet Holmgren
+    OKC   nearest_dist=  0.00  (100.0% covered)
+    CLE   nearest_dist= 16.20  (91.9% covered)
+    CHI   nearest_dist= 34.09  (83.0% covered)
+  PASS: CLE > CHI (91.9% vs 83.0%, margin 8.9 pts)  [prior z-scored verdict: PASS]
+----------------------------------------------------------------------
+Jusuf Nurkić  [could not compute for: ['OKC', 'CLE', 'CHI']]
+----------------------------------------------------------------------
+Donovan Clingan
+    OKC   nearest_dist= 32.40  (83.8% covered)
+    CLE   nearest_dist= 40.21  (79.9% covered)
+    CHI   nearest_dist= 26.15  (86.9% covered)
+  FAIL: CLE <= CHI (79.9% vs 86.9%, margin 7.0 pts)  [prior z-scored verdict: FAIL]
+
+======================================================================
+SUMMARY — percentile-space vs. prior z-scored verdicts
+======================================================================
+    Onyeka Okongwu       percentile-space=PASS  z-scored=FAIL  <-- changed
+    Nique Clifford       percentile-space=FAIL  z-scored=FAIL
+    Anthony Gill         percentile-space=PASS  z-scored=FAIL  <-- changed
+    Chet Holmgren        percentile-space=PASS  z-scored=PASS
+    Donovan Clingan      percentile-space=FAIL  z-scored=FAIL
+
+  3 of 5 points PASS in percentile space (z-scored space: 2 of 7).
+  More points PASS than under the z-scored metric, but not all -- a real improvement, not a full fix. The remaining failures should be inspected individually (raw percentile values, which specific team's nearest player is closest) before this metric is trusted for production use.
+
+Done.

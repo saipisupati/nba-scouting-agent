@@ -1,0 +1,408 @@
+====================================================================
+TEST (a): deliberately-broken-column startup failure
+====================================================================
+
+Setup: renamed DEFLECTIONS -> DEFLECTIONS_RENAMED_BY_MISTAKE in a
+real copy of hustle_stats_2025_26.csv, then attempted to start
+uvicorn against it.
+
+Result: server process exited immediately (did not stay running).
+
+Full, literal RuntimeError message:
+--------------------------------------------------------------------
+RuntimeError: Startup schema check failed: 'hustle_stats_2025_26.csv' is missing required column(s) ['DEFLECTIONS']. This file exists but does not match the schema this app depends on -- it may be stale, corrupted, or pulled from a changed upstream endpoint. Re-run ./refresh_data.sh to regenerate it.
+--------------------------------------------------------------------
+
+File was restored immediately after and confirmed identical to
+git HEAD via diff before any further testing.
+
+
+====================================================================
+TEST (b): normal startup + data_as_of, local uvicorn
+====================================================================
+
+--- GET /health ---
+{"status":"ok","current_season_rows":581,"prior_season_rows":567,"groq_key_configured":false}
+
+--- POST /query {"question": "Who leads the league in deflections per 36 minutes?"} ---
+{
+    "question": "Who leads the league in deflections per 36 minutes?",
+    "response_type": "answer",
+    "answer": "Dru Smith (MIA) leads in deflections per 36 with 6.21 in 68 games averaging 16.7 minutes [2025-26].",
+    "function_matched": "deflections_per36",
+    "method": "deterministic",
+    "table": [
+        {
+            "PLAYER_NAME": "Dru Smith",
+            "TEAM_ABBREVIATION": "MIA",
+            "G": 68,
+            "MIN": 16.7,
+            "DEFLECTIONS_PER36": 6.21
+        },
+        {
+            "PLAYER_NAME": "Ausar Thompson",
+            "TEAM_ABBREVIATION": "DET",
+            "G": 73,
+            "MIN": 26.0,
+            "DEFLECTIONS_PER36": 6.09
+        },
+        {
+            "PLAYER_NAME": "Alex Caruso",
+            "TEAM_ABBREVIATION": "OKC",
+            "G": 56,
+            "MIN": 18.2,
+            "DEFLECTIONS_PER36": 6.07
+        },
+        {
+            "PLAYER_NAME": "Cason Wallace",
+            "TEAM_ABBREVIATION": "OKC",
+            "G": 77,
+            "MIN": 26.6,
+            "DEFLECTIONS_PER36": 5.95
+        },
+        {
+            "PLAYER_NAME": "Jordan Goodwin",
+            "TEAM_ABBREVIATION": "PHX",
+            "G": 70,
+            "MIN": 22.5,
+            "DEFLECTIONS_PER36": 5.94
+        },
+        {
+            "PLAYER_NAME": "Javonte Green",
+            "TEAM_ABBREVIATION": "DET",
+            "G": 79,
+            "MIN": 18.1,
+            "DEFLECTIONS_PER36": 5.21
+        },
+        {
+            "PLAYER_NAME": "Ziaire Williams",
+            "TEAM_ABBREVIATION": "BKN",
+            "G": 55,
+            "MIN": 23.0,
+            "DEFLECTIONS_PER36": 4.95
+        },
+        {
+            "PLAYER_NAME": "John Konchar",
+            "TEAM_ABBREVIATION": "UTA",
+            "G": 53,
+            "MIN": 20.7,
+            "DEFLECTIONS_PER36": 4.89
+        },
+        {
+            "PLAYER_NAME": "Kelly Oubre Jr.",
+            "TEAM_ABBREVIATION": "PHI",
+            "G": 50,
+            "MIN": 31.5,
+            "DEFLECTIONS_PER36": 4.85
+        },
+        {
+            "PLAYER_NAME": "Reed Sheppard",
+            "TEAM_ABBREVIATION": "HOU",
+            "G": 82,
+            "MIN": 26.2,
+            "DEFLECTIONS_PER36": 4.84
+        },
+        {
+            "PLAYER_NAME": "Gary Payton II",
+            "TEAM_ABBREVIATION": "GSW",
+            "G": 71,
+            "MIN": 15.8,
+            "DEFLECTIONS_PER36": 4.78
+        },
+        {
+            "PLAYER_NAME": "Kris Dunn",
+            "TEAM_ABBREVIATION": "LAC",
+            "G": 82,
+            "MIN": 27.2,
+            "DEFLECTIONS_PER36": 4.78
+        },
+        {
+            "PLAYER_NAME": "Keon Ellis",
+            "TEAM_ABBREVIATION": "CLE",
+            "G": 70,
+            "MIN": 20.9,
+            "DEFLECTIONS_PER36": 4.77
+        },
+        {
+            "PLAYER_NAME": "Day'Ron Sharpe",
+            "TEAM_ABBREVIATION": "BKN",
+            "G": 62,
+            "MIN": 18.7,
+            "DEFLECTIONS_PER36": 4.72
+        },
+        {
+            "PLAYER_NAME": "Josh Minott",
+            "TEAM_ABBREVIATION": "BKN",
+            "G": 48,
+            "MIN": 17.3,
+            "DEFLECTIONS_PER36": 4.72
+        },
+        {
+            "PLAYER_NAME": "Kyle Anderson",
+            "TEAM_ABBREVIATION": "MIN",
+            "G": 43,
+            "MIN": 19.8,
+            "DEFLECTIONS_PER36": 4.56
+        },
+        {
+            "PLAYER_NAME": "De'Anthony Melton",
+            "TEAM_ABBREVIATION": "GSW",
+            "G": 49,
+            "MIN": 23.0,
+            "DEFLECTIONS_PER36": 4.54
+        },
+        {
+            "PLAYER_NAME": "Ryan Rollins",
+            "TEAM_ABBREVIATION": "MIL",
+            "G": 74,
+            "MIN": 32.1,
+            "DEFLECTIONS_PER36": 4.53
+        },
+        {
+            "PLAYER_NAME": "Dyson Daniels",
+            "TEAM_ABBREVIATION": "ATL",
+            "G": 76,
+            "MIN": 33.2,
+            "DEFLECTIONS_PER36": 4.51
+        },
+        {
+            "PLAYER_NAME": "Collin Murray-Boyles",
+            "TEAM_ABBREVIATION": "TOR",
+            "G": 57,
+            "MIN": 21.9,
+            "DEFLECTIONS_PER36": 4.5
+        },
+        {
+            "PLAYER_NAME": "Jake LaRavia",
+            "TEAM_ABBREVIATION": "LAL",
+            "G": 82,
+            "MIN": 25.1,
+            "DEFLECTIONS_PER36": 4.49
+        },
+        {
+            "PLAYER_NAME": "T.J. McConnell",
+            "TEAM_ABBREVIATION": "IND",
+            "G": 54,
+            "MIN": 17.3,
+            "DEFLECTIONS_PER36": 4.47
+        },
+        {
+            "PLAYER_NAME": "Herbert Jones",
+            "TEAM_ABBREVIATION": "NOP",
+            "G": 56,
+            "MIN": 28.4,
+            "DEFLECTIONS_PER36": 4.44
+        },
+        {
+            "PLAYER_NAME": "Jalen Suggs",
+            "TEAM_ABBREVIATION": "ORL",
+            "G": 57,
+            "MIN": 27.6,
+            "DEFLECTIONS_PER36": 4.4
+        },
+        {
+            "PLAYER_NAME": "Craig Porter Jr.",
+            "TEAM_ABBREVIATION": "CLE",
+            "G": 62,
+            "MIN": 18.4,
+            "DEFLECTIONS_PER36": 4.38
+        }
+    ],
+    "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+}
+
+
+====================================================================
+TEST (b): normal startup + data_as_of, real Docker container
+(docker build + docker run, fresh image, not the local venv)
+====================================================================
+
+--- GET /health ---
+{"status":"ok","current_season_rows":581,"prior_season_rows":567,"groq_key_configured":false}
+
+--- POST /query {"question": "Who leads the league in deflections per 36 minutes?"} ---
+{
+    "question": "Who leads the league in deflections per 36 minutes?",
+    "response_type": "answer",
+    "answer": "Dru Smith (MIA) leads in deflections per 36 with 6.21 in 68 games averaging 16.7 minutes [2025-26].",
+    "function_matched": "deflections_per36",
+    "method": "deterministic",
+    "table": [
+        {
+            "PLAYER_NAME": "Dru Smith",
+            "TEAM_ABBREVIATION": "MIA",
+            "G": 68,
+            "MIN": 16.7,
+            "DEFLECTIONS_PER36": 6.21
+        },
+        {
+            "PLAYER_NAME": "Ausar Thompson",
+            "TEAM_ABBREVIATION": "DET",
+            "G": 73,
+            "MIN": 26.0,
+            "DEFLECTIONS_PER36": 6.09
+        },
+        {
+            "PLAYER_NAME": "Alex Caruso",
+            "TEAM_ABBREVIATION": "OKC",
+            "G": 56,
+            "MIN": 18.2,
+            "DEFLECTIONS_PER36": 6.07
+        },
+        {
+            "PLAYER_NAME": "Cason Wallace",
+            "TEAM_ABBREVIATION": "OKC",
+            "G": 77,
+            "MIN": 26.6,
+            "DEFLECTIONS_PER36": 5.95
+        },
+        {
+            "PLAYER_NAME": "Jordan Goodwin",
+            "TEAM_ABBREVIATION": "PHX",
+            "G": 70,
+            "MIN": 22.5,
+            "DEFLECTIONS_PER36": 5.94
+        },
+        {
+            "PLAYER_NAME": "Javonte Green",
+            "TEAM_ABBREVIATION": "DET",
+            "G": 79,
+            "MIN": 18.1,
+            "DEFLECTIONS_PER36": 5.21
+        },
+        {
+            "PLAYER_NAME": "Ziaire Williams",
+            "TEAM_ABBREVIATION": "BKN",
+            "G": 55,
+            "MIN": 23.0,
+            "DEFLECTIONS_PER36": 4.95
+        },
+        {
+            "PLAYER_NAME": "John Konchar",
+            "TEAM_ABBREVIATION": "UTA",
+            "G": 53,
+            "MIN": 20.7,
+            "DEFLECTIONS_PER36": 4.89
+        },
+        {
+            "PLAYER_NAME": "Kelly Oubre Jr.",
+            "TEAM_ABBREVIATION": "PHI",
+            "G": 50,
+            "MIN": 31.5,
+            "DEFLECTIONS_PER36": 4.85
+        },
+        {
+            "PLAYER_NAME": "Reed Sheppard",
+            "TEAM_ABBREVIATION": "HOU",
+            "G": 82,
+            "MIN": 26.2,
+            "DEFLECTIONS_PER36": 4.84
+        },
+        {
+            "PLAYER_NAME": "Gary Payton II",
+            "TEAM_ABBREVIATION": "GSW",
+            "G": 71,
+            "MIN": 15.8,
+            "DEFLECTIONS_PER36": 4.78
+        },
+        {
+            "PLAYER_NAME": "Kris Dunn",
+            "TEAM_ABBREVIATION": "LAC",
+            "G": 82,
+            "MIN": 27.2,
+            "DEFLECTIONS_PER36": 4.78
+        },
+        {
+            "PLAYER_NAME": "Keon Ellis",
+            "TEAM_ABBREVIATION": "CLE",
+            "G": 70,
+            "MIN": 20.9,
+            "DEFLECTIONS_PER36": 4.77
+        },
+        {
+            "PLAYER_NAME": "Day'Ron Sharpe",
+            "TEAM_ABBREVIATION": "BKN",
+            "G": 62,
+            "MIN": 18.7,
+            "DEFLECTIONS_PER36": 4.72
+        },
+        {
+            "PLAYER_NAME": "Josh Minott",
+            "TEAM_ABBREVIATION": "BKN",
+            "G": 48,
+            "MIN": 17.3,
+            "DEFLECTIONS_PER36": 4.72
+        },
+        {
+            "PLAYER_NAME": "Kyle Anderson",
+            "TEAM_ABBREVIATION": "MIN",
+            "G": 43,
+            "MIN": 19.8,
+            "DEFLECTIONS_PER36": 4.56
+        },
+        {
+            "PLAYER_NAME": "De'Anthony Melton",
+            "TEAM_ABBREVIATION": "GSW",
+            "G": 49,
+            "MIN": 23.0,
+            "DEFLECTIONS_PER36": 4.54
+        },
+        {
+            "PLAYER_NAME": "Ryan Rollins",
+            "TEAM_ABBREVIATION": "MIL",
+            "G": 74,
+            "MIN": 32.1,
+            "DEFLECTIONS_PER36": 4.53
+        },
+        {
+            "PLAYER_NAME": "Dyson Daniels",
+            "TEAM_ABBREVIATION": "ATL",
+            "G": 76,
+            "MIN": 33.2,
+            "DEFLECTIONS_PER36": 4.51
+        },
+        {
+            "PLAYER_NAME": "Collin Murray-Boyles",
+            "TEAM_ABBREVIATION": "TOR",
+            "G": 57,
+            "MIN": 21.9,
+            "DEFLECTIONS_PER36": 4.5
+        },
+        {
+            "PLAYER_NAME": "Jake LaRavia",
+            "TEAM_ABBREVIATION": "LAL",
+            "G": 82,
+            "MIN": 25.1,
+            "DEFLECTIONS_PER36": 4.49
+        },
+        {
+            "PLAYER_NAME": "T.J. McConnell",
+            "TEAM_ABBREVIATION": "IND",
+            "G": 54,
+            "MIN": 17.3,
+            "DEFLECTIONS_PER36": 4.47
+        },
+        {
+            "PLAYER_NAME": "Herbert Jones",
+            "TEAM_ABBREVIATION": "NOP",
+            "G": 56,
+            "MIN": 28.4,
+            "DEFLECTIONS_PER36": 4.44
+        },
+        {
+            "PLAYER_NAME": "Jalen Suggs",
+            "TEAM_ABBREVIATION": "ORL",
+            "G": 57,
+            "MIN": 27.6,
+            "DEFLECTIONS_PER36": 4.4
+        },
+        {
+            "PLAYER_NAME": "Craig Porter Jr.",
+            "TEAM_ABBREVIATION": "CLE",
+            "G": 62,
+            "MIN": 18.4,
+            "DEFLECTIONS_PER36": 4.38
+        }
+    ],
+    "data_as_of": "2026-08-10T05:59:00.375646+00:00"
+}

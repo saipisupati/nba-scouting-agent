@@ -1,0 +1,319 @@
+======================================================================
+GROQ MODEL FIX — full verification record
+======================================================================
+Date: 2026-08-21
+Root cause: query_router.py's _llm_route was hardcoded to
+"llama-3.3-70b-versatile", which Groq removed from its catalog. Every
+question that fell through to the LLM fallback (out_of_scope,
+needs_clarification, and any question requiring free-text name/metric
+extraction like signature_play_type) was returning a routing error in
+production.
+
+
+======================================================================
+STEP 1 — Groq's current model catalog
+======================================================================
+GET https://api.groq.com/openai/v1/models (real key, real response)
+
+whisper-large-v3-turbo                        active=True context_window=448
+groq/compound                                 active=True context_window=131072
+qwen/qwen3.6-27b                              active=True context_window=131072
+allam-2-7b                                    active=True context_window=4096
+canopylabs/orpheus-v1-english                 active=True context_window=4000
+openai/gpt-oss-safeguard-20b                  active=True context_window=131072
+openai/gpt-oss-20b                            active=True context_window=131072
+canopylabs/orpheus-arabic-saudi               active=True context_window=4000
+whisper-large-v3                              active=True context_window=448
+openai/gpt-oss-120b                           active=True context_window=131072
+groq/compound-mini                            active=True context_window=131072
+meta-llama/llama-prompt-guard-2-86m           active=True context_window=512
+meta-llama/llama-prompt-guard-2-22m           active=True context_window=512
+
+Original model confirmed dead via direct call:
+  curl -X POST https://api.groq.com/openai/v1/chat/completions \
+    -d '{"model":"llama-3.3-70b-versatile","max_tokens":20,"messages":[{"role":"user","content":"say hi"}]}'
+  -> {"error":{"message":"The model `llama-3.3-70b-versatile` does not
+      exist or you do not have access to it.","type":"invalid_request_error",
+      "code":"model_not_found"}}
+
+Whisper (audio transcription), orpheus/allam (TTS), llama-prompt-guard
+(prompt-injection classifiers), and groq/compound* (agentic tool-use
+wrappers) are not general chat/JSON-classification models and were
+excluded from candidacy on that basis. Three real candidates identified:
+  - openai/gpt-oss-120b
+  - openai/gpt-oss-20b
+  - qwen/qwen3.6-27b
+
+
+======================================================================
+STEP 2 — Vetting against the router's exact production contract
+======================================================================
+Same payload shape as query_router.py's _llm_route: no response_format
+flag, the real _SYSTEM_PROMPT (all 15 functions + scope statement), and
+the same parse (raw.strip().strip("```json").strip("```").strip(), then
+json.loads). "Correct" means BOTH valid JSON AND the right classification
+key/function -- not just "did it respond."
+
+--- qwen/qwen3.6-27b: DISQUALIFIED (hard contract violation) ---
+Every response (even ones that eventually contain correct JSON) is
+prefixed with a <think>...</think> reasoning block before the JSON,
+e.g.:
+
+  Q: "What's the trade value of Donovan Clingan?"
+  raw response: '\n<think>\nThe user is asking about the "trade value"
+  of Donovan Clingan.\nLooking at the available functions, none of them
+  cover trade value. ... Therefore, this question is out of scope.\nI
+  will return `{"out_of_scope": true}`.\n...\n</think>\n\n{"out_of_scope": true}'
+  JSON valid: False (JSONDecodeError: Expecting value: line 1 column 1 (char 0))
+
+This is not a rate-limit or sampling artifact -- it reproduced on every
+non-rate-limited call. query_router.py's parser has no logic to strip a
+<think> block, so every real call to this model would crash with
+JSONDecodeError. Not re-tested further; disqualified on this evidence
+alone.
+
+--- openai/gpt-oss-120b and openai/gpt-oss-20b: full 10-question run ---
+
+Test set (each independently verified via
+query_router._deterministic_route(q) == None, confirming every question
+genuinely reaches the LLM fallback in the real router and isn't
+secretly caught by a regex rule first):
+
+  1. "Who is the best scorer in the league?"                    -> out_of_scope
+  2. "What's the trade value of Donovan Clingan?"                -> out_of_scope
+  3. "Who should my team draft this year?"                       -> out_of_scope
+  4. "How much is Victor Wembanyama worth in a trade?"           -> out_of_scope
+  5. "What's Clingan's points per game?"                         -> out_of_scope
+  6. "What's Stephen Curry's signature play type?"                -> function: signature_play_type
+  7. "What does Nikola Jokic do best offensively?"                -> function: signature_play_type
+  8. "Give me his numbers"                                        -> needs_clarification
+  9. "How is he doing this year?"                                 -> needs_clarification
+  10. "What is LeBron James's salary?"                            -> out_of_scope
+
+NOTE: two originally-planned test questions ("Which player has the best
+defensive instincts based on the numbers?" and "Tell me about his
+hustle stats") were DROPPED after _deterministic_route() showed both
+are actually caught by the regex router in production (via "instinct"
+and "hustle" respectively) -- testing them against a bare LLM call
+would have produced evidence about a code path the real router never
+takes for those questions.
+
+--- openai/gpt-oss-120b: 10/10 valid JSON, 9/10 correct on first clean run ---
+
+[PASS] Q: Who is the best scorer in the league?
+  raw response    : '{"out_of_scope": true}'
+[PASS] Q: What's the trade value of Donovan Clingan?
+  raw response    : '{"out_of_scope": true}'
+[FAIL] Q: Who should my team draft this year?
+  raw response    : '{"needs_clarification": true}'   (expected out_of_scope)
+[PASS] Q: How much is Victor Wembanyama worth in a trade?
+  raw response    : '{"out_of_scope": true}'
+[PASS] Q: What's Clingan's points per game?
+  raw response    : '{"out_of_scope": true}'
+[PASS] Q: What's Stephen Curry's signature play type?
+  raw response    : '{"function": "signature_play_type", "sort_col": "Stephen Curry"}'
+[PASS] Q: What does Nikola Jokic do best offensively?
+  raw response    : '{"function": "signature_play_type", "sort_col": "Nikola Jokic"}'
+[PASS] Q: Give me his numbers
+  raw response    : '{"needs_clarification": true}'
+[PASS] Q: How is he doing this year?
+  raw response    : '{"needs_clarification": true}'
+[PASS] Q: What is LeBron James's salary?
+  raw response    : '{"out_of_scope": true}'
+
+Repeat-tested the one miss ("Who should my team draft this year?") 3
+more times in isolation:
+  attempt 1: '{"out_of_scope": true}'
+  attempt 2: '{"out_of_scope": true}'
+  attempt 3: '{"out_of_scope": true}'
+-> 3/3 correct on repeat. The original miss was sampling variance, not a
+   systematic contract violation. Effective reliability: 12/13 across
+   all calls made against this model.
+
+--- openai/gpt-oss-20b: 10/10 valid JSON, 10/10 correct on TWO independent clean runs ---
+
+Run 1:
+[PASS] Q: Who is the best scorer in the league?
+  raw response    : '{"out_of_scope": true}'
+[PASS] Q: What's the trade value of Donovan Clingan?
+  raw response    : '{"out_of_scope": true}'
+[PASS] Q: Who should my team draft this year?
+  raw response    : '{"out_of_scope": true}'
+[PASS] Q: How much is Victor Wembanyama worth in a trade?
+  raw response    : '{"out_of_scope": true}'
+[PASS] Q: What's Clingan's points per game?
+  raw response    : '{"out_of_scope": true}'
+[PASS] Q: What's Stephen Curry's signature play type?
+  raw response    : '{"function":"signature_play_type","sort_col":"Stephen Curry"}'
+[PASS] Q: What does Nikola Jokic do best offensively?
+  raw response    : '{"function":"signature_play_type","sort_col":"Nikola Jokic"}'
+[PASS] Q: Give me his numbers
+  raw response    : '{"needs_clarification": true}'
+[PASS] Q: How is he doing this year?
+  raw response    : '{"needs_clarification": true}'
+[PASS] Q: What is LeBron James's salary?
+  raw response    : '{"out_of_scope": true}'
+
+Repeat-tested the three most uncertain questions again (2 attempts each):
+  'Give me his numbers'                 attempt 1: '{"needs_clarification": true}'
+  'Give me his numbers'                 attempt 2: '{"needs_clarification": true}'
+  'How is he doing this year?'          attempt 1: '{"needs_clarification": true}'
+  'How is he doing this year?'          attempt 2: '{"needs_clarification": true}'
+  'Who should my team draft this year?' attempt 1: '{"out_of_scope": true}'
+  'Who should my team draft this year?' attempt 2: '{"out_of_scope": true}'
+-> 16/16 correct across all calls made against this model.
+
+SUMMARY:
+  openai/gpt-oss-120b             valid_json=10/10  correct=9/10 (12/13 incl. repeats)
+  openai/gpt-oss-20b              valid_json=10/10  correct=10/10 (16/16 incl. repeats)
+
+DECISION: openai/gpt-oss-20b selected. Equal measured reliability to
+120b once sampling variance is accounted for; smaller/faster model.
+
+
+======================================================================
+STEP 3 — Code changes
+======================================================================
+query_router.py:
+  "model": "llama-3.3-70b-versatile"  ->  "model": "openai/gpt-oss-20b"
+  (with an inline comment documenting the vetting summary above)
+
+test_llm_fallback.py:
+  same model string updated to match.
+
+
+======================================================================
+STEP 4 — test_router.py's LLM-fallback question set, re-run for real
+against the new model (GROQ_API_KEY sourced from .env, live Groq calls)
+======================================================================
+
+Q8: Who is the best scorer in the league?
+  Routing method : llm_fallback
+  Function matched: out_of_scope
+  Answer: I don't have data to answer that — this tool covers deflections,
+  rim/perimeter contests, box-out efficiency, ... [full out-of-scope message]
+
+Q9: What's the trade value of Donovan Clingan?
+  Routing method : llm_fallback
+  Function matched: out_of_scope
+
+Q10: Who should my team draft this year?
+  Routing method : llm_fallback
+  Function matched: out_of_scope
+
+Q11: How much is Victor Wembanyama worth in a trade?
+  Routing method : llm_fallback
+  Function matched: out_of_scope
+
+Q13: What's Clingan's points per game?
+  Routing method : llm_fallback
+  Function matched: out_of_scope
+
+Q23: Is this player trending up or down defensively?
+  [First attempt hit a real 429 rate-limit from this test run's own call
+  volume against the free-tier 8000 TPM cap -- exhausted the built-in
+  4-attempt retry in _llm_route. Re-tested in isolation after the limit
+  cleared:]
+  Routing method : llm_fallback
+  Function matched: needs_clarification
+  Answer: I can track year-over-year trends, but I need to know which stat
+  (deflections, contests, box-outs, or hustle IQ) and which direction
+  (improving or declining) you're asking about.
+
+Q42: What's Stephen Curry's signature play type?
+  Routing method : llm_fallback
+  Function matched: signature_play_type
+  Answer: Stephen Curry's signature play type is dribble handoff offense
+  (99.6% percentile, 2.8 poss/g).
+
+Q43: What does Nikola Jokic do best offensively?
+  Routing method : llm_fallback
+  Function matched: signature_play_type
+  Answer: Nikola Jokić's signature play type is off-screen offense
+  (94.9% percentile, 1.2 poss/g).
+  [also confirms the separate resolve_player_name accent-fold fix:
+   unaccented "Nikola Jokic" input resolved to the roster's actual
+   "Nikola Jokić" in the answer text]
+
+RESULT: all 8 previously-broken LLM-fallback questions (Q8, Q9, Q10,
+Q11, Q13, Q23, Q42, Q43) now pass. All other 37 deterministically-routed
+questions in test_router.py were unaffected (unchanged from before this
+fix). Full test suite (test_compute.py, test_smoke.py, test_report.py)
+also re-run clean, no regressions.
+
+
+======================================================================
+STEP 5 — Deploy and live-site confirmation
+======================================================================
+git commit 8108e66 pushed to origin/master.
+
+Live URL: https://nba-scouting-agent.onrender.com (per README.md)
+
+First check immediately after push (deploy not yet rolled out):
+  POST /query {"question": "What is LeBron James's salary?"}
+  -> {"...","answer":"Routing error: 404 Client Error: Not Found for url:
+      https://api.groq.com/openai/v1/chat/completions", "method":"error", ...}
+  (confirms old broken model still live at this point)
+
+After waiting for Render's free-tier build+deploy cycle (~4-5 min total),
+re-checked:
+
+  POST https://nba-scouting-agent.onrender.com/query
+  {"question": "What is LeBron James's salary?"}
+  ->
+  {"question":"What is LeBron James's salary?",
+   "response_type":"out_of_scope",
+   "answer":"I don't have data to answer that — this tool covers
+   deflections, rim/perimeter contests, box-out efficiency, hustle-play
+   composites, shot suppression (opponent FG%), hustle-vs-suppression gap
+   analysis, Synergy play-type defense (Isolation, PRBallHandler,
+   PRRollman, Postup, Spotup, Handoff, OffScreen), Synergy play-type
+   offense (Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff,
+   Cut, OffScreen, Transition), drive efficiency (points per drive, drive
+   FG%, playmaking on drives), 2026 NBA draft-class college stats (player
+   lookup, leaderboards, usage-vs-efficiency), and signature play type (a
+   player's standout offensive category by percentile).",
+   "function_matched":"out_of_scope",
+   "method":"llm_fallback",
+   "table":null,
+   "data_as_of":"2026-08-21T02:11:22.727331+00:00",
+   "audit":null}
+
+  DEPLOY CONFIRMED: method="llm_fallback" (not "error") -- the live
+  instance is running the fixed model.
+
+Second live check, exercising a function-match case AND the separate
+accent-fold fix simultaneously:
+
+  POST https://nba-scouting-agent.onrender.com/query
+  {"question": "What does Nikola Jokic do best offensively?"}
+  ->
+  {"question":"What does Nikola Jokic do best offensively?",
+   "response_type":"answer",
+   "answer":"Nikola Jokić's signature play type is off-screen offense
+   (94.9% percentile, 1.2 poss/g).",
+   "function_matched":"signature_play_type",
+   "method":"llm_fallback",
+   "table":[{"play_type":"OffScreen","percentile":0.949,"poss":1.2},
+            {"play_type":"Isolation","percentile":0.876,"poss":1.7},
+            {"play_type":"PRRollman","percentile":0.758,"poss":2.8},
+            {"play_type":"Postup","percentile":0.75,"poss":5.5},
+            {"play_type":"Spotup","percentile":0.682,"poss":2.4},
+            {"play_type":"PRBallHandler","percentile":0.379,"poss":2.1},
+            {"play_type":"Transition","percentile":0.228,"poss":2.2}],
+   "data_as_of":"2026-08-21T02:11:22.727331+00:00",
+   "audit":{"intent":"signature_play_type",
+            "parameters":{"tie_margin":0.04,"min_percentile":0.6},
+            "qualifying_pool_size":7,
+            "routing_method":"llm_fallback",
+            "data_as_of":"2026-08-21T02:11:22.727331+00:00",
+            "matched_text":null,"matched_pattern":null}}
+
+  CONFIRMED LIVE: correct function match via the new model AND unaccented
+  "Nikola Jokic" input resolved to "Nikola Jokić" in the answer, on the
+  real deployed URL (not localhost).
+
+
+======================================================================
+DONE. Live production LLM fallback is fixed and verified.
+======================================================================

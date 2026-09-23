@@ -1,0 +1,376 @@
+Building feature matrix from Layer 1 axes (qualification floor: MIN>=15, GP>=40)...
+Feature matrix: 305 qualified players, 37 columns
+
+======================================================================
+EXPLAINED VARIANCE RATIO PER PRINCIPAL COMPONENT
+======================================================================
+  PC1: 0.1955   (cumulative: 0.1955)
+  PC2: 0.1016   (cumulative: 0.2971)
+  PC3: 0.0852   (cumulative: 0.3823)
+  PC4: 0.0780   (cumulative: 0.4602)
+  PC5: 0.0589   (cumulative: 0.5191)
+  PC6: 0.0485   (cumulative: 0.5676)
+  PC7: 0.0436   (cumulative: 0.6112)
+  PC8: 0.0385   (cumulative: 0.6497)
+
+======================================================================
+TOP FEATURE LOADINGS — first 4 components
+======================================================================
+
+  PC1:
+    CONTESTED_SHOTS_PER36            +0.322
+    BOX_OUTS_PER36                   +0.302
+    EFG_PCT                          +0.287
+    TS_PCT                           +0.271
+    SHOT_SUPPRESSION_LESS_THAN_6FT   -0.267
+    SHOT_SUPPRESSION_2_POINTERS      -0.265
+    SHOT_SUPPRESSION_OVERALL         -0.262
+    AST_PCT                          -0.255
+
+  PC2:
+    AST_RATIO                        +0.376
+    DRIVE_AST_PCT                    +0.369
+    DRIVE_PASSES_PCT                 +0.366
+    AST_TO                           +0.334
+    SHOT_SUPPRESSION_OVERALL         -0.298
+    SHOT_SUPPRESSION_2_POINTERS      -0.277
+    USG_PCT                          -0.247
+    SHOT_SUPPRESSION_LESS_THAN_6FT   -0.202
+
+  PC3:
+    DRIVE_FG_PCT                     +0.407
+    AST_PCT                          +0.402
+    USG_PCT                          +0.384
+    SELF_CREATION_SHARE              +0.369
+    TS_PCT                           +0.309
+    SPOTUP_SHARE                     -0.269
+    EFG_PCT                          +0.213
+    CUT_OFFSCREEN_SHARE              +0.172
+
+  PC4:
+    SHOT_SUPPRESSION_OVERALL         +0.352
+    EFG_PCT                          +0.337
+    USG_PCT                          -0.317
+    TS_PCT                           +0.284
+    SHOT_SUPPRESSION_2_POINTERS      +0.276
+    SHOT_SUPPRESSION_3_POINTERS      +0.251
+    DRIVE_PASSES_PCT                 +0.249
+    DRIVE_AST_PCT                    +0.228
+
+======================================================================
+REFERENCE PLAYERS — raw feature vector + position in reduced space
+======================================================================
+
+──────────────────────────────────────────────────────────────────────
+Stephen Curry  (GSW)
+──────────────────────────────────────────────────────────────────────
+  Raw feature vector:
+    SELF_CREATION_SHARE              0.3892
+    AST_PCT                          0.2450
+    AST_TO                           1.6800
+    AST_RATIO                        16.8000
+    DRIVE_AST_PCT                    0.0680
+    DRIVE_PASSES_PCT                 0.3920
+    DRIVE_FG_PCT                     0.5200
+    SPOTUP_SHARE                     0.3294
+    CUT_OFFSCREEN_SHARE              0.6706
+    DEF_PPP_ISOLATION                0.7780
+    DEF_PPP_PRBALLHANDLER            0.8870
+    DEF_PPP_PRROLLMAN                1.0370
+    DEF_PPP_POSTUP                   1.2730
+    DEF_PPP_SPOTUP                   1.0510
+    DEF_PPP_HANDOFF                  NaN (insufficient qualifying sample)
+    DEF_PPP_OFFSCREEN                1.0480
+    SHOT_SUPPRESSION_OVERALL         0.0310
+    SHOT_SUPPRESSION_3_POINTERS      0.0150
+    SHOT_SUPPRESSION_2_POINTERS      0.0190
+    SHOT_SUPPRESSION_LESS_THAN_6FT   -0.0220
+    DEFLECTIONS_PER36                2.8194
+    CONTESTED_SHOTS_PER36            3.2272
+    BOX_OUTS_PER36                   0.3495
+    TS_PCT                           0.6370
+    EFG_PCT                          0.5870
+    USG_PCT                          0.3080
+    PACE                             103.6600
+    TRANSITION_PPP                   1.0310
+
+  Position in reduced space:
+    PC1: -0.038
+    PC2: -1.627
+    PC3: +2.759
+    PC4: -0.072
+
+──────────────────────────────────────────────────────────────────────
+Nikola Jokić  (DEN)
+──────────────────────────────────────────────────────────────────────
+  Raw feature vector:
+    SELF_CREATION_SHARE              0.6159
+    AST_PCT                          0.4580
+    AST_TO                           2.8700
+    AST_RATIO                        30.6000
+    DRIVE_AST_PCT                    0.0950
+    DRIVE_PASSES_PCT                 0.3140
+    DRIVE_FG_PCT                     0.6120
+    SPOTUP_SHARE                     0.4138
+    CUT_OFFSCREEN_SHARE              0.5862
+    DEF_PPP_ISOLATION                1.1040
+    DEF_PPP_PRBALLHANDLER            0.8590
+    DEF_PPP_PRROLLMAN                1.1830
+    DEF_PPP_POSTUP                   NaN (insufficient qualifying sample)
+    DEF_PPP_SPOTUP                   1.0670
+    DEF_PPP_HANDOFF                  NaN (insufficient qualifying sample)
+    DEF_PPP_OFFSCREEN                NaN (insufficient qualifying sample)
+    SHOT_SUPPRESSION_OVERALL         0.0210
+    SHOT_SUPPRESSION_3_POINTERS      0.0550
+    SHOT_SUPPRESSION_2_POINTERS      -0.0090
+    SHOT_SUPPRESSION_LESS_THAN_6FT   -0.0100
+    DEFLECTIONS_PER36                2.8138
+    CONTESTED_SHOTS_PER36            6.1862
+    BOX_OUTS_PER36                   2.3379
+    TS_PCT                           0.6700
+    EFG_PCT                          0.6180
+    USG_PCT                          0.2890
+    PACE                             102.5900
+    TRANSITION_PPP                   0.9930
+
+  Position in reduced space:
+    PC1: -0.146
+    PC2: +0.607
+    PC3: +5.559
+    PC4: +0.429
+
+──────────────────────────────────────────────────────────────────────
+Alex Caruso  (OKC)
+──────────────────────────────────────────────────────────────────────
+  Raw feature vector:
+    SELF_CREATION_SHARE              NaN (insufficient qualifying sample)
+    AST_PCT                          0.1450
+    AST_TO                           2.2900
+    AST_RATIO                        22.8000
+    DRIVE_AST_PCT                    0.1100
+    DRIVE_PASSES_PCT                 0.4100
+    DRIVE_FG_PCT                     0.4420
+    SPOTUP_SHARE                     1.0000
+    CUT_OFFSCREEN_SHARE              NaN (insufficient qualifying sample)
+    DEF_PPP_ISOLATION                0.7780
+    DEF_PPP_PRBALLHANDLER            0.8150
+    DEF_PPP_PRROLLMAN                NaN (insufficient qualifying sample)
+    DEF_PPP_POSTUP                   1.3330
+    DEF_PPP_SPOTUP                   1.0350
+    DEF_PPP_HANDOFF                  NaN (insufficient qualifying sample)
+    DEF_PPP_OFFSCREEN                NaN (insufficient qualifying sample)
+    SHOT_SUPPRESSION_OVERALL         -0.0180
+    SHOT_SUPPRESSION_3_POINTERS      0.0310
+    SHOT_SUPPRESSION_2_POINTERS      -0.0490
+    SHOT_SUPPRESSION_LESS_THAN_6FT   0.0220
+    DEFLECTIONS_PER36                6.0725
+    CONTESTED_SHOTS_PER36            4.6681
+    BOX_OUTS_PER36                   0.7516
+    TS_PCT                           0.5400
+    EFG_PCT                          0.5120
+    USG_PCT                          0.1520
+    PACE                             102.7400
+    TRANSITION_PPP                   1.2690
+
+  Position in reduced space:
+    PC1: -1.352
+    PC2: +1.186
+    PC3: -1.658
+    PC4: +0.147
+
+──────────────────────────────────────────────────────────────────────
+Donovan Clingan  (POR)
+──────────────────────────────────────────────────────────────────────
+  Raw feature vector:
+    SELF_CREATION_SHARE              NaN (insufficient qualifying sample)
+    AST_PCT                          0.1120
+    AST_TO                           1.7100
+    AST_RATIO                        15.7000
+    DRIVE_AST_PCT                    NaN (insufficient qualifying sample)
+    DRIVE_PASSES_PCT                 NaN (insufficient qualifying sample)
+    DRIVE_FG_PCT                     NaN (insufficient qualifying sample)
+    SPOTUP_SHARE                     0.4722
+    CUT_OFFSCREEN_SHARE              0.5278
+    DEF_PPP_ISOLATION                0.8290
+    DEF_PPP_PRBALLHANDLER            0.8840
+    DEF_PPP_PRROLLMAN                1.0890
+    DEF_PPP_POSTUP                   1.2220
+    DEF_PPP_SPOTUP                   1.1610
+    DEF_PPP_HANDOFF                  NaN (insufficient qualifying sample)
+    DEF_PPP_OFFSCREEN                NaN (insufficient qualifying sample)
+    SHOT_SUPPRESSION_OVERALL         -0.0420
+    SHOT_SUPPRESSION_3_POINTERS      0.0260
+    SHOT_SUPPRESSION_2_POINTERS      -0.0750
+    SHOT_SUPPRESSION_LESS_THAN_6FT   -0.0990
+    DEFLECTIONS_PER36                1.4294
+    CONTESTED_SHOTS_PER36            17.8412
+    BOX_OUTS_PER36                   2.3029
+    TS_PCT                           0.6040
+    EFG_PCT                          0.5820
+    USG_PCT                          0.1630
+    PACE                             101.8600
+    TRANSITION_PPP                   1.1760
+
+  Position in reduced space:
+    PC1: +4.349
+    PC2: +1.259
+    PC3: +0.207
+    PC4: -0.316
+
+──────────────────────────────────────────────────────────────────────
+Shai Gilgeous-Alexander  (OKC)
+──────────────────────────────────────────────────────────────────────
+  Raw feature vector:
+    SELF_CREATION_SHARE              0.8700
+    AST_PCT                          0.3320
+    AST_TO                           2.9700
+    AST_RATIO                        20.6000
+    DRIVE_AST_PCT                    0.1060
+    DRIVE_PASSES_PCT                 0.3790
+    DRIVE_FG_PCT                     0.5920
+    SPOTUP_SHARE                     0.6667
+    CUT_OFFSCREEN_SHARE              0.3333
+    DEF_PPP_ISOLATION                1.0780
+    DEF_PPP_PRBALLHANDLER            0.6240
+    DEF_PPP_PRROLLMAN                1.0740
+    DEF_PPP_POSTUP                   0.7100
+    DEF_PPP_SPOTUP                   0.9240
+    DEF_PPP_HANDOFF                  0.8260
+    DEF_PPP_OFFSCREEN                0.6920
+    SHOT_SUPPRESSION_OVERALL         -0.0400
+    SHOT_SUPPRESSION_3_POINTERS      -0.0310
+    SHOT_SUPPRESSION_2_POINTERS      -0.0580
+    SHOT_SUPPRESSION_LESS_THAN_6FT   -0.0830
+    DEFLECTIONS_PER36                3.1771
+    CONTESTED_SHOTS_PER36            4.6843
+    BOX_OUTS_PER36                   0.2602
+    TS_PCT                           0.6650
+    EFG_PCT                          0.5970
+    USG_PCT                          0.3230
+    PACE                             101.8400
+    TRANSITION_PPP                   1.3250
+
+  Position in reduced space:
+    PC1: +0.693
+    PC2: +1.995
+    PC3: +4.701
+    PC4: -2.924
+======================================================================
+K-MEANS SWEEP — elbow (inertia/WCSS) and silhouette score per k
+======================================================================
+    k    inertia (WCSS)   silhouette
+    3           6897.43       0.0962
+    4           6537.72       0.0868
+    5           6264.80       0.0819
+    6           6026.64       0.0802
+    7           5850.07       0.0795
+    8           5727.25       0.0688
+    9           5627.74       0.0718
+   10           5533.24       0.0617
+   11           5457.70       0.0721
+   12           5359.22       0.0670
+
+Data-supported k (highest silhouette score): 3
+
+======================================================================
+CLUSTER PROFILES — k=3
+======================================================================
+
+──────────────────────────────────────────────────────────────────────
+Cluster 0  —  51 players
+──────────────────────────────────────────────────────────────────────
+  Representative players (closest to centroid):
+    1. Dylan Cardwell  (dist=3.058)
+    2. Adem Bona  (dist=3.282)
+    3. Wendell Carter Jr.  (dist=3.320)
+    4. Daniel Gafford  (dist=3.413)
+    5. Jarrett Allen  (dist=3.472)
+
+  Most distinctive features (cluster mean vs. population, in std units):
+    Highest:
+      BOX_OUTS_PER36                   +1.69
+      CONTESTED_SHOTS_PER36            +1.64
+      CUT_OFFSCREEN_SHARE              +1.60
+      EFG_PCT                          +1.27
+      TS_PCT                           +1.16
+      TRANSITION_PPP                   +0.67
+    Lowest:
+      SHOT_SUPPRESSION_LESS_THAN_6FT   -0.97
+      SHOT_SUPPRESSION_2_POINTERS      -0.93
+      SHOT_SUPPRESSION_OVERALL         -0.91
+      SPOTUP_SHARE                     -0.59
+      AST_PCT                          -0.57
+      AST_TO                           -0.55
+
+──────────────────────────────────────────────────────────────────────
+Cluster 1  —  108 players
+──────────────────────────────────────────────────────────────────────
+  Representative players (closest to centroid):
+    1. Jrue Holiday  (dist=2.422)
+    2. De'Aaron Fox  (dist=2.503)
+    3. Darius Garland  (dist=3.258)
+    4. Scottie Barnes  (dist=3.312)
+    5. Immanuel Quickley  (dist=3.331)
+
+  Most distinctive features (cluster mean vs. population, in std units):
+    Highest:
+      AST_RATIO                        +0.93
+      AST_PCT                          +0.92
+      DRIVE_AST_PCT                    +0.79
+      AST_TO                           +0.77
+      DRIVE_PASSES_PCT                 +0.64
+      SELF_CREATION_SHARE              +0.62
+    Lowest:
+      CONTESTED_SHOTS_PER36            -0.57
+      BOX_OUTS_PER36                   -0.50
+      TRANSITION_PPP                   -0.45
+      EFG_PCT                          -0.42
+      TS_PCT                           -0.36
+      CUT_OFFSCREEN_SHARE              -0.28
+
+──────────────────────────────────────────────────────────────────────
+Cluster 2  —  146 players
+──────────────────────────────────────────────────────────────────────
+  Representative players (closest to centroid):
+    1. Guerschon Yabusele  (dist=2.725)
+    2. RJ Barrett  (dist=2.787)
+    3. Naz Reid  (dist=2.888)
+    4. Max Christie  (dist=3.016)
+    5. Anthony Black  (dist=3.085)
+
+  Most distinctive features (cluster mean vs. population, in std units):
+    Highest:
+      DEF_PPP_PRBALLHANDLER            +0.19
+      DEF_PPP_ISOLATION                +0.14
+      SHOT_SUPPRESSION_OVERALL         +0.14
+      SHOT_SUPPRESSION_3_POINTERS      +0.13
+      SHOT_SUPPRESSION_2_POINTERS      +0.10
+      TRANSITION_PPP                   +0.10
+    Lowest:
+      AST_RATIO                        -0.55
+      AST_PCT                          -0.48
+      DRIVE_AST_PCT                    -0.45
+      SELF_CREATION_SHARE              -0.38
+      AST_TO                           -0.38
+      CUT_OFFSCREEN_SHARE              -0.35
+
+======================================================================
+PC3 BLEND CHECK — Jokic vs. SGA cluster assignment
+======================================================================
+  Nikola Jokić                 -> cluster 1
+  Shai Gilgeous-Alexander      -> cluster 1
+
+  Verdict: SAME cluster -- clustering on the full feature space does NOT separate them either
+
+======================================================================
+HYPOTHESIZED ARCHETYPES vs. K-MEANS OUTPUT
+======================================================================
+  Hypothesized (8): movement shooter, primary shot creator, offensive hub, rim-running finisher, 3-and-D wing, high-activity defensive specialist, two-way engine, traditional post scorer
+  Data-supported k: 3
+
+  3 clusters were found vs. 8 hypothesized archetypes. Cross-reference each cluster's representative players and distinctive
+  features (printed above) against the hypothesis list by hand -- this function intentionally does not
+  auto-label clusters, since forcing a label onto a cluster is exactly the kind of unjustified
+  assumption this analysis is trying to avoid.
+
+Done.
