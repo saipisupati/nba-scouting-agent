@@ -288,6 +288,149 @@ def print_restricted_comparison(space: dict, player_name: str, n: int = 5, max_c
               f"or more reliable comp list here.")
     print()
 
+_CACHED_SPACE: dict | None = None
+
+
+def get_or_build_mahalanobis_space() -> dict:
+    """Lazily build and cache the standardized feature space and inverse
+    covariance matrix so repeated API requests run in milliseconds."""
+    global _CACHED_SPACE
+    if _CACHED_SPACE is None:
+        fm = build_feature_matrix()
+        _CACHED_SPACE = build_mahalanobis_space(fm)
+    return _CACHED_SPACE
+
+
+FEATURE_LABELS = {
+    "SELF_CREATION_SHARE": "Self-creation share",
+    "AST_PCT": "Assist rate",
+    "AST_TO": "Assist-to-turnover ratio",
+    "AST_RATIO": "Assist ratio",
+    "DRIVE_AST_PCT": "Drive kickout rate",
+    "DRIVE_PASSES_PCT": "Drive pass rate",
+    "DRIVE_FG_PCT": "Finishing on drives",
+    "SPOTUP_SHARE": "Spot-up / catch-and-shoot volume",
+    "CUT_OFFSCREEN_SHARE": "Off-ball movement & cuts",
+    "DEF_PPP_ISOLATION": "Isolation defense",
+    "DEF_PPP_PRBALLHANDLER": "Pick-and-roll ballhandler defense",
+    "DEF_PPP_PRROLLMAN": "Roll man defense",
+    "DEF_PPP_POSTUP": "Post-up defense",
+    "DEF_PPP_SPOTUP": "Closeout / spot-up defense",
+    "DEF_PPP_HANDOFF": "Dribble handoff defense",
+    "DEF_PPP_OFFSCREEN": "Off-screen defense",
+    "SHOT_SUPPRESSION_OVERALL": "Overall shot suppression",
+    "SHOT_SUPPRESSION_3_POINTERS": "Perimeter shot suppression",
+    "SHOT_SUPPRESSION_2_POINTERS": "Midrange shot suppression",
+    "SHOT_SUPPRESSION_LESS_THAN_6FT": "Rim shot suppression",
+    "DEFLECTIONS_PER36": "Deflection activity (per 36)",
+    "CONTESTED_SHOTS_PER36": "Contest volume (per 36)",
+    "BOX_OUTS_PER36": "Box-out frequency (per 36)",
+    "TS_PCT": "True shooting efficiency",
+    "EFG_PCT": "Effective field goal %",
+    "USG_PCT": "Usage load",
+    "PACE": "Transition pace",
+    "TRANSITION_PPP": "Transition efficiency",
+}
+
+
+def get_comps_data(player_name: str, n: int = 5, space: dict | None = None) -> dict:
+    """Retrieve Mahalanobis-distance stylistic comps for a player, returning
+    a structured dictionary suitable for API and UI rendering."""
+    if space is None:
+        space = get_or_build_mahalanobis_space()
+
+    roster_names = space["feature_matrix"]["PLAYER_NAME"]
+    canonical = _resolve_reference_player(player_name, roster_names)
+    if canonical is None:
+        raise ValueError(
+            f"Player {player_name!r} not found in the qualified feature matrix "
+            f"(minimum {MIN_MINUTES} MPG, {MIN_GAMES} GP)."
+        )
+
+    fm = space["feature_matrix"]
+    player_row = fm[fm["PLAYER_NAME"] == canonical].iloc[0]
+    team = str(player_row["TEAM_ABBREVIATION"])
+
+    n_imputed = space["X_raw"].isna().sum(axis=1)
+    names = fm["PLAYER_NAME"].reset_index(drop=True)
+    query_idx = names[names == canonical].index
+    query_n_imputed = int(n_imputed.iloc[query_idx[0]]) if len(query_idx) else 0
+
+    comps_df = find_comps(space, canonical, n=n)
+
+    X_scaled = space["X_scaled"]
+    feature_cols = space["feature_cols"]
+    query_row_idx = query_idx[0]
+    query_vec = X_scaled[query_row_idx]
+
+    comp_items = []
+    for rank, row in enumerate(comps_df.itertuples(index=False), start=1):
+        dist = float(row.MAHALANOBIS_DISTANCE)
+        sim_pct = max(15.0, min(98.5, round(100.0 - (dist - 2.5) * 8.5, 1)))
+        tier = "Near Twin" if dist <= 4.8 else ("High Overlap" if dist <= 5.8 else "Moderate Overlap")
+
+        comp_row_matches = names[names == row.PLAYER_NAME].index
+        if len(comp_row_matches):
+            comp_row_idx = comp_row_matches[0]
+            comp_vec = X_scaled[comp_row_idx]
+            diffs = np.abs(query_vec - comp_vec)
+            sorted_asc = np.argsort(diffs)
+            sorted_desc = np.argsort(diffs)[::-1]
+            shared_traits = [FEATURE_LABELS.get(feature_cols[i], feature_cols[i]) for i in sorted_asc[:2]]
+            divergent_traits = [FEATURE_LABELS.get(feature_cols[i], feature_cols[i]) for i in sorted_desc[:2]]
+        else:
+            shared_traits = []
+            divergent_traits = []
+
+        comp_items.append({
+            "rank": rank,
+            "player_name": str(row.PLAYER_NAME),
+            "team_abbreviation": str(row.TEAM_ABBREVIATION),
+            "mahalanobis_distance": round(dist, 3),
+            "similarity_pct": sim_pct,
+            "similarity_tier": tier,
+            "confidence_tier": str(row.CONFIDENCE_TIER),
+            "shared_archetype_features": shared_traits,
+            "divergent_features": divergent_traits,
+            "n_imputed_features": int(row.N_IMPUTED_FEATURES),
+            "query_n_imputed": int(row.QUERY_N_IMPUTED),
+            "total_imputed": int(row.TOTAL_IMPUTED),
+        })
+
+    notes = (
+        f"Evaluated across {len(feature_cols)} style dimensions with inverted covariance correction. "
+        + (f"{query_n_imputed} features median-imputed for {canonical} due to limited play-type sample." if query_n_imputed > 0 else "0 query features imputed.")
+    )
+
+    return {
+        "player_name": canonical,
+        "team_abbreviation": team,
+        "query_n_imputed": query_n_imputed,
+        "total_features": len(feature_cols),
+        "comps": comp_items,
+        "notes": notes,
+        "season": "2025-26",
+    }
+
+
+def format_comps_answer(data: dict) -> str:
+    """Format comps data into a verified natural language answer string."""
+    lines = [
+        f"{data['player_name']} ({data['team_abbreviation']}) — closest stylistic twins by covariance-corrected Mahalanobis distance across {data['total_features']} style axes [2025-26]:"
+    ]
+    for c in data["comps"]:
+        lines.append(
+            f"• #{c['rank']} {c['player_name']} ({c['team_abbreviation']}) — distance: {c['mahalanobis_distance']:.2f} [{c['confidence_tier'].upper()}]"
+        )
+    if data["query_n_imputed"] > 0:
+        lines.append(
+            f"NOTE: {data['query_n_imputed']} of {data['total_features']} style features were median-imputed for {data['player_name']} due to limited qualifying sample in certain play types."
+        )
+    lines.append(
+        "NOTE: Mahalanobis distance corrects for feature covariance so comps are not double-weighted on correlated metrics (e.g. usage and assist rate moving together)."
+    )
+    return "\n".join(lines)
+
 
 def main() -> None:
     print("Building feature matrix from Layer 1 axes "

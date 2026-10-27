@@ -393,6 +393,7 @@ _SIGNATURE_MIN_PERCENTILE = 0.60
 # category's possession floor somewhere (438 rows) -- a real but thin-data
 # player like Thanasis Antetokounmpo (5.2 min/g) exists in the former but not
 # the latter, which is exactly the distinction this needs.
+_ROSTER_2026_27_CSV = "data/rosters_2026_27.csv"
 _ROSTER_CSV = "data/hustle_stats_2025_26.csv"
 
 
@@ -410,10 +411,19 @@ _ROSTER_CSV = "data/hustle_stats_2025_26.csv"
 # other column (POSS/PPP/FG_PCT are Synergy-specific stats with no
 # equivalent in hustle_stats, so only TEAM_ABBREVIATION is ever replaced).
 def _current_team_map() -> dict[str, str]:
-    """PLAYER_NAME -> TEAM_ABBREVIATION from the verified-accurate roster
-    source, for overwriting stale team fields elsewhere."""
-    roster = pd.read_csv(_ROSTER_CSV)
-    return dict(zip(roster["PLAYER_NAME"], roster["TEAM_ABBREVIATION"]))
+    """PLAYER_NAME -> TEAM_ABBREVIATION prioritizing 2026-27 active rosters,
+    falling back to 2025-26 for players without 2026-27 records."""
+    try:
+        roster_27 = pd.read_csv(_ROSTER_2026_27_CSV)
+        m = dict(zip(roster_27["PLAYER_NAME"], roster_27["TEAM_ABBREVIATION"]))
+        roster_26 = pd.read_csv(_ROSTER_CSV)
+        for name, team in zip(roster_26["PLAYER_NAME"], roster_26["TEAM_ABBREVIATION"]):
+            if name not in m:
+                m[name] = team
+        return m
+    except Exception:
+        roster = pd.read_csv(_ROSTER_CSV)
+        return dict(zip(roster["PLAYER_NAME"], roster["TEAM_ABBREVIATION"]))
 
 
 def _apply_current_team(df: pd.DataFrame) -> pd.DataFrame:

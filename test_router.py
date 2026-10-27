@@ -59,6 +59,12 @@ questions = [
     # ── Q44-Q45: youth_adjusted_leaderboard ───────────────────────────────────
     "Which freshmen or sophomores are outperforming upperclassmen in BPM in this draft class?",  # Q44 → youth_adjusted_leaderboard, BPM
     "Which underclassmen are outperforming upperclassmen in PER in the 2026 draft class?",       # Q45 → youth_adjusted_leaderboard, PER
+    # ── Q46-Q47: comps (stylistic twins via Mahalanobis distance) ─────────────
+    "Who plays like Alex Caruso?",                                  # Q46 → comps
+    "Who are comps for Stephen Curry?",                             # Q47 → comps
+    # ── Q48-Q49: team_gaps (capability profile rankings and transfer/draft targets)
+    "What are the biggest roster gaps for the Warriors?",           # Q48 → team_gaps, GSW
+    "What does Chicago need?",                                      # Q49 → team_gaps, CHI
 ]
 
 for i, q in enumerate(questions, 1):

@@ -7,13 +7,15 @@ from typing import Optional
 
 import json
 import pandas as pd
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from query_router import route
 from report import generate_scouting_report_data, compare_players_data
+from comps import get_comps_data, get_or_build_mahalanobis_space
+from team_gaps import get_team_gaps_data, get_or_build_team_capability_space
 from data_schema import (
     HUSTLE_COLUMNS, SHOT_DEFENSE_COLUMNS, PLAYTYPE_COLUMNS,
     DRIVES_COLUMNS, DRAFT_CLASS_COLUMNS, USAGE_CONTEXT_COLUMNS, missing_columns,
@@ -111,6 +113,19 @@ async def lifespan(app: FastAPI):
         ) from e
 
     _state["manifest"] = _load_manifest()
+
+    try:
+        _state["mahalanobis_space"] = get_or_build_mahalanobis_space()
+    except Exception as e:
+        print(f"Warning: could not initialize mahalanobis space: {e}")
+        _state["mahalanobis_space"] = None
+
+    try:
+        _state["team_gaps_space"] = get_or_build_team_capability_space()
+    except Exception as e:
+        print(f"Warning: could not initialize team gaps space: {e}")
+        _state["team_gaps_space"] = None
+
     yield
     _state.clear()
 
@@ -163,6 +178,7 @@ class QueryResponse(BaseModel):
     table: Optional[list[dict]]
     data_as_of: Optional[str] = None
     audit: Optional[AuditInfo] = None
+    team_gaps_data: Optional[dict] = None
 
 
 class ReportRequest(BaseModel):
@@ -219,6 +235,100 @@ class CompareResponse(BaseModel):
     data_as_of: Optional[str] = None
 
 
+class CompsRequest(BaseModel):
+    player_name: str
+    n: int = 5
+
+
+class CompItem(BaseModel):
+    rank: int
+    player_name: str
+    team_abbreviation: str
+    mahalanobis_distance: float
+    confidence_tier: str
+    similarity_pct: Optional[float] = None
+    similarity_tier: Optional[str] = None
+    shared_archetype_features: list[str] = []
+    divergent_features: list[str] = []
+    n_imputed_features: int
+    query_n_imputed: int
+    total_imputed: int
+
+
+class CompsResponse(BaseModel):
+    player_name: str
+    team_abbreviation: str
+    query_n_imputed: int
+    total_features: int
+    comps: list[CompItem]
+    notes: Optional[str] = None
+    season: str = "2025-26"
+    data_as_of: Optional[str] = None
+
+
+class TeamGapsRequest(BaseModel):
+    team: str
+
+
+class CapabilityItem(BaseModel):
+    subset_name: str
+    label: str
+    rank: int
+    score: float
+    status: str
+    tier: str
+    key_contributors: list[str] = []
+    capability_id: Optional[str] = None
+    capability_name: Optional[str] = None
+    team_rank: Optional[int] = None
+    team_score: Optional[float] = None
+    tier_status: Optional[str] = None
+
+
+class TargetNbaPlayer(BaseModel):
+    player_name: str
+    team_abbreviation: str
+    score: float
+    fit_score: Optional[float] = None
+
+
+class TargetProspect(BaseModel):
+    name: str
+    school: str
+    pick_number: int
+    stat_highlight: str
+    player_name: Optional[str] = None
+    draft_profile: Optional[str] = None
+    score: Optional[float] = None
+    fit_score: Optional[float] = None
+
+
+class GapSolution(BaseModel):
+    gap_name: str
+    rank: int
+    score: float
+    nba_targets: list[TargetNbaPlayer] = []
+    prospect_targets: list[TargetProspect] = []
+    capability_name: Optional[str] = None
+    team_rank: Optional[int] = None
+    team_score: Optional[float] = None
+    matching_nba_targets: list[TargetNbaPlayer] = []
+    matching_draft_prospects: list[TargetProspect] = []
+
+
+class TeamGapsResponse(BaseModel):
+    team_abbreviation: str
+    team_name: str
+    qualified_players_count: int
+    rotation_size: Optional[int] = None
+    capabilities: list[CapabilityItem]
+    identified_gaps: list[GapSolution]
+    top_gaps: Optional[list[GapSolution]] = None
+    season: str = "2025-26"
+    data_as_of: Optional[str] = None
+    audit: Optional[dict] = None
+
+
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 def _sanitize(records: list[dict]) -> list[dict]:
@@ -263,6 +373,8 @@ def health():
         "status": "ok",
         "current_season_rows": len(_state["df"]),
         "prior_season_rows": len(_state["prior_df"]),
+        "comps_model_loaded": bool(_state.get("mahalanobis_space")),
+        "team_gaps_loaded": bool(_state.get("team_gaps_space")),
         "groq_key_configured": bool(os.environ.get("GROQ_API_KEY")),
     }
 
@@ -291,6 +403,7 @@ def query(req: QueryRequest):
         table=table,
         data_as_of=data_as_of,
         audit=_with_data_as_of(result.get("audit"), data_as_of),
+        team_gaps_data=result.get("team_gaps_data"),
     )
 
 
@@ -310,6 +423,23 @@ def compare(req: CompareRequest):
     for section in data["sections"]:
         section["audit"] = [_with_data_as_of(a, data_as_of) for a in section.get("audit", [])]
     return CompareResponse(**data, data_as_of=data_as_of)
+
+
+@app.post("/comps", response_model=CompsResponse)
+def comps(req: CompsRequest):
+    data = get_comps_data(req.player_name, n=req.n, space=_state.get("mahalanobis_space"))
+    data_as_of = _data_as_of()
+    return CompsResponse(**data, data_as_of=data_as_of)
+
+
+@app.post("/team-gaps", response_model=TeamGapsResponse)
+def team_gaps(req: TeamGapsRequest):
+    try:
+        data = get_team_gaps_data(req.team)
+        data_as_of = _data_as_of()
+        return TeamGapsResponse(**data, data_as_of=data_as_of)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 # ── serve frontend ────────────────────────────────────────────────────────────

@@ -47,6 +47,9 @@ from compute_college import (
     _LEADERBOARD_LABEL as _COLLEGE_LEADERBOARD_METRICS,
     _HIGH_USAGE_FLOOR as _COLLEGE_HIGH_USAGE_FLOOR,
 )
+from comps import get_comps_data, format_comps_answer
+from team_gaps import get_team_gaps_data, format_team_gaps_answer, resolve_team
+from feature_vector import _resolve_reference_player
 
 
 def _default_kwargs(fn) -> dict:
@@ -70,7 +73,9 @@ OUT_OF_SCOPE_MSG = (
     "(Isolation, PRBallHandler, PRRollman, Postup, Spotup, Handoff, Cut, OffScreen, Transition), "
     "drive efficiency (points per drive, drive FG%, playmaking on drives), "
     "2026 NBA draft-class college stats (player lookup, leaderboards, usage-vs-efficiency), "
-    "and signature play type (a player's standout offensive category by percentile)."
+    "signature play type (a player's standout offensive category by percentile), "
+    "stylistic comps (covariance-corrected Mahalanobis distance twins), "
+    "and team roster gaps (capability profile rankings and transfer/draft targets)."
 )
 
 _NEEDS_CLARIFICATION_MSG = (
@@ -603,7 +608,7 @@ _RULES = [
 ]
 
 _SYSTEM_PROMPT = """You are a routing assistant for an NBA scouting tool.
-You have access to exactly fifteen statistical functions:
+You have access to exactly sixteen statistical functions:
 
 1. deflections_per36(df, min_minutes=15, min_games=40)
    Measures: deflections per 36 minutes.
@@ -714,11 +719,16 @@ You have access to exactly fifteen statistical functions:
     Valid metrics: same as college_leaderboard ("PTS", "TRB", "AST", "USG%", "TS%", "BPM", "PER").
     Sort column hint: the metric code exactly as listed above.
 
-None of these functions cover: salary, trade value, draft grades, injuries, assists, or anything outside
-hustle/defense/play-type offense/drive efficiency/2026 college draft-class data/signature play type as described above.
+16. comps(player_name, n=5)
+    Measures: nearest stylistic comps via Mahalanobis distance across 28 covariance-corrected style axes.
+    Use for: "who plays like [Player]?", "who is similar to [Player]?", "who are comps for [Player]?", or stylistic twins.
+    Sort column hint: the player's full name exactly as written in the question.
+
+None of these functions cover: salary, trade value, draft grades, injuries, or anything outside
+hustle/defense/play-type offense/drive efficiency/2026 college draft-class data/signature play type/stylistic comps as described above.
 
 Respond ONLY with a JSON object — no prose, no markdown, no explanation. Three possible responses:
-- If the question maps to one of the fifteen functions:
+- If the question maps to one of the sixteen functions:
   {"function": "<function_name>", "sort_col": "<hint>"}
 - If the question is about a stat this tool tracks but is too vague or underspecified:
   {"needs_clarification": true}
@@ -785,12 +795,50 @@ def _llm_route(question: str) -> dict:
     raise RuntimeError(f"Groq rate-limited after 4 attempts: {resp.text[:200]}")
 
 
+_COMPS_PATTERN = re.compile(
+    r"(?:who (?:plays|moves|defends) like|comps? (?:for|to)|comparisons? (?:for|to)|who is (?:similar to|like)|stylistic (?:comps?|twins?) (?:for|to)|twins? for)\s+([A-Za-z'.-]+(?:\s+[A-Za-z'.-]+)*)",
+    re.IGNORECASE,
+)
+
+
+_TEAM_GAPS_PATTERN = re.compile(
+    r"(?:roster gaps?|team gaps?|roster holes?|weaknesses?|needs?)\s+(?:for|of|in)\s+(?:the\s+)?([A-Za-z'.-]+(?:\s+[A-Za-z'.-]+)*)|what (?:are the )?(?:biggest )?(?:roster )?(?:gaps?|holes?|weaknesses?)\s+(?:for|of)\s+(?:the\s+)?([A-Za-z'.-]+(?:\s+[A-Za-z'.-]+)*)|what do(?:es)?\s+(?:the\s+)?([A-Za-z'.-]+(?:\s+[A-Za-z'.-]+)*)\s+need",
+    re.IGNORECASE,
+)
+
+
 def _deterministic_route(question: str) -> Optional[dict]:
     # YoY checked first — a trend question with a clear direction+metric wins
     # before any base-metric rule can claim the "improve/decline" phrasing.
     yoy = _yoy_route(question)
     if yoy is not None:
         return yoy
+
+    # Team gaps checked before player comps
+    team_gaps_match = _TEAM_GAPS_PATTERN.search(question)
+    if team_gaps_match:
+        cand_team = (team_gaps_match.group(1) or team_gaps_match.group(2) or team_gaps_match.group(3)).rstrip("?.,! ").strip()
+        resolved_abbr = resolve_team(cand_team)
+        if resolved_abbr:
+            return {
+                "function": "team_gaps",
+                "sort_col": resolved_abbr,
+                "matched_text": team_gaps_match.group(0),
+                "matched_pattern": _TEAM_GAPS_PATTERN.pattern,
+            }
+
+    # Comps checked before generic rules so "comps for Alex Caruso" doesn't hit
+    # any generic pattern.
+    comps_match = _COMPS_PATTERN.search(question)
+    if comps_match:
+        candidate_name = comps_match.group(1).rstrip("?.,! ").strip()
+        return {
+            "function": "comps",
+            "sort_col": candidate_name,
+            "matched_text": comps_match.group(0),
+            "matched_pattern": _COMPS_PATTERN.pattern,
+        }
+
     for pattern, func_name, hint in _RULES:
         match = pattern.search(question)
         if match:
@@ -1152,6 +1200,83 @@ def route(
                         "min_percentile": _SIGNATURE_MIN_PERCENTILE,
                     },
                     "qualifying_pool_size": len(sig_result["categories"]),
+                    "routing_method": method,
+                    "matched_text": routing.get("matched_text"),
+                    "matched_pattern": routing.get("matched_pattern"),
+                },
+            }
+
+        elif func_name == "comps":
+            player_name = sort_col
+            if not player_name:
+                return {
+                    "question": question,
+                    "method": method,
+                    "function_matched": "needs_clarification",
+                    "answer": "Which player's stylistic comps did you want?",
+                }
+            try:
+                comps_data = get_comps_data(player_name, n=5)
+            except ValueError as e:
+                return {
+                    "question": question,
+                    "method": method,
+                    "function_matched": "needs_clarification",
+                    "answer": str(e),
+                }
+
+            answer = format_comps_answer(comps_data)
+            return {
+                "question": question,
+                "method": method,
+                "function_matched": "comps",
+                "answer": answer,
+                "resolved_player_name": comps_data["player_name"],
+                "table": comps_data["comps"],
+                "audit": {
+                    "intent": "comps",
+                    "parameters": {
+                        "n": 5,
+                        "distance_metric": "mahalanobis",
+                        "covariance_corrected": True,
+                        "total_style_features": comps_data["total_features"],
+                    },
+                    "qualifying_pool_size": 305,
+                    "routing_method": method,
+                    "matched_text": routing.get("matched_text"),
+                    "matched_pattern": routing.get("matched_pattern"),
+                },
+            }
+
+        elif func_name == "team_gaps":
+            team_query = sort_col or question
+            try:
+                gaps_data = get_team_gaps_data(team_query)
+            except ValueError as e:
+                return {
+                    "question": question,
+                    "method": method,
+                    "function_matched": "needs_clarification",
+                    "answer": str(e),
+                }
+
+            answer = format_team_gaps_answer(gaps_data)
+            return {
+                "question": question,
+                "method": method,
+                "function_matched": "team_gaps",
+                "answer": answer,
+                "resolved_team_name": f"{gaps_data['team_name']} ({gaps_data['team_abbreviation']})",
+                "table": gaps_data["capabilities"],
+                "identified_gaps": gaps_data["identified_gaps"],
+                "team_gaps_data": gaps_data,
+                "audit": {
+                    "intent": "team_gaps",
+                    "parameters": {
+                        "team": gaps_data["team_abbreviation"],
+                        "subsets_evaluated": len(gaps_data["capabilities"]),
+                    },
+                    "qualifying_pool_size": gaps_data["qualified_players_count"],
                     "routing_method": method,
                     "matched_text": routing.get("matched_text"),
                     "matched_pattern": routing.get("matched_pattern"),

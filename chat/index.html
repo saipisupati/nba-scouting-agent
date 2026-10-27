@@ -575,6 +575,10 @@
     background: #0d1b36;
     color: #fff;
     padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
   }
   .report-header .report-player {
     font-size: 1.4rem;
@@ -699,6 +703,489 @@
   #compare-btn:hover:not(:disabled) { background: #1a3a6e; }
   #compare-btn:disabled { opacity: .45; cursor: default; }
 
+  /* ── comps search bar ── */
+  #comps-bar {
+    display: none;
+    background: #f0f2f7;
+    padding: 10px 16px 14px;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  #comps-bar.visible { display: flex; }
+  #comps-bar label {
+    font-size: .78rem;
+    font-weight: 600;
+    color: #334060;
+    align-self: center;
+    white-space: nowrap;
+  }
+  #comps-input {
+    flex: 1;
+    border: 1px solid #c8d0e4;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: .9rem;
+    font-family: inherit;
+    background: #fff;
+    outline: none;
+    transition: border-color .15s;
+  }
+  #comps-input:focus { border-color: #1d4ed8; }
+  #comps-btn {
+    background: #0d1b36;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-size: .9rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s;
+    white-space: nowrap;
+  }
+  #comps-btn:hover:not(:disabled) { background: #1a3a6e; }
+  #comps-btn:disabled { opacity: .45; cursor: default; }
+
+  /* ── team gaps search bar ── */
+  #gaps-bar {
+    display: none;
+    background: #f0f2f7;
+    padding: 10px 16px 14px;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  #gaps-bar.visible { display: flex; }
+  #gaps-bar label {
+    font-size: .78rem;
+    font-weight: 600;
+    color: #334060;
+    align-self: center;
+    white-space: nowrap;
+  }
+  #gaps-input {
+    flex: 1;
+    border: 1px solid #c8d0e4;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: .9rem;
+    font-family: inherit;
+    background: #fff;
+    outline: none;
+    transition: border-color .15s;
+  }
+  #gaps-input:focus { border-color: #1d4ed8; }
+  #gaps-btn {
+    background: #0d1b36;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-size: .9rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s;
+    white-space: nowrap;
+  }
+  #gaps-btn:hover:not(:disabled) { background: #1a3a6e; }
+  #gaps-btn:disabled { opacity: .45; cursor: default; }
+
+  /* ── gaps view ── */
+  #gaps-view {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px 24px;
+  }
+  #gaps-view.visible { display: block; }
+
+  /* ── comps view ── */
+  #comps-view {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px 24px;
+  }
+  #comps-view.visible { display: block; }
+
+  /* ── comps result card ── */
+  .comps-result-card {
+    background: #fff;
+    border: 1px solid #e2e8f4;
+    border-radius: 14px;
+    max-width: 780px;
+    margin: 0 auto;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(13,27,54,.04);
+  }
+  .comps-header {
+    background: #0d1b36;
+    color: #fff;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .comps-header .comps-player {
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+  .comps-header .comps-subtitle {
+    font-size: .8rem;
+    color: #94a3b8;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  .comps-notes-banner {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f4;
+    padding: 10px 24px;
+    font-size: .78rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .comp-item {
+    padding: 18px 24px;
+    border-bottom: 1px solid #eef1f8;
+    transition: background .12s ease;
+  }
+  .comp-item:last-child { border-bottom: none; }
+  .comp-item:hover { background: #fafbfe; }
+  .comp-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .comp-name-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .comp-rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #0d1b36;
+    color: #fff;
+    font-size: .75rem;
+    font-weight: 700;
+  }
+  .comp-rank-badge.rank-1 { background: #b45309; }
+  .comp-rank-badge.rank-2 { background: #475569; }
+  .comp-rank-badge.rank-3 { background: #92400e; }
+  .comp-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0d1b36;
+  }
+  .comp-tier-pill {
+    font-size: .75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+    letter-spacing: .02em;
+  }
+  .tier-near-twin { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+  .tier-high-overlap { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+  .tier-moderate-overlap { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f4; }
+  .comp-meta-row {
+    font-size: .78rem;
+    color: #64748b;
+    margin-bottom: 10px;
+  }
+  .comp-traits-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  @media (max-width: 600px) {
+    .comp-traits-grid { grid-template-columns: 1fr; }
+  }
+  .traits-box {
+    background: #f8fafc;
+    border: 1px solid #edf2f7;
+    border-radius: 8px;
+    padding: 8px 12px;
+  }
+  .traits-label {
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 6px;
+  }
+  .traits-label.shared { color: #059669; }
+  .traits-label.divergent { color: #d97706; }
+  .traits-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .trait-tag {
+    font-size: .72rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  .trait-tag.shared { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+  .trait-tag.divergent { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+  .comp-action-btn {
+    font-size: .75rem;
+    color: #1d4ed8;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0;
+    margin-top: 8px;
+    display: inline-block;
+  }
+  .comp-action-btn:hover { text-decoration: underline; }
+
+  /* ── team gaps card ── */
+  .gaps-card {
+    background: #fff;
+    border: 1px solid #e2e8f4;
+    border-radius: 14px;
+    max-width: 820px;
+    margin: 0 auto;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(13,27,54,.04);
+  }
+  .gaps-header {
+    background: #0d1b36;
+    color: #fff;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .gaps-title-group .gaps-team {
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+  .gaps-title-group .gaps-subtitle {
+    font-size: .8rem;
+    color: #94a3b8;
+    margin-top: 4px;
+  }
+  .capability-list {
+    padding: 16px 24px;
+    border-bottom: 1px solid #eef1f8;
+  }
+  .capability-row {
+    padding: 11px 0;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .capability-row:last-child { border-bottom: none; }
+  .cap-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .cap-label {
+    font-size: .88rem;
+    font-weight: 700;
+    color: #0d1b36;
+  }
+  .cap-contributors {
+    font-size: .75rem;
+    color: #64748b;
+  }
+  .cap-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cap-rank-badge {
+    font-size: .82rem;
+    font-weight: 700;
+    color: #0d1b36;
+    background: #f1f5f9;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+  .status-strength { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+  .status-average { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f4; }
+  .status-gap { background: #ffe4e6; color: #be123c; border: 1px solid #fecdd3; }
+  .cap-status-pill {
+    font-size: .72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+
+  /* ── highlighted gaps section ── */
+  .gaps-solutions-section {
+    padding: 20px 24px;
+    background: #fafbfc;
+  }
+  .gaps-section-title {
+    font-size: .98rem;
+    font-weight: 800;
+    color: #0d1b36;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .gap-solution-card {
+    background: #fff;
+    border: 1px solid #e2e8f4;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .gap-solution-card:last-child { margin-bottom: 0; }
+  .gap-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .gap-name-title {
+    font-size: .92rem;
+    font-weight: 700;
+    color: #be123c;
+  }
+  .gap-rank-tag {
+    font-size: .75rem;
+    font-weight: 700;
+    background: #ffe4e6;
+    color: #be123c;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .solvers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 600px) {
+    .solvers-grid { grid-template-columns: 1fr; }
+  }
+  .solver-col {
+    background: #f8fafc;
+    border: 1px solid #edf2f7;
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .solver-col-title {
+    font-size: .72rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 8px;
+  }
+  .solver-item {
+    font-size: .8rem;
+    padding: 4px 0;
+    border-bottom: 1px solid #edf2f7;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .solver-item:last-child { border-bottom: none; }
+  .solver-link {
+    color: #1d4ed8;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .solver-link:hover { text-decoration: underline; }
+
+  /* ── share / export action buttons & toast ── */
+  .card-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .card-action-btn {
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
+    color: #fff;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: .75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .card-action-btn:hover {
+    background: rgba(255,255,255,.25);
+    border-color: #fff;
+  }
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #0d1b36;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: .82rem;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(0,0,0,.2);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+    transition: all .2s ease;
+    z-index: 9999;
+  }
+  .toast.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .empty-workflow-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 24px;
+    width: 100%;
+    max-width: 680px;
+    text-align: left;
+  }
+  .workflow-card {
+    background: #fff;
+    border: 1px solid #e2e8f4;
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all .15s ease;
+    box-shadow: 0 1px 2px rgba(13,27,54,.03);
+  }
+  .workflow-card:hover {
+    border-color: #1d4ed8;
+    box-shadow: 0 4px 12px rgba(29,78,216,.08);
+    transform: translateY(-1px);
+  }
+  .workflow-icon { font-size: 1.3rem; margin-bottom: 6px; }
+  .workflow-title { font-size: .88rem; font-weight: 700; color: #0d1b36; }
+  .workflow-desc { font-size: .75rem; color: #64748b; margin-top: 3px; line-height: 1.35; }
+
   /* ── compare view: two-column, section-aligned ── */
   #compare-view {
     display: none;
@@ -822,6 +1309,8 @@
 
 <div id="mode-bar">
   <button class="mode-btn active" id="mode-ask">Ask a question</button>
+  <button class="mode-btn" id="mode-comps">Stylistic Twins (Comps)</button>
+  <button class="mode-btn" id="mode-gaps">Team Roster Gaps</button>
   <button class="mode-btn" id="mode-report">Full scouting report</button>
   <button class="mode-btn" id="mode-compare">Compare</button>
 </div>
@@ -835,21 +1324,64 @@
         <line x1="4" y1="22" x2="40" y2="22" stroke="#1d4ed8" stroke-width="1.5"/>
       </svg>
     </div>
-    <div class="empty-title">Ask about any player or team trend</div>
-    <p>Click a suggestion chip above, or type a question below to get started.</p>
+    <div class="empty-title">Evidence-Based NBA Scouting Terminal</div>
+    <p>Zero hallucinated statistics. Pure mathematical models and verified player tracking data.</p>
+    <div class="empty-workflow-grid">
+      <div class="workflow-card" id="card-start-comps">
+        <div class="workflow-icon">🎯</div>
+        <div class="workflow-title">Stylistic Twins (Comps)</div>
+        <div class="workflow-desc">Covariance-corrected Mahalanobis distance across 28 style axes</div>
+      </div>
+      <div class="workflow-card" id="card-start-gaps">
+        <div class="workflow-icon">🏀</div>
+        <div class="workflow-title">Team Roster Gaps</div>
+        <div class="workflow-desc">Capability profile rankings and transfer/draft targets</div>
+      </div>
+      <div class="workflow-card" id="card-start-compare">
+        <div class="workflow-icon">⚔️</div>
+        <div class="workflow-title">Head-to-Head Compare</div>
+        <div class="workflow-desc">Compare two players with qualified section-level analysis</div>
+      </div>
+      <div class="workflow-card" id="card-start-report">
+        <div class="workflow-icon">📋</div>
+        <div class="workflow-title">Full Scouting Report</div>
+        <div class="workflow-desc">Comprehensive 8-section report for any rotation player</div>
+      </div>
+      <div class="workflow-card" id="card-start-draft">
+        <div class="workflow-icon">🎓</div>
+        <div class="workflow-title">2026 Draft Board</div>
+        <div class="workflow-desc">College scouting analytics for the upcoming draft class</div>
+      </div>
+    </div>
   </div>
 </div>
 
+<div id="gaps-view"></div>
+<div id="comps-view"></div>
 <div id="report-view"></div>
 <div id="compare-view"></div>
+
+<div id="toast" class="toast">Copied to clipboard!</div>
 
 <div id="chip-bar">
   <div class="chips-row" id="suggest-chips"></div>
 </div>
 
 <div id="input-bar">
-  <input id="question" type="text" placeholder="Ask about defense, hustle, play types, year-over-year trends…" autocomplete="off" />
+  <input id="question" type="text" placeholder="Ask about defense, hustle, play types, comps, year-over-year trends…" autocomplete="off" />
   <button id="send-btn">Ask</button>
+</div>
+
+<div id="comps-bar">
+  <label for="comps-input">Stylistic twins for…</label>
+  <input id="comps-input" type="text" placeholder="e.g. Alex Caruso or Stephen Curry" autocomplete="off" />
+  <button id="comps-btn">Find Twins</button>
+</div>
+
+<div id="gaps-bar">
+  <label for="gaps-input">Analyze roster gaps for…</label>
+  <input id="gaps-input" type="text" placeholder="e.g. Warriors, GSW, Bulls, Celtics, Thunder, LAL..." autocomplete="off" />
+  <button id="gaps-btn">Analyze Gaps</button>
 </div>
 
 <div id="report-bar">
@@ -869,11 +1401,11 @@
 <script>
 /* ── constants ── */
 const SUGGEST_CHIPS = [
+  'Who plays like Alex Caruso?',
+  'Who plays like Stephen Curry?',
   'Best rim protector',
   'Best scorer in isolation',
   'Best pick-and-roll defender',
-  "Who's the best off-screen shooter",
-  'Underrated defenders',
   'Who cuts the most',
 ];
 
@@ -932,10 +1464,20 @@ function getTeamGeneric(row, fn) {
 // player's own category breakdown, or a single player's full stat line) --
 // these get a distinct card template in buildStatCard() rather than the
 // "top 5 players" ranking treatment, since that concept doesn't apply.
-const NON_RANKING_FUNCTIONS = new Set(['signature_play_type', 'college_player_lookup']);
+const NON_RANKING_FUNCTIONS = new Set(['signature_play_type', 'college_player_lookup', 'comps', 'team_gaps']);
 
 // follow-up chips per function
 const FOLLOWUPS = {
+  team_gaps: [
+    'What does Chicago need?',
+    'What are the biggest roster gaps for the Warriors?',
+    'Who plays like Stephen Curry?',
+  ],
+  comps: [
+    'Who are the closest comps for Stephen Curry?',
+    'Who plays like Alex Caruso?',
+    'Check full scouting report',
+  ],
   contest_profile_per36: [
     'Check perimeter suppression instead',
     'Who\'s improved most in contests this year?',
@@ -1147,12 +1689,44 @@ function buildCollegeLookupCard(data) {
   return buildPlayerCard(header, subheader, rows, answer);
 }
 
+function buildCompsCard(data) {
+  const { table, answer, resolved_player_name, question } = data;
+  const header = resolved_player_name || question;
+  const subheader = 'Stylistic Twins (Mahalanobis Distance across 28 covariance-corrected axes)';
+  const rows = (table || []).map(c => {
+    const dist = c.mahalanobis_distance !== undefined ? c.mahalanobis_distance : c.distance;
+    const tier = c.similarity_tier || (c.confidence_tier ? c.confidence_tier.toUpperCase() : 'Comp');
+    const sim = c.similarity_pct !== undefined ? `${c.similarity_pct}%` : 'Match';
+    const shared = Array.isArray(c.shared_archetype_features) ? c.shared_archetype_features.join(', ') : (c.shared_traits || 'Overall shape');
+    return {
+      label: `#${c.rank} ${c.player_name} ${c.team_abbreviation ? '(' + c.team_abbreviation + ')' : ''} · ${tier} (${sim})`,
+      value: `Dist ${dist} · Shared: ${shared}`,
+    };
+  });
+  return buildPlayerCard(header, subheader, rows, answer);
+}
+
+function buildTeamGapsCard(data) {
+  if (data.team_gaps_data) {
+    return buildGapsView(data.team_gaps_data);
+  }
+  const header = (data.filters && data.filters.team) ? data.filters.team : (data.resolved_team_name || data.question);
+  const subheader = '2026–27 Active Rosters (2025–26 Tracking Baseline)';
+  const rows = (data.table || []).map(r => ({
+    label: `${r.capability} (Rank #${r.rank} / 30) · ${r.tier}`,
+    value: `${r.score >= 0 ? '+' : ''}${typeof r.score === 'number' ? r.score.toFixed(2) : r.score}σ | Core: ${r.leaders}`,
+  }));
+  return buildPlayerCard(header, subheader, rows, data.answer);
+}
+
 function buildStatCard(data) {
   const { table, function_matched: fn, answer } = data;
   if (!table || table.length === 0) return null;
 
   if (fn === 'signature_play_type') return buildSignaturePlayTypeCard(data);
   if (fn === 'college_player_lookup') return buildCollegeLookupCard(data);
+  if (fn === 'comps') return buildCompsCard(data);
+  if (fn === 'team_gaps') return buildTeamGapsCard(data);
 
   const row0 = table[0];
   const card = document.createElement('div');
@@ -1435,12 +2009,22 @@ async function ask() {
 sendBtn.addEventListener('click', ask);
 input.addEventListener('keydown', e => { if (e.key === 'Enter') ask(); });
 
-/* ── mode toggle: Ask vs. Scouting Report vs. Compare ── */
+/* ── mode toggle: Ask vs. Scouting Report vs. Compare vs. Comps vs. Gaps ── */
 const modeAskBtn     = document.getElementById('mode-ask');
+const modeCompsBtn   = document.getElementById('mode-comps');
+const modeGapsBtn    = document.getElementById('mode-gaps');
 const modeReportBtn  = document.getElementById('mode-report');
 const modeCompareBtn = document.getElementById('mode-compare');
 const chipBarWrap    = document.getElementById('chip-bar');
 const inputBar       = document.getElementById('input-bar');
+const compsBar       = document.getElementById('comps-bar');
+const compsView      = document.getElementById('comps-view');
+const compsInput     = document.getElementById('comps-input');
+const compsBtn       = document.getElementById('comps-btn');
+const gapsBar        = document.getElementById('gaps-bar');
+const gapsView       = document.getElementById('gaps-view');
+const gapsInput      = document.getElementById('gaps-input');
+const gapsBtn        = document.getElementById('gaps-btn');
 const reportBar      = document.getElementById('report-bar');
 const reportView     = document.getElementById('report-view');
 const playerInput    = document.getElementById('player-input');
@@ -1453,24 +2037,169 @@ const compareBtn     = document.getElementById('compare-btn');
 
 function setMode(mode) {
   modeAskBtn.classList.toggle('active', mode === 'ask');
+  modeCompsBtn.classList.toggle('active', mode === 'comps');
+  modeGapsBtn.classList.toggle('active', mode === 'gaps');
   modeReportBtn.classList.toggle('active', mode === 'report');
   modeCompareBtn.classList.toggle('active', mode === 'compare');
 
   chat.style.display        = mode === 'ask' ? 'flex' : 'none';
   chipBarWrap.style.display = mode === 'ask' ? 'block' : 'none';
   inputBar.style.display    = mode === 'ask' ? 'flex' : 'none';
+  compsBar.classList.toggle('visible', mode === 'comps');
+  compsView.classList.toggle('visible', mode === 'comps');
+  gapsBar.classList.toggle('visible', mode === 'gaps');
+  gapsView.classList.toggle('visible', mode === 'gaps');
   reportBar.classList.toggle('visible', mode === 'report');
   reportView.classList.toggle('visible', mode === 'report');
   compareBar.classList.toggle('visible', mode === 'compare');
   compareView.classList.toggle('visible', mode === 'compare');
 
-  if (mode === 'report') playerInput.focus();
+  if (mode === 'comps') compsInput.focus();
+  else if (mode === 'gaps') gapsInput.focus();
+  else if (mode === 'report') playerInput.focus();
   else if (mode === 'compare') playerAInput.focus();
   else input.focus();
 }
 modeAskBtn.addEventListener('click', () => setMode('ask'));
+modeCompsBtn.addEventListener('click', () => setMode('comps'));
+modeGapsBtn.addEventListener('click', () => setMode('gaps'));
 modeReportBtn.addEventListener('click', () => setMode('report'));
 modeCompareBtn.addEventListener('click', () => setMode('compare'));
+
+// Empty state workflow cards
+document.getElementById('card-start-comps')?.addEventListener('click', () => setMode('comps'));
+document.getElementById('card-start-gaps')?.addEventListener('click', () => setMode('gaps'));
+document.getElementById('card-start-compare')?.addEventListener('click', () => setMode('compare'));
+document.getElementById('card-start-report')?.addEventListener('click', () => setMode('report'));
+document.getElementById('card-start-draft')?.addEventListener('click', () => fireQuestion('Who had the highest scoring average in the 2026 draft class?'));
+
+/* ── clipboard & toast helpers ── */
+function showToast(message) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.className = 'toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add('visible');
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => {
+    toast.classList.remove('visible');
+  }, 2600);
+}
+
+function copyToClipboard(text, successMsg = 'Copied to clipboard!') {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(successMsg);
+    }).catch(() => {
+      fallbackCopy(text, successMsg);
+    });
+  } else {
+    fallbackCopy(text, successMsg);
+  }
+}
+
+function fallbackCopy(text, successMsg) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showToast(successMsg);
+  } catch (e) {
+    showToast('Failed to copy');
+  }
+  document.body.removeChild(ta);
+}
+
+function copyReportSummary(data) {
+  let md = `# NBA Scouting Report: ${data.player_name} (${data.season} Season)\n`;
+  md += `*Grounded NBA Tracking Intelligence & Stylistic Evaluation*\n\n`;
+  (data.sections || []).forEach(sec => {
+    md += `## ${sec.title}\n`;
+    (sec.rows || []).forEach(r => {
+      if (sec.rows.length > 1 && r.label) {
+        md += `- **${r.label}:** ${r.text}\n`;
+      } else {
+        md += `- ${r.text}\n`;
+      }
+      if (r.caveats && r.caveats.length) {
+        r.caveats.forEach(c => { md += `  - *Note: ${c}*\n`; });
+      }
+    });
+    md += `\n`;
+  });
+  md += `---\n*Generated by NBA Scouting Agent*\n`;
+  copyToClipboard(md, `Copied report for ${data.player_name}!`);
+}
+
+function copyCompareSummary(data) {
+  let md = `# Head-to-Head Comparison: ${data.player_a} vs. ${data.player_b}\n`;
+  md += `**Season:** ${data.season} | *NBA Tracking Intelligence*\n\n`;
+  (data.sections || []).forEach(sec => {
+    md += `## ${sec.title}\n`;
+    (sec.rows || []).forEach(r => {
+      const winTagA = r.winner === 'a' ? ' 🏆' : '';
+      const winTagB = r.winner === 'b' ? ' 🏆' : '';
+      md += `### ${r.label}\n`;
+      md += `- **${data.player_a}${winTagA}:** ${r.a.text}\n`;
+      md += `- **${data.player_b}${winTagB}:** ${r.b.text}\n\n`;
+    });
+  });
+  md += `---\n*Generated by NBA Scouting Agent*\n`;
+  copyToClipboard(md, `Copied comparison of ${data.player_a} vs. ${data.player_b}!`);
+}
+
+function copyCompsSummary(data) {
+  let md = `# Stylistic Archetype Twins: ${data.player_name}\n`;
+  md += `*Evaluated across ${data.features_considered || 28} covariance-adjusted tracking dimensions (Mahalanobis distance)*\n\n`;
+  (data.comps || []).forEach(c => {
+    md += `### #${c.rank} ${c.player_name} — ${c.similarity_pct}% Match (${c.similarity_tier})\n`;
+    md += `- **Mahalanobis Distance:** ${c.distance}\n`;
+    if (c.shared_archetype_features && c.shared_archetype_features.length) {
+      md += `- **Shared Archetype Features:** ${c.shared_archetype_features.join(', ')}\n`;
+    }
+    if (c.divergent_features && c.divergent_features.length) {
+      md += `- **Key Divergences:** ${c.divergent_features.join(', ')}\n`;
+    }
+    md += `\n`;
+  });
+  md += `---\n*Generated by NBA Scouting Agent*\n`;
+  copyToClipboard(md, `Copied stylistic comps for ${data.player_name}!`);
+}
+
+function copyGapsSummary(data) {
+  let md = `# NBA Team Roster & Capability Analysis: ${data.team_name} (${data.team_abbreviation || ''})\n`;
+  md += `**Rosters:** 2026–27 Active Rosters | **Tracking Baseline:** 2025–26 Full Season | **Qualified Rotation:** ${data.rotation_size} players\n\n`;
+  md += `### Capability Subset Rankings (vs. 30 NBA Teams)\n`;
+  (data.capabilities || []).forEach(c => {
+    const scoreStr = c.team_score >= 0 ? `+${c.team_score.toFixed(2)}σ` : `${c.team_score.toFixed(2)}σ`;
+    md += `- **${c.capability_name}:** Rank #${c.team_rank} / 30 (${scoreStr}) — *${c.tier_status}*\n`;
+    if (c.key_contributors && c.key_contributors.length) {
+      md += `  - Key contributors: ${c.key_contributors.join(', ')}\n`;
+    }
+  });
+  if (data.top_gaps && data.top_gaps.length > 0) {
+    md += `\n### Identified Roster Holes & Targeted Solvers\n`;
+    data.top_gaps.forEach(g => {
+      md += `\n#### Need: ${g.capability_name} (Rank #${g.team_rank} / 30)\n`;
+      if (g.matching_nba_targets && g.matching_nba_targets.length) {
+        md += `- **NBA Transfer Targets:** ` + g.matching_nba_targets.map(t => `${t.player_name} (${t.team_abbreviation}) [+${t.fit_score.toFixed(2)}σ]`).join(', ') + `\n`;
+      }
+      if (g.matching_draft_prospects && g.matching_draft_prospects.length) {
+        md += `- **2026 Draft Prospects:** ` + g.matching_draft_prospects.map(p => `${p.player_name} (${p.school}) [+${p.fit_score.toFixed(2)}σ]`).join(', ') + `\n`;
+      }
+    });
+  }
+  md += `\n---\n*Generated by NBA Scouting Agent — Grounded Tracking Intelligence*\n`;
+  copyToClipboard(md, `Copied ${data.team_name} roster gaps summary!`);
+}
 
 /* ── caveat box builder (visually distinct, reused across all report sections) ── */
 function buildCaveatBox(text) {
@@ -1578,14 +2307,36 @@ function buildReportCard(data) {
 
   const header = document.createElement('div');
   header.className = 'report-header';
+
+  const titleGroup = document.createElement('div');
   const nameEl = document.createElement('div');
   nameEl.className = 'report-player';
   nameEl.textContent = data.player_name;
-  header.appendChild(nameEl);
+  titleGroup.appendChild(nameEl);
   const seasonEl = document.createElement('div');
   seasonEl.className = 'report-season';
   seasonEl.textContent = `${data.season} season`;
-  header.appendChild(seasonEl);
+  titleGroup.appendChild(seasonEl);
+  header.appendChild(titleGroup);
+
+  const actions = document.createElement('div');
+  actions.className = 'card-actions';
+
+  const copyBtn = document.createElement('button');
+  copyBtn.className = 'card-action-btn';
+  copyBtn.innerHTML = '📋 Copy Summary';
+  copyBtn.title = 'Copy formatted markdown summary to clipboard';
+  copyBtn.addEventListener('click', () => copyReportSummary(data));
+  actions.appendChild(copyBtn);
+
+  const printBtn = document.createElement('button');
+  printBtn.className = 'card-action-btn';
+  printBtn.innerHTML = '🖨️ Export';
+  printBtn.title = 'Print or save as PDF';
+  printBtn.addEventListener('click', () => window.print());
+  actions.appendChild(printBtn);
+
+  header.appendChild(actions);
   card.appendChild(header);
 
   data.sections.forEach(section => {
@@ -1692,17 +2443,45 @@ function buildCompareCard(data) {
 
   const header = document.createElement('div');
   header.className = 'compare-header';
-  [data.player_a, data.player_b].forEach(name => {
+  [data.player_a, data.player_b].forEach((name, idx) => {
     const col = document.createElement('div');
     col.className = 'compare-header-col';
+
+    const topRow = document.createElement('div');
+    topRow.style.display = 'flex';
+    topRow.style.justifyContent = 'space-between';
+    topRow.style.alignItems = 'flex-start';
+
+    const titleGroup = document.createElement('div');
     const nameEl = document.createElement('div');
     nameEl.className = 'report-player';
     nameEl.textContent = name;
-    col.appendChild(nameEl);
+    titleGroup.appendChild(nameEl);
     const seasonEl = document.createElement('div');
     seasonEl.className = 'report-season';
     seasonEl.textContent = `${data.season} season`;
-    col.appendChild(seasonEl);
+    titleGroup.appendChild(seasonEl);
+    topRow.appendChild(titleGroup);
+
+    if (idx === 1) {
+      const actions = document.createElement('div');
+      actions.className = 'card-actions';
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'card-action-btn';
+      copyBtn.innerHTML = '📋 Copy Summary';
+      copyBtn.title = 'Copy formatted markdown summary to clipboard';
+      copyBtn.addEventListener('click', () => copyCompareSummary(data));
+      actions.appendChild(copyBtn);
+      const printBtn = document.createElement('button');
+      printBtn.className = 'card-action-btn';
+      printBtn.innerHTML = '🖨️ Export';
+      printBtn.title = 'Print or save as PDF';
+      printBtn.addEventListener('click', () => window.print());
+      actions.appendChild(printBtn);
+      topRow.appendChild(actions);
+    }
+
+    col.appendChild(topRow);
     header.appendChild(col);
   });
   card.appendChild(header);
@@ -1780,6 +2559,426 @@ async function generateComparison() {
 compareBtn.addEventListener('click', generateComparison);
 playerAInput.addEventListener('keydown', e => { if (e.key === 'Enter') generateComparison(); });
 playerBInput.addEventListener('keydown', e => { if (e.key === 'Enter') generateComparison(); });
+
+/* ── comps builder & handler ── */
+function buildCompsView(data) {
+  const card = document.createElement('div');
+  card.className = 'comps-result-card';
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'comps-header';
+
+  const titleGroup = document.createElement('div');
+  const title = document.createElement('div');
+  title.className = 'comps-player';
+  title.textContent = data.player_name;
+  titleGroup.appendChild(title);
+
+  const sub = document.createElement('div');
+  sub.className = 'comps-subtitle';
+  sub.textContent = `Stylistic Archetype Twins · Evaluated across ${data.features_considered || 28} covariance-adjusted metric dimensions (Mahalanobis distance)`;
+  titleGroup.appendChild(sub);
+  header.appendChild(titleGroup);
+
+  const actions = document.createElement('div');
+  actions.className = 'card-actions';
+
+  const copyBtn = document.createElement('button');
+  copyBtn.className = 'card-action-btn';
+  copyBtn.innerHTML = '📋 Copy Summary';
+  copyBtn.title = 'Copy formatted markdown summary to clipboard';
+  copyBtn.addEventListener('click', () => copyCompsSummary(data));
+  actions.appendChild(copyBtn);
+
+  const printBtn = document.createElement('button');
+  printBtn.className = 'card-action-btn';
+  printBtn.innerHTML = '🖨️ Export';
+  printBtn.title = 'Print or save as PDF';
+  printBtn.addEventListener('click', () => window.print());
+  actions.appendChild(printBtn);
+
+  header.appendChild(actions);
+  card.appendChild(header);
+
+  // Notes banner
+  if (data.notes) {
+    const banner = document.createElement('div');
+    banner.className = 'comps-notes-banner';
+    banner.innerHTML = `<span>ℹ️</span> <span>${data.notes}</span>`;
+    card.appendChild(banner);
+  }
+
+  // Comps items
+  (data.comps || []).forEach(comp => {
+    const item = document.createElement('div');
+    item.className = 'comp-item';
+
+    // Top row
+    const topRow = document.createElement('div');
+    topRow.className = 'comp-top-row';
+
+    const nameGroup = document.createElement('div');
+    nameGroup.className = 'comp-name-group';
+
+    const rankBadge = document.createElement('div');
+    rankBadge.className = `comp-rank-badge rank-${comp.rank}`;
+    rankBadge.textContent = `#${comp.rank}`;
+    nameGroup.appendChild(rankBadge);
+
+    const name = document.createElement('div');
+    name.className = 'comp-name';
+    name.textContent = comp.team_abbreviation ? `${comp.player_name} (${comp.team_abbreviation})` : comp.player_name;
+    nameGroup.appendChild(name);
+    topRow.appendChild(nameGroup);
+
+    const tierClass = comp.similarity_tier === 'Near Twin' ? 'tier-near-twin'
+      : (comp.similarity_tier === 'High Overlap' ? 'tier-high-overlap' : 'tier-moderate-overlap');
+    const pill = document.createElement('div');
+    pill.className = `comp-tier-pill ${tierClass}`;
+    pill.textContent = `${comp.similarity_pct}% · ${comp.similarity_tier}`;
+    topRow.appendChild(pill);
+    item.appendChild(topRow);
+
+    // Meta row (distance, stats)
+    const meta = document.createElement('div');
+    meta.className = 'comp-meta-row';
+    meta.textContent = `Mahalanobis Distance: ${comp.distance} · Relative to 2025–26 NBA rotation player covariance`;
+    item.appendChild(meta);
+
+    // Traits grid
+    const traitsGrid = document.createElement('div');
+    traitsGrid.className = 'comp-traits-grid';
+
+    // Shared traits
+    const sharedBox = document.createElement('div');
+    sharedBox.className = 'traits-box';
+    const sharedLbl = document.createElement('div');
+    sharedLbl.className = 'traits-label shared';
+    sharedLbl.textContent = 'Shared Stylistic Dimensions';
+    sharedBox.appendChild(sharedLbl);
+
+    const sharedTags = document.createElement('div');
+    sharedTags.className = 'traits-tags';
+    if (comp.shared_archetype_features && comp.shared_archetype_features.length > 0) {
+      comp.shared_archetype_features.forEach(f => {
+        const tag = document.createElement('span');
+        tag.className = 'trait-tag shared';
+        tag.textContent = f;
+        sharedTags.appendChild(tag);
+      });
+    } else {
+      const none = document.createElement('span');
+      none.className = 'trait-tag shared';
+      none.textContent = 'Overall multi-dimensional shape match';
+      sharedTags.appendChild(none);
+    }
+    sharedBox.appendChild(sharedTags);
+    traitsGrid.appendChild(sharedBox);
+
+    // Divergent traits
+    const divBox = document.createElement('div');
+    divBox.className = 'traits-box';
+    const divLbl = document.createElement('div');
+    divLbl.className = 'traits-label divergent';
+    divLbl.textContent = 'Key Stylistic Divergences';
+    divBox.appendChild(divLbl);
+
+    const divTags = document.createElement('div');
+    divTags.className = 'traits-tags';
+    if (comp.divergent_features && comp.divergent_features.length > 0) {
+      comp.divergent_features.forEach(f => {
+        const tag = document.createElement('span');
+        tag.className = 'trait-tag divergent';
+        tag.textContent = f;
+        divTags.appendChild(tag);
+      });
+    } else {
+      const none = document.createElement('span');
+      none.className = 'trait-tag divergent';
+      none.textContent = 'No significant dimensional deviations';
+      divTags.appendChild(none);
+    }
+    divBox.appendChild(divTags);
+    traitsGrid.appendChild(divBox);
+
+    item.appendChild(traitsGrid);
+
+    // Action button: jump to scouting report
+    const actBtn = document.createElement('button');
+    actBtn.className = 'comp-action-btn';
+    actBtn.textContent = `View full scouting report for ${comp.player_name} →`;
+    actBtn.addEventListener('click', () => {
+      setMode('report');
+      playerInput.value = comp.player_name;
+      generateReport();
+    });
+    item.appendChild(actBtn);
+
+    card.appendChild(item);
+  });
+
+  return card;
+}
+
+async function generateComps() {
+  const name = compsInput.value.trim();
+  if (!name) return;
+
+  compsBtn.disabled = true;
+  compsView.innerHTML = '<div class="report-loading"><span class="spinner"></span>Calculating 28-dimensional Mahalanobis distance…</div>';
+
+  try {
+    const res = await fetch('/comps', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ player_name: name, n: 5 }),
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.detail || 'Request failed');
+    }
+    const data = await res.json();
+    compsView.innerHTML = '';
+    compsView.appendChild(buildCompsView(data));
+  } catch (err) {
+    compsView.innerHTML = `<div class="report-error">Could not calculate comps for "${name}": ${err.message || 'Player not found in active dataset'}.</div>`;
+  } finally {
+    compsBtn.disabled = false;
+  }
+}
+
+compsBtn.addEventListener('click', generateComps);
+compsInput.addEventListener('keydown', e => { if (e.key === 'Enter') generateComps(); });
+
+/* ── team gaps builder & handler ── */
+function buildGapsView(data) {
+  const card = document.createElement('div');
+  card.className = 'gaps-card';
+
+  // 1. Header
+  const header = document.createElement('div');
+  header.className = 'gaps-header';
+
+  const titleGroup = document.createElement('div');
+  titleGroup.className = 'gaps-title-group';
+
+  const teamTitle = document.createElement('div');
+  teamTitle.className = 'gaps-team';
+  teamTitle.textContent = `${data.team_name} (${data.team_abbreviation || ''})`;
+  titleGroup.appendChild(teamTitle);
+
+  const subtitle = document.createElement('div');
+  subtitle.className = 'gaps-subtitle';
+  subtitle.textContent = `2026–27 Active Rosters (2025–26 Tracking Baseline) · ${data.rotation_size || '10+'} Qualified Players · Ranked across 6 Capability Subsets vs. All 30 Teams`;
+  titleGroup.appendChild(subtitle);
+  header.appendChild(titleGroup);
+
+  const actions = document.createElement('div');
+  actions.className = 'card-actions';
+
+  const copyBtn = document.createElement('button');
+  copyBtn.className = 'card-action-btn';
+  copyBtn.innerHTML = '📋 Copy Summary';
+  copyBtn.title = 'Copy formatted markdown summary to clipboard';
+  copyBtn.addEventListener('click', () => copyGapsSummary(data));
+  actions.appendChild(copyBtn);
+
+  const printBtn = document.createElement('button');
+  printBtn.className = 'card-action-btn';
+  printBtn.innerHTML = '🖨️ Export';
+  printBtn.title = 'Print or save as PDF';
+  printBtn.addEventListener('click', () => window.print());
+  actions.appendChild(printBtn);
+
+  header.appendChild(actions);
+  card.appendChild(header);
+
+  // 2. Capability list
+  const capList = document.createElement('div');
+  capList.className = 'capability-list';
+
+  (data.capabilities || []).forEach(cap => {
+    const row = document.createElement('div');
+    row.className = 'capability-row';
+
+    const left = document.createElement('div');
+    left.className = 'cap-left';
+
+    const label = document.createElement('div');
+    label.className = 'cap-label';
+    label.textContent = cap.capability_name;
+    left.appendChild(label);
+
+    const contrib = document.createElement('div');
+    contrib.className = 'cap-contributors';
+    contrib.textContent = 'Key contributors: ' + (cap.key_contributors && cap.key_contributors.length ? cap.key_contributors.join(', ') : 'Rotation collective');
+    left.appendChild(contrib);
+    row.appendChild(left);
+
+    const right = document.createElement('div');
+    right.className = 'cap-right';
+
+    const rankTag = document.createElement('div');
+    rankTag.className = 'cap-rank-badge';
+    const scoreStr = cap.team_score >= 0 ? `+${cap.team_score.toFixed(2)}σ` : `${cap.team_score.toFixed(2)}σ`;
+    rankTag.textContent = `#${cap.team_rank} / 30 (${scoreStr})`;
+    right.appendChild(rankTag);
+
+    const statusPill = document.createElement('div');
+    const isGap = cap.tier_status.includes('Gap') || cap.tier_status.includes('Need');
+    const isStrength = cap.tier_status.includes('Elite') || cap.tier_status.includes('Strength') || cap.tier_status.includes('Above');
+    const statusCls = isGap ? 'status-gap' : (isStrength ? 'status-strength' : 'status-average');
+    statusPill.className = `cap-status-pill ${statusCls}`;
+    statusPill.textContent = cap.tier_status;
+    right.appendChild(statusPill);
+
+    row.appendChild(right);
+    capList.appendChild(row);
+  });
+  card.appendChild(capList);
+
+  // 3. Highlighted gaps & targeted solvers
+  if (data.top_gaps && data.top_gaps.length > 0) {
+    const solSec = document.createElement('div');
+    solSec.className = 'gaps-solutions-section';
+
+    const secTitle = document.createElement('div');
+    secTitle.className = 'gaps-section-title';
+    secTitle.innerHTML = '<span>🚨 Identified Roster Holes & Targeted Solvers</span>';
+    solSec.appendChild(secTitle);
+
+    data.top_gaps.forEach(gap => {
+      const gCard = document.createElement('div');
+      gCard.className = 'gap-solution-card';
+
+      const gHeader = document.createElement('div');
+      gHeader.className = 'gap-card-header';
+
+      const gTitle = document.createElement('div');
+      gTitle.className = 'gap-name-title';
+      gTitle.textContent = `${gap.capability_name} · Rank #${gap.team_rank} of 30 (${gap.team_score.toFixed(2)}σ)`;
+      gHeader.appendChild(gTitle);
+
+      const gTag = document.createElement('div');
+      gTag.className = 'gap-rank-tag';
+      gTag.textContent = 'Top Need';
+      gHeader.appendChild(gTag);
+      gCard.appendChild(gHeader);
+
+      const grid = document.createElement('div');
+      grid.className = 'solvers-grid';
+
+      // Col 1: NBA targets
+      const col1 = document.createElement('div');
+      col1.className = 'solver-col';
+      const col1Title = document.createElement('div');
+      col1Title.className = 'solver-col-title';
+      col1Title.textContent = 'Matching NBA Transfer Targets';
+      col1.appendChild(col1Title);
+
+      (gap.matching_nba_targets || []).forEach(tgt => {
+        const item = document.createElement('div');
+        item.className = 'solver-item';
+
+        const link = document.createElement('a');
+        link.className = 'solver-link';
+        link.textContent = `${tgt.player_name} (${tgt.team_abbreviation})`;
+        link.title = `Generate full scouting report for ${tgt.player_name}`;
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          setMode('report');
+          playerInput.value = tgt.player_name;
+          generateReport();
+        });
+        item.appendChild(link);
+
+        const fit = document.createElement('span');
+        fit.style.fontWeight = '600';
+        fit.style.color = '#15803d';
+        fit.textContent = `+${tgt.fit_score.toFixed(2)}σ`;
+        item.appendChild(fit);
+
+        col1.appendChild(item);
+      });
+      grid.appendChild(col1);
+
+      // Col 2: Draft prospects
+      const col2 = document.createElement('div');
+      col2.className = 'solver-col';
+      const col2Title = document.createElement('div');
+      col2Title.className = 'solver-col-title';
+      col2Title.textContent = '2026 NCAA Draft Prospect Fits';
+      col2.appendChild(col2Title);
+
+      (gap.matching_draft_prospects || []).forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'solver-item';
+
+        const pName = document.createElement('span');
+        pName.style.fontWeight = '600';
+        pName.style.color = '#0d1b36';
+        pName.textContent = `${p.player_name} (${p.school})`;
+        item.appendChild(pName);
+
+        const fit = document.createElement('span');
+        fit.style.fontWeight = '600';
+        fit.style.color = '#15803d';
+        fit.textContent = `+${p.fit_score.toFixed(2)}σ`;
+        item.appendChild(fit);
+
+        col2.appendChild(item);
+      });
+      grid.appendChild(col2);
+
+      gCard.appendChild(grid);
+      solSec.appendChild(gCard);
+    });
+
+    card.appendChild(solSec);
+  }
+
+  // 4. Audit
+  if (data.audit) {
+    const auditParts = buildAuditToggle(data.audit);
+    if (auditParts) {
+      card.appendChild(auditParts.toggle);
+      card.appendChild(auditParts.box);
+    }
+  }
+
+  return card;
+}
+
+async function generateTeamGaps() {
+  const team = gapsInput.value.trim();
+  if (!team) return;
+
+  gapsBtn.disabled = true;
+  gapsView.innerHTML = '<div class="report-loading"><span class="spinner"></span>Evaluating team capability space & roster holes…</div>';
+
+  try {
+    const res = await fetch('/team-gaps', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ team: team }),
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.detail || 'Request failed');
+    }
+    const data = await res.json();
+    gapsView.innerHTML = '';
+    gapsView.appendChild(buildGapsView(data));
+  } catch (err) {
+    gapsView.innerHTML = `<div class="report-error">Could not analyze roster gaps for "${team}": ${err.message || 'Team not found'}.</div>`;
+  } finally {
+    gapsBtn.disabled = false;
+  }
+}
+
+gapsBtn.addEventListener('click', generateTeamGaps);
+gapsInput.addEventListener('keydown', e => { if (e.key === 'Enter') generateTeamGaps(); });
 </script>
 </body>
 </html>
